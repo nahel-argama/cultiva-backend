@@ -299,9 +299,11 @@ class ProcessPaymentAction
 
 ---
 
-## Design Patterns (Use When Convenient)
+## Design Patterns (Mandatory When the Criteria Match)
 
 **Patterns are tools INSIDE Actions, not replacements.**
+
+Not decorative, not optional flourish - but not forced either. Each pattern below has a **When** trigger in docs/PATTERNS.md. If the situation matches the trigger, apply the pattern; don't hand-roll an if/else chain or a switch that a Strategy/Factory already solves. If it doesn't match, don't add it "just in case" - see Anti-Patterns below.
 
 7 Available Patterns:
 
