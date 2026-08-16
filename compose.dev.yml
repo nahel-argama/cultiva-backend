@@ -9,6 +9,7 @@ volumes:
 services:
   php:
     container_name: php
+    user: "${COMPOSE_PHP_UID}:${COMPOSE_PHP_GID}"
     environment:
       HOME: /tmp
     build:
@@ -66,12 +67,13 @@ services:
 
   worker:
     container_name: worker
+    user: "${COMPOSE_PHP_UID}:${COMPOSE_PHP_GID}"
     build:
       context: .
       dockerfile: Dockerfile
     command: php artisan queue:work redis --sleep=3 --tries=3 --timeout=90
     volumes:
-      - ./src:/var/www/html
+      - ./:/var/www/html
     depends_on:
       - database
       - redis
