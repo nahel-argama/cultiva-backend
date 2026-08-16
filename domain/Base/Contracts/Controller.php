@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace Cultiva\Base\Contracts;
 
 abstract class Controller
 {
