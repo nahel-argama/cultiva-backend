@@ -1,6 +1,6 @@
 <?php
 
 return [
-    App\Providers\AppServiceProvider::class,
-    App\Providers\HorizonServiceProvider::class,
+    Cultiva\Providers\AppServiceProvider::class,
+    Cultiva\Providers\HorizonServiceProvider::class,
 ];
