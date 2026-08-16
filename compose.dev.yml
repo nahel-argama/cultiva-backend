@@ -8,9 +8,6 @@ volumes:
 
 services:
   php:
-    user: "${COMPOSE_PHP_UID}:${COMPOSE_PHP_GID}"
-    environment:
-      HOME: /tmp
     build:
       args:
         UID: ${COMPOSE_PHP_UID}
@@ -65,14 +62,13 @@ services:
       - internal
 
   worker:
-    user: "${COMPOSE_PHP_UID}:${COMPOSE_PHP_GID}"
     build:
       args:
         UID: ${COMPOSE_PHP_UID}
         GID: ${COMPOSE_PHP_GID}
       context: .
       dockerfile: Dockerfile
-    command: php artisan queue:work redis --sleep=3 --tries=3 --timeout=90
+    command: php artisan horizon
     volumes:
       - ./:/var/www/html
     depends_on:
