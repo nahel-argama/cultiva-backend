@@ -13,6 +13,9 @@ services:
     environment:
       HOME: /tmp
     build:
+      args:
+        UID: ${COMPOSE_PHP_UID}
+        GID: ${COMPOSE_PHP_GID}
       context: .
       dockerfile: Dockerfile
     volumes:
@@ -69,6 +72,9 @@ services:
     container_name: worker
     user: "${COMPOSE_PHP_UID}:${COMPOSE_PHP_GID}"
     build:
+      args:
+        UID: ${COMPOSE_PHP_UID}
+        GID: ${COMPOSE_PHP_GID}
       context: .
       dockerfile: Dockerfile
     command: php artisan queue:work redis --sleep=3 --tries=3 --timeout=90
