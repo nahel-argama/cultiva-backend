@@ -1,0 +1,78 @@
+networks:
+  internal:
+    driver: bridge
+
+volumes:
+  db-data:
+  redis-data:
+
+services:
+  php:
+    build:
+      args:
+        UID: ${COMPOSE_PHP_UID}
+        GID: ${COMPOSE_PHP_GID}
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./:/var/www/html
+      - ./docker/php/development.ini:/usr/local/etc/php/conf.d/development.ini:ro
+      - ./docker/php/xdebug.ini:/usr/local/etc/php/conf.d/xdebug.ini:ro
+    depends_on:
+      - database
+    networks:
+      - internal
+
+  nginx:
+    image: nginx:stable-alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./docker/nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf:ro
+    networks:
+      - internal
+    depends_on:
+      - php
+
+  database:
+    image: postgres:18
+    ports:
+      - "5432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=app
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=root
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD", "pg_isready"]
+      interval: 10s
+      timeout: 30s
+      retries: 3
+      start_period: 10s
+
+  redis:
+    image: redis:8-alpine
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
+    volumes:
+      - redis-data:/data
+    networks:
+      - internal
+
+  worker:
+    build:
+      args:
+        UID: ${COMPOSE_PHP_UID}
+        GID: ${COMPOSE_PHP_GID}
+      context: .
+      dockerfile: Dockerfile
+    command: php artisan horizon
+    volumes:
+      - ./:/var/www/html
+    depends_on:
+      - database
+      - redis
+    networks:
+      - internal
