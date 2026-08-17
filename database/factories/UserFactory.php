@@ -2,7 +2,7 @@
 
 namespace Database\Factories;
 
-use Cultiva\Models\User;
+use Cultiva\Models\User\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;

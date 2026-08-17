@@ -39,7 +39,6 @@ return new class extends Migration {
             $table->foreignId("user_id")->primary()->constrained("users")->cascadeOnDelete();
             $table->foreignId('address_id')->constrained('addresses');
             $table->string('identity', 14)->unique();
-            $table->boolean('is_company');
             $table->string('phone', 15);
         });
     }
