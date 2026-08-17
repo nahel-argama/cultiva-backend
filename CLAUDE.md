@@ -20,25 +20,26 @@ All business logic lives in Actions. Follow these rules:
 ### Standard Action Structure
 
 ```php
-// src/Actions/User/CreateUserAction.php
+// domain/Models/User/Actions/CreateUserAction.php
+namespace Cultiva\Models\User\Actions;
+
 class CreateUserAction
 {
     public function __construct(
-        private UserRepository $users,
         private NotificationService $notifications
     ) {}
 
-    public function execute(UserData $data): User
+    public function execute(UserDTO $data): User
     {
         $this->validateBusinessRules($data);
 
-        $user = $this->users->create($data);
+        $user = User::create((array) $data);
         $this->sendWelcomeEmail($user);
         event(new UserCreated($user));
         return $user;
     }
 
-    private function validateBusinessRules(UserData $data): void
+    private function validateBusinessRules(UserDTO $data): void
     {
         if (User::where('email', $data->email)->exists()) {
             throw new UserAlreadyExistsException('Email already registered');
@@ -55,14 +56,16 @@ class CreateUserAction
 ### Usage in Controller
 
 ```php
-// src/Http/Controllers/UserController.php
+// domain/Models/User/Http/Controllers/UserController.php
+namespace Cultiva\Models\User\Http\Controllers;
+
 class UserController extends Controller
 {
     public function store(
         StoreUserRequest $request,
         CreateUserAction $action
     ) {
-        $data = UserData::from($request->validated());
+        $data = UserDTO::from($request->validated());
         $user = $action->execute($data);
         return redirect()->route('users.show', $user);
     }
@@ -81,7 +84,7 @@ Two layers, two jobs:
 | `Action::execute()`      | Business rule validation (uniqueness across domain rules, state checks, cross-entity checks). |
 
 ```php
-// Input - src/Http/Requests/StoreUserRequest.php
+// Input - domain/Models/User/Http/Requests/StoreUserRequest.php
 class StoreUserRequest extends FormRequest
 {
     public function rules(): array
@@ -94,7 +97,7 @@ class StoreUserRequest extends FormRequest
 }
 
 // Business rule - inside the Action (private helper)
-private function validateBusinessRules(UserData $data): void
+private function validateBusinessRules(UserDTO $data): void
 {
     if (User::where('email', $data->email)->exists()) {
         throw new UserAlreadyExistsException();
@@ -114,18 +117,16 @@ A FormRequest rule that only checks a single field belongs in `rules()`. Anythin
 class CreateOrderAction
 {
     public function __construct(
-        private OrderRepository $orders,
-        private ItemRepository $items,
         private InventoryService $inventory
     ) {}
 
-    public function execute(OrderData $data): Order
+    public function execute(OrderDTO $data): Order
     {
         return DB::transaction(function () use ($data) {
-            $order = $this->orders->create($data);
+            $order = Order::create((array) $data);
 
             foreach ($data->items as $item) {
-                $this->items->create([
+                OrderItem::create([
                     'order_id' => $order->id,
                     'product_id' => $item['product_id'],
                     'quantity' => $item['quantity'],
@@ -154,48 +155,77 @@ class CreateOrderAction
 - `UserRepository` - Eloquent already does that
 - `BaseService` or abstraction for its own sake
 
+Namespace root: `Cultiva\` → `domain/` (see `composer.json` psr-4).
+
 ```
-src/
-├── Actions/
-│   ├── User/
-│   │   ├── CreateUserAction.php
-│   │   └── UpdateUserAction.php
-│   ├── Post/
-│   │   └── CreatePostAction.php
-│   └── Payment/
-│       └── ProcessPaymentAction.php
-├── Data/
-│   └── UserData.php
-├── Exceptions/
-│   ├── User/
-│   │   └── UserAlreadyExistsException.php
-│   └── DomainException.php
+domain/
+├── Base/                       # shared across every entity
+│   ├── Contracts/
+│   │   └── Controller.php
+│   └── Exceptions/
+│       └── DomainException.php
 ├── Models/
-├── Http/
-│   ├── Controllers/
-│   └── Requests/
-├── Events/
-├── Listeners/
-└── Jobs/
+│   ├── User/
+│   │   ├── User.php            # the Eloquent model
+│   │   ├── Actions/
+│   │   │   ├── CreateUserAction.php
+│   │   │   └── UpdateUserAction.php
+│   │   ├── DTO/
+│   │   │   └── UserDTO.php
+│   │   ├── Exceptions/
+│   │   │   └── UserAlreadyExistsException.php
+│   │   ├── Http/
+│   │   │   ├── Controllers/
+│   │   │   │   └── UserController.php
+│   │   │   └── Requests/
+│   │   │       └── StoreUserRequest.php
+│   │   ├── Events/
+│   │   │   └── UserCreated.php
+│   │   ├── Listeners/
+│   │   └── Jobs/
+│   └── Post/
+│       ├── Post.php
+│       └── Actions/
+│           └── CreatePostAction.php
+├── Integrations/                # external services/APIs - no Eloquent model
+│   └── Payment/
+│       ├── Adapters/
+│       │   └── StripeAdapter.php
+│       ├── Actions/
+│       │   └── ProcessPaymentAction.php
+│       ├── DTO/
+│       │   └── ChargeDTO.php
+│       └── Exceptions/
+│           └── PaymentDeclinedException.php
+└── Providers/                  # boot / service providers
+    ├── AppServiceProvider.php
+    └── HorizonServiceProvider.php
 
 tests/
 ├── Unit/
-│   └── Actions/
+│   └── Models/
 │       └── User/
-│           └── CreateUserActionTest.php
+│           └── Actions/
+│               └── CreateUserActionTest.php
 └── Fixtures/
     └── UserFixture.php
 ```
 
+Everything for one entity lives together under `domain/Models/<Entity>/` - the entity folder IS the feature module (model, Actions, DTO, Exceptions, Http, Events, Listeners, Jobs). Only what's genuinely shared across entities goes in `domain/Base/`.
+
+`domain/Integrations/<Service>/` is for external APIs/gateways with no Eloquent model behind them (payment gateways, email providers, third-party APIs) - same internal shape as a `Models/<Entity>/` folder (Actions, DTO, Exceptions), plus an `Adapters/` folder wrapping the external client (see Adapter pattern in docs/PATTERNS.md).
+
 ---
 
-## Data / Value Objects
+## DTOs / Value Objects
 
-Pasta `src/Data/`. Naming: `<Domain>Data`. Readonly class, built with a `from()` named constructor.
+Pasta `domain/Models/<Entity>/DTO/`. Naming: `<Domain>DTO`. Readonly class, built with a `from()` named constructor.
 
 ```php
-// src/Data/UserData.php
-readonly class UserData
+// domain/Models/User/DTO/UserDTO.php
+namespace Cultiva\Models\User\DTO;
+
+readonly class UserDTO
 {
     public function __construct(
         public string $name,
@@ -214,21 +244,27 @@ readonly class UserData
 }
 ```
 
-Controller builds the `Data` object from validated input and hands it to the Action - the Action never touches `$request`.
+Controller builds the `DTO` object from validated input and hands it to the Action - the Action never touches `$request`.
 
 ---
 
 ## Custom Exceptions
 
-Pasta `src/Exceptions/<Domain>/`. Naming: `<Domain><Condition>Exception` - never generic (`Exception`, `AppException`).
+Pasta `domain/Models/<Entity>/Exceptions/`. Naming: `<Domain><Condition>Exception` - never generic (`Exception`, `AppException`).
 
-All domain exceptions extend a single project base:
+All domain exceptions extend a single project base living in `domain/Base/`:
 
 ```php
-// src/Exceptions/DomainException.php
+// domain/Base/Exceptions/DomainException.php
+namespace Cultiva\Base\Exceptions;
+
 abstract class DomainException extends Exception {}
 
-// src/Exceptions/User/UserAlreadyExistsException.php
+// domain/Models/User/Exceptions/UserAlreadyExistsException.php
+namespace Cultiva\Models\User\Exceptions;
+
+use Cultiva\Base\Exceptions\DomainException;
+
 class UserAlreadyExistsException extends DomainException {}
 ```
 
@@ -239,7 +275,9 @@ class UserAlreadyExistsException extends DomainException {}
 Inject the Action into `handle()`, same as a Controller. Let queue failure handling take over instead of catching everything manually.
 
 ```php
-// src/Jobs/ProcessOrderJob.php
+// domain/Models/Order/Jobs/ProcessOrderJob.php
+namespace Cultiva\Models\Order\Jobs;
+
 class ProcessOrderJob implements ShouldQueue
 {
     public function __construct(public Order $order) {}
@@ -276,12 +314,14 @@ Don't extract on a feeling. Check against a concrete signal:
 Verify before extracting - grep for actual reuse, don't guess:
 
 ```bash
-grep -r "PaymentFacade" src/ | wc -l
+grep -r "PaymentFacade" domain/ | wc -l
 # 3+ files using it → extraction pays for itself
 ```
 
 ```php
-// Facade - shared between multiple actions
+// Facade - shared between multiple actions - domain/Base/Facades/PaymentFacade.php
+namespace Cultiva\Base\Facades;
+
 class PaymentFacade
 {
     public function process(Order $order): Payment { ... }
@@ -347,17 +387,17 @@ Not decorative, not optional flourish - but not forced either. Each pattern belo
 - **Adapters:** `<Service>Adapter` → StripeAdapter
 - **Events:** `<Noun><Verb>ed` → UserCreated, OrderPaid
 - **Listeners:** `<Verb><Noun>Listener` → SendWelcomeEmailListener
-- **Value Objects:** `<Noun>Data` → UserData, PaymentData (in `src/Data/`)
-- **Exceptions:** `<Domain><Condition>Exception` → UserAlreadyExistsException, InvalidOrderException (in `src/Exceptions/<Domain>/`)
+- **DTOs:** `<Noun>DTO` → UserDTO, OrderDTO (in `domain/Models/<Entity>/DTO/`)
+- **Exceptions:** `<Domain><Condition>Exception` → UserAlreadyExistsException, InvalidOrderException (in `domain/Models/<Entity>/Exceptions/`)
 
 ---
 
 ## Testing Convention
 
-Pasta `tests/Unit/Actions/<Domain>/`. Naming: `<ActionName>Test`. Shared setup data goes in `tests/Fixtures/`.
+Pasta `tests/Unit/Models/<Entity>/Actions/`, mirroring `domain/Models/<Entity>/Actions/`. Naming: `<ActionName>Test`. Shared setup data goes in `tests/Fixtures/`.
 
 ```php
-// tests/Unit/Actions/User/CreateUserActionTest.php
+// tests/Unit/Models/User/Actions/CreateUserActionTest.php
 class CreateUserActionTest extends TestCase
 {
     #[Test]
@@ -386,9 +426,9 @@ class CreateUserActionTest extends TestCase
 // tests/Fixtures/UserFixture.php
 class UserFixture
 {
-    public static function validData(): UserData
+    public static function validData(): UserDTO
     {
-        return UserData::from([
+        return UserDTO::from([
             'name' => 'John Doe',
             'email' => 'john@example.com',
             'password' => 'secret123',
@@ -408,7 +448,7 @@ class GetUserAction
 {
     public function execute(int $id): User
     {
-        return $this->users->findOrFail($id);
+        return User::findOrFail($id);
     }
 }
 
@@ -416,7 +456,7 @@ class ListActiveUsersAction
 {
     public function execute(): Collection
     {
-        return $this->users->active()->get();
+        return User::active()->get();
     }
 }
 
@@ -424,7 +464,7 @@ class ListUsersAction
 {
     public function execute(int $perPage = 15): LengthAwarePaginator
     {
-        return $this->users->paginate($perPage);
+        return User::paginate($perPage);
     }
 }
 
@@ -434,8 +474,8 @@ class SearchUsersAction
     public function execute(string $query): SearchResult
     {
         return new SearchResult(
-            users: $this->users->search($query)->get(),
-            total: $this->users->search($query)->count(),
+            users: User::search($query)->get(),
+            total: User::search($query)->count(),
         );
     }
 }
