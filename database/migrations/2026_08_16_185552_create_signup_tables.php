@@ -10,14 +10,6 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->timestamp('last_login')->nullable();
-            $table->boolean('is_retailer')->default(false);
-            $table->boolean('is_producer')->default(false);
-            $table->boolean('is_active')->default(true);
-            $table->softDeletes();
-        });
-
         Schema::create('addresses', function (Blueprint $table) {
             $table->id();
             $table->string('neighborhood', 30);
@@ -29,17 +21,25 @@ return new class extends Migration {
         });
 
         Schema::create('retailers', function (Blueprint $table) {
-            $table->foreignId("user_id")->primary()->constrained("users")->cascadeOnDelete();
+            $table->id();
             $table->foreignId('address_id')->constrained('addresses');
             $table->string('identity', 14)->unique();
             $table->string('phone', 15);
         });
 
         Schema::create('producers', function (Blueprint $table) {
-            $table->foreignId("user_id")->primary()->constrained("users")->cascadeOnDelete();
+            $table->id();
             $table->foreignId('address_id')->constrained('addresses');
             $table->string('identity', 14)->unique();
             $table->string('phone', 15);
+        });
+
+        Schema::table('users', function (Blueprint $table) {
+            $table->timestamp('last_login')->nullable();
+            $table->foreignId('retailer_id')->nullable()->constrained('retailers');
+            $table->foreignId('producer_id')->nullable()->constrained('producers');
+            $table->boolean('is_active')->default(true);
+            $table->softDeletes();
         });
     }
 };
