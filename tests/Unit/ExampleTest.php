@@ -2,8 +2,6 @@
 
 namespace Tests\Unit;
 
-use Cultiva\Models\User\User;
-use Database\Factories\UserFactory;
 use PHPUnit\Framework\TestCase;
 
 class ExampleTest extends TestCase

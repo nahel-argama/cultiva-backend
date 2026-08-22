@@ -5,7 +5,6 @@ namespace Database\Factories;
 use Cultiva\Models\User\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 
 /**
  * @extends Factory<User>
@@ -24,22 +23,18 @@ class UserFactory extends Factory
      */
     public function definition(): array
     {
-        return [
-            'name' => fake()->name(),
-            'email' => fake()->unique()->safeEmail(),
-            'email_verified_at' => now(),
-            'password' => static::$password ??= Hash::make('password'),
-            'remember_token' => Str::random(10),
-        ];
-    }
+        $password = $this->faker->password();
 
-    /**
-     * Indicate that the model's email address should be unverified.
-     */
-    public function unverified(): static
-    {
-        return $this->state(fn (array $attributes) => [
-            'email_verified_at' => null,
-        ]);
+        return [
+            'name'              => $this->faker->name(),
+            'email'             => $this->faker->email(),
+            'password'          => Hash::make($password),
+            'email_verified_at' => now(),
+            'remember_token'    => null,
+            'last_login'        => null,
+            'is_retailer'       => false,
+            'is_producer'       => false,
+            'is_active'         => true,
+        ];
     }
 }
