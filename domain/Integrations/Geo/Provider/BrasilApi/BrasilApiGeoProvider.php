@@ -30,6 +30,19 @@ final class BrasilApiGeoProvider implements GeoProviderContract
     #[Override]
     public function searchByCep(Cep $cep): GeoAddressDTO
     {
+        /**
+         * @nicolas
+         *
+         * Um exemplo prático de user o ServiceContainer vonluntariamente. Aqui eu digo pra ele
+         * instancias a classe pra mim.
+         *
+         * Ele vai olhar todas as dependências da classe e instanciar elas também, e assim por diante.
+         *
+         * Sem eu precisar digitar um "new" sequer.
+         *
+         * Tem vários jeitos de chamar ele, resolve(), app()->make(), app()->resolve().
+         * Aqui eu injeto pra conseguir testar caso necessário
+         */
         return $this->container->make(SearchByCepAction::class)->execute($cep);
     }
 }
