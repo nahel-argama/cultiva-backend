@@ -59,6 +59,22 @@ $$\text{Source Path: } \texttt{<path>/<File>.php} \implies \text{Test Path: } \t
 | `domain/Models/User/Http/Controllers/UserController.php` (Single flow) | **Feature** | `tests/Feature/domain/Models/User/Http/Controllers/UserControllerTest.php` |
 | `domain/Models/User/Http/Controllers/UserController.php` (Multi-flow) | **Feature** | `tests/Feature/domain/Models/User/Http/Controllers/UserController/StoreTest.php`<br>`tests/Feature/domain/Models/User/Http/Controllers/UserController/IndexTest.php` |
 
+### Fixtures Directory & Pathing
+All external payloads, mocked responses, and static dataset fixtures must be stored under `tests/Fixtures/` mirroring the relevant domain, model, or integration context:
+
+```text
+tests/Fixtures/
+└── Integrations/
+    └── Geo/
+        └── BrasilApi/
+            ├── cep_v2_success.php
+            └── cep_v2_error.php
+```
+
+- **File Format**: Always use `.php` files (never raw `.json` files).
+- **Return Type**: Return a multiline string using heredoc (`return <<<JSON ... JSON;`).
+- **Loading in Tests**: Loaded via `require base_path('tests/Fixtures/<path>.php')`.
+
 ---
 
 ## 3. Feature vs Unit Testing Boundaries
@@ -124,7 +140,7 @@ Every test method must explicitly follow the **Arrange, Action, Assert** pattern
 
 ---
 
-## 6. Tools, Libraries & Database Factories
+## 6. Tools, Libraries, Database Factories & Fixtures
 
 ### Tools
 - **Test Framework**: PHPUnit (`phpunit/phpunit`).
@@ -143,6 +159,51 @@ $users = UserFactory::new()->count(3)->make();
 
 // INCORRECT: Never use Model::factory()
 // $user = User::factory()->create();
+```
+
+### Test Fixtures Convention (PHP Files with Heredoc)
+**Mandatory Rule**: Never use `.json` files for fixtures. All payload fixtures must be defined as `.php` files returning a multiline string via heredoc (`<<<JSON ... JSON;`) or native arrays.
+
+```php
+// tests/Fixtures/Integrations/Geo/BrasilApi/cep_v2_success.php
+<?php
+
+return <<<JSON
+{
+  "cep": "89010025",
+  "state": "SC",
+  "city": "Blumenau",
+  "neighborhood": "Centro",
+  "street": "Rua Doutor Luiz de Freitas Melro",
+  "service": "open-cep",
+  "location": {
+    "type": "Point",
+    "coordinates": {
+      "longitude": "-49.0629788",
+      "latitude": "-26.9244749"
+    }
+  }
+}
+JSON;
+```
+
+#### Why PHP Files for Fixtures?
+- **Performance**: Loaded via PHP's native `require` statement, leveraging opcode caching without runtime file I/O overhead from `file_get_contents`.
+- **Flexibility**: Can return heredoc strings or PHP arrays, and supports comments or dynamic tokens if needed.
+- **IDE Support**: Full PHP syntax validation and autocomplete.
+
+#### Using Fixtures in Tests
+```php
+// For HTTP client fake responses (pass fixture string directly):
+$fixture = require base_path('tests/Fixtures/Integrations/Geo/BrasilApi/cep_v2_success.php');
+
+Http::fake([
+    'https://brasilapi.com.br/api/cep/v2/89010025' => Http::response($fixture, 200),
+]);
+
+// When an array is required (decode string to array):
+$fixture = require base_path('tests/Fixtures/Integrations/Geo/BrasilApi/cep_v2_success.php');
+$payload = json_decode($fixture, true);
 ```
 
 ---
@@ -439,6 +500,53 @@ class UserDTOTest extends TestCase
 
 ---
 
+### Example 5: Integration Provider Test with PHP Fixtures & HTTP Mocking
+
+Integration Provider Test File (`tests/Unit/domain/Integrations/Geo/Provider/BrasilApi/BrasilApiGeoProviderTest.php`):
+```php
+<?php
+
+namespace Tests\Unit\domain\Integrations\Geo\Provider\BrasilApi;
+
+use Cultiva\Base\ValueObjects\Cep;
+use Cultiva\Integrations\Geo\DTO\GeoAddressDTO;
+use Cultiva\Integrations\Geo\Exceptions\GeoException;
+use Cultiva\Integrations\Geo\Provider\BrasilApi\BrasilApiGeoProvider;
+use Illuminate\Support\Facades\Http;
+use Tests\TestCase;
+
+class BrasilApiGeoProviderTest extends TestCase
+{
+    public function test_should_return_geo_address_dto_when_brasil_api_returns_successful_response(): void
+    {
+        // Arrange
+        $fixture = require base_path('tests/Fixtures/Integrations/Geo/BrasilApi/cep_v2_success.php');
+
+        Http::fake([
+            'https://brasilapi.com.br/api/cep/v2/89010025' => Http::response($fixture, 200),
+        ]);
+
+        $cep = new Cep('89010-025');
+        $sut = $this->app->make(BrasilApiGeoProvider::class);
+
+        // Action
+        $result = $sut->searchByCep($cep);
+
+        // Assert
+        $this->assertInstanceOf(GeoAddressDTO::class, $result);
+        $this->assertSame('89010025', $result->zipCode);
+        $this->assertSame('SC', $result->state);
+        $this->assertSame('Blumenau', $result->city);
+        $this->assertSame('Centro', $result->neighborhood);
+        $this->assertSame('Rua Doutor Luiz de Freitas Melro', $result->street);
+        $this->assertSame(-26.9244749, $result->latitude);
+        $this->assertSame(-49.0629788, $result->longitude);
+    }
+}
+```
+
+---
+
 ## 9. Summary Checklist for Every Test
 
 Before committing tests or considering a task done, verify against this checklist:
@@ -450,6 +558,8 @@ Before committing tests or considering a task done, verify against this checklis
 - [ ] **AAA Structure**: Explicit `// Arrange`, `// Expects`, `// Action`, `// Assert` (or `// Action & Assert`) comments.
 - [ ] **SUT Variable**: Subject under test stored in `$sut`.
 - [ ] **Factory Usage**: Direct `Factory::new()->create(...)` / `Factory::new()->make(...)` used (no `Model::factory()`).
+- [ ] **Fixtures**: Stored in `tests/Fixtures/` as `.php` files returning multiline strings (heredoc `<<<JSON ... JSON;`), loaded via `require base_path(...)`.
 - [ ] **Array Assertions**: Uses `assertEqualsCanonicalizing` for unordered array checks.
 - [ ] **Independence**: Tests are self-contained without hidden abstraction helpers.
 - [ ] **Action Pattern**: Follows single `execute()` method with DTO input and typed return.
+

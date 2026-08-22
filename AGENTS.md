@@ -55,7 +55,8 @@ domain/
 
 tests/
 ├── Unit/                       # Mirrored source path unit tests
-└── Feature/                    # Mirrored source path end-to-end / route tests
+├── Feature/                    # Mirrored source path end-to-end / route tests
+└── Fixtures/                   # Payload fixtures as PHP files (multiline strings / heredoc)
 ```
 
 ---
