@@ -1,0 +1,44 @@
+info:
+  name: Signup (Producer)
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{base_url}}/v1/auth/signup"
+  headers:
+    - name: Accept
+      value: application/json
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |
+      {
+        "user": {
+          "name": "Maria Silva",
+          "email": "maria@example.com",
+          "password": "Password123!",
+          "password_confirmation": "Password123!"
+        },
+        "profile_type": "producer",
+        "producer": {
+          "trade_name": "Sítio Primavera",
+          "legal_name": "Sítio Primavera LTDA",
+          "is_company": false,
+          "document_number": "12345678901",
+          "phone": "5511987654321",
+          "address": {
+            "zip": "89010025",
+            "number": "123",
+            "complement": "Portão Azul",
+            "reference_point": "Perto da ponte"
+          }
+        }
+      }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
