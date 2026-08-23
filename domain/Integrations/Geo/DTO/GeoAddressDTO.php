@@ -32,4 +32,17 @@ final class GeoAddressDTO
         public readonly float  $latitude,
         public readonly float  $longitude,
     ) {}
+
+    public function toArray(): array
+    {
+        return [
+            'zip_code'     => $this->zipCode,
+            'state'        => $this->state,
+            'city'         => $this->city,
+            'neighborhood' => $this->neighborhood,
+            'street'       => $this->street,
+            'latitude'     => $this->latitude,
+            'longitude'    => $this->longitude,
+        ];
+    }
 }
