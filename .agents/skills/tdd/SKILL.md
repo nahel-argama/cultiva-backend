@@ -1,6 +1,6 @@
 ---
 name: tdd
-description: Test-Driven Development (TDD) guide and standards for the Cultiva backend.
+description: Test-Driven Development (TDD) used .
 ---
 
 # Test-Driven Development (TDD) Guide
@@ -8,6 +8,13 @@ description: Test-Driven Development (TDD) guide and standards for the Cultiva b
 This skill defines the mandatory testing standards, workflows, conventions, and patterns for the Cultiva backend application.
 
 ---
+
+## When to use
+
+Use this skill when the user asks about:
+
+- How to write tests for the Cultiva backend application.
+- Develop a new feature, fix a bug, or change a requirement following TDD principles.
 
 ## 1. The TDD Development Flow (Red-Green-Refactor)
 
