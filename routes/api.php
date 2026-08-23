@@ -1,5 +1,6 @@
 <?php
 
+use Cultiva\Auth\Controllers\RegisterController;
 use Cultiva\Integrations\Geo\Controllers\GeoController;
 use Illuminate\Support\Facades\Route;
 
@@ -7,10 +8,11 @@ Route::group([
     'prefix' => 'v1',
 ], function (): void {
     Route::group([
-        'namespace' => 'Auth',
-        'prefix'    => 'auth',
-        'as'        => 'auth.',
-    ], function (): void {});
+        'prefix' => 'auth',
+        'as'     => 'auth.',
+    ], function (): void {
+        Route::post('signup', [RegisterController::class, 'signUp'])->name('signup');
+    });
 
     Route::group([
         'namespace' => 'Consult',

@@ -7,7 +7,7 @@ use Cultiva\Models\Producer\DTOs\ProducerRegisterDTO;
 use Cultiva\Models\Producer\Producer;
 use Illuminate\Support\Facades\DB;
 
-final class CreateProducerAction
+class CreateProducerAction
 {
 
     public function __construct(
