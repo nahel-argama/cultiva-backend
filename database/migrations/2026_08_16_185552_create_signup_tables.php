@@ -55,7 +55,7 @@ return new class extends Migration
             $table->string('document_number', 14)->unique();
             $table->string('trade_name', 100);
             $table->string('legal_name', 100)->nullable();
-            $table->string('business_type', 30)->nullable();
+            $table->string('business_type', 30);
             $table->string('phone', 15);
 
             $table->timestamps();
