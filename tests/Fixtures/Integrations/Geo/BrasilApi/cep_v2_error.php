@@ -29,4 +29,3 @@ return <<<JSON
   ]
 }
 JSON;
-

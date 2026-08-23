@@ -51,11 +51,11 @@ class CepTest extends TestCase
     public static function invalidCepDataProvider(): array
     {
         return [
-            'too short'              => ['1234567'],
-            'too long'               => ['123456789'],
-            'non-digit characters'   => ['abcdefgh'],
-            'empty string'           => [''],
-            'symbols only'           => ['---..'],
+            'too short'            => ['1234567'],
+            'too long'             => ['123456789'],
+            'non-digit characters' => ['abcdefgh'],
+            'empty string'         => [''],
+            'symbols only'         => ['---..'],
         ];
     }
 }
