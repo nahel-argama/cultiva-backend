@@ -2,6 +2,7 @@
 
 namespace Cultiva\Models\Retailer\Actions;
 
+use Cultiva\Integrations\Geo\DTO\GeoAddressDTO;
 use Cultiva\Models\Address\Action\CreateAddressAction;
 use Cultiva\Models\Retailer\DTOs\RetailerRegisterDTO;
 use Cultiva\Models\Retailer\Retailer;
@@ -14,11 +15,9 @@ class CreateRetailerAction
         private readonly CreateAddressAction $createAddress,
     ) {}
 
-    public function execute(int $userId, RetailerRegisterDTO $dto): Retailer
+    public function execute(int $userId, RetailerRegisterDTO $dto, GeoAddressDTO $geo): Retailer
     {
-        return DB::transaction(function () use ($dto, $userId) {
-            $address = $this->createAddress->execute($dto->address);
-
+        return DB::transaction(function () use ($dto, $userId, $geo) {
             $retailer = Retailer::query()->create([
                 'user_id'         => $userId,
                 'document_number' => $dto->documentNumber,
@@ -27,6 +26,8 @@ class CreateRetailerAction
                 'business_type'   => $dto->businessType->value,
                 'phone'           => $dto->phone,
             ]);
+
+            $address = $this->createAddress->execute($retailer, $dto->address, $geo);
 
             $retailer->setRelation('address', $address);
 

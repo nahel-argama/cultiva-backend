@@ -2,26 +2,28 @@
 
 namespace Cultiva\Models\Address\Action;
 
+use Cultiva\Integrations\Geo\DTO\GeoAddressDTO;
 use Cultiva\Models\Address\Address;
 use Cultiva\Models\Address\DTOs\AddressRegisterDTO;
+use Illuminate\Database\Eloquent\Model;
 
 class CreateAddressAction
 {
 
-    public function execute(AddressRegisterDTO $dto): Address
+    public function execute(Model $addressable, AddressRegisterDTO $dto, GeoAddressDTO $geo): Address
     {
         return Address::query()->create([
-            'addressable_type' => $dto->addressableType,
-            'addressable_id'   => $dto->addressableId,
+            'addressable_type' => $addressable::class,
+            'addressable_id'   => $addressable->getKey(),
             'zip'              => $dto->zip,
-            'street'           => $dto->street,
+            'street'           => $geo->street,
             'number'           => $dto->number,
             'complement'       => $dto->complement,
             'reference_point'  => $dto->referencePoint,
-            'neighborhood'     => $dto->neighborhood,
-            'city'             => $dto->city,
-            'state'            => $dto->state,
-            'coordinate'       => "POINT({$dto->longitude} {$dto->latitude})",
+            'neighborhood'     => $geo->neighborhood,
+            'city'             => $geo->city,
+            'state'            => $geo->state,
+            'coordinate'       => "POINT({$geo->longitude} {$geo->latitude})",
         ]);
     }
 }

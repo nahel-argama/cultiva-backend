@@ -14,6 +14,6 @@ final class GeoController extends Controller
     {
         $result = $action->execute(new Cep($cep));
 
-        return response()->json($result);
+        return response()->json($result->toArray());
     }
 }

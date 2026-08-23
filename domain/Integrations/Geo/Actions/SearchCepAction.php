@@ -3,6 +3,7 @@
 namespace Cultiva\Integrations\Geo\Actions;
 
 use Cultiva\Base\ValueObjects\Cep;
+use Cultiva\Integrations\Geo\DTO\GeoAddressDTO;
 
 class SearchCepAction
 {
@@ -11,12 +12,10 @@ class SearchCepAction
         private readonly ResolveGeoProviderAction $resolveGeoProvider,
     ) {}
 
-    public function execute(Cep $cep): array
+    public function execute(Cep $cep): GeoAddressDTO
     {
         $provider = $this->resolveGeoProvider->execute();
 
-        $result = $provider->searchByCep($cep);
-
-        return $result->toArray();
+        return $provider->searchByCep($cep);
     }
 }

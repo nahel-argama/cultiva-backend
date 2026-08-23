@@ -28,27 +28,19 @@ final class SignUpRequest extends FormRequest
     private const string ZIP_REGEX = '/^[0-9]{8}$/';
     private const string DOCUMENT_REGEX = '/^[0-9]{11,14}$/';
 
-    protected function prepareForValidation(): void
-    {
-        $profile = $this->enum('profile_type', ProfileType::class);
-
-        if ($profile === ProfileType::PRODUCER) {
-            $this->merge($this->producerRules());
-        }
-
-        if ($profile === ProfileType::RETAILER) {
-            $this->merge($this->retailerRules());
-        }
-    }
-
     public function rules(): array
     {
-        return [
+        $rules = [
             'profile_type'  => ['required', Rule::enum(ProfileType::class)],
             'user.name'     => ['required', 'string', 'max:100'],
             'user.email'    => ['required', 'string', 'email', 'max:100', 'unique:users,email'],
             'user.password' => ['required', 'string', 'min:8', 'confirmed'],
         ];
+
+        return match ($this->enum('profile_type', ProfileType::class)) {
+            ProfileType::PRODUCER => [...$rules, ...$this->producerRules()],
+            ProfileType::RETAILER => [...$rules, ...$this->retailerRules()],
+        };
     }
 
     private function producerRules(): array
@@ -84,7 +76,7 @@ final class SignUpRequest extends FormRequest
                 'regex:' . self::DOCUMENT_REGEX,
                 'unique:retailers,document_number',
             ],
-            'retailer.business_type'   => ['nullable', Rule::enum(BusinessType::class)],
+            'retailer.business_type'   => ['required', Rule::enum(BusinessType::class)],
             'retailer.phone'           => ['required', 'string', 'max:15', 'regex:' . self::PHONE_REGEX],
 
             ...$this->addressRules('retailer.address'),
@@ -95,13 +87,9 @@ final class SignUpRequest extends FormRequest
     {
         return [
             "{$prefix}.zip"             => ['required', 'string', 'digits:8', 'regex:' . self::ZIP_REGEX],
-            "{$prefix}.street"          => ['required', 'string', 'max:100'],
             "{$prefix}.number"          => ['required', 'string', 'max:20'],
             "{$prefix}.complement"      => ['nullable', 'string', 'max:50'],
             "{$prefix}.reference_point" => ['nullable', 'string', 'max:150'],
-            "{$prefix}.neighborhood"    => ['required', 'string', 'max:50'],
-            "{$prefix}.city"            => ['required', 'string', 'max:50'],
-            "{$prefix}.state"           => ['required', 'string', 'size:2'],
         ];
     }
 }

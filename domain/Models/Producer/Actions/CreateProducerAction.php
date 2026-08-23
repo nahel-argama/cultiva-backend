@@ -2,6 +2,7 @@
 
 namespace Cultiva\Models\Producer\Actions;
 
+use Cultiva\Integrations\Geo\DTO\GeoAddressDTO;
 use Cultiva\Models\Address\Action\CreateAddressAction;
 use Cultiva\Models\Producer\DTOs\ProducerRegisterDTO;
 use Cultiva\Models\Producer\Producer;
@@ -14,11 +15,9 @@ class CreateProducerAction
         private readonly CreateAddressAction $createAddress,
     ) {}
 
-    public function execute(int $userId, ProducerRegisterDTO $dto): Producer
+    public function execute(int $userId, ProducerRegisterDTO $dto, GeoAddressDTO $geo): Producer
     {
-        return DB::transaction(function () use ($dto, $userId) {
-            $address = $this->createAddress->execute($dto->address);
-
+        return DB::transaction(function () use ($dto, $userId, $geo) {
             $producer = Producer::query()->create([
                 'user_id'         => $userId,
                 'is_company'      => $dto->isCompany,
@@ -27,6 +26,8 @@ class CreateProducerAction
                 'legal_name'      => $dto->legalName,
                 'phone'           => $dto->phone,
             ]);
+
+            $address = $this->createAddress->execute($producer, $dto->address, $geo);
 
             $producer->setRelation('address', $address);
 

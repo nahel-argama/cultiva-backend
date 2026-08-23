@@ -22,8 +22,8 @@ final class SignUpDTO
         return new self(
             user: UserRegisterDTO::fromArray($data['user']),
             profileType: ProfileType::from($data['profile_type']),
-            producer: isset($data['producer']) ?: ProducerRegisterDTO::fromArray($data['producer']),
-            retailer: isset($data['retailer']) ?: RetailerRegisterDTO::fromArray($data['retailer']),
+            producer: isset($data['producer']) ? ProducerRegisterDTO::fromArray($data['producer']) : null,
+            retailer: isset($data['retailer']) ? RetailerRegisterDTO::fromArray($data['retailer']) : null,
         );
     }
 }

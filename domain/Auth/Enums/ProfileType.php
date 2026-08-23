@@ -6,5 +6,4 @@ enum ProfileType: string
 {
     case PRODUCER = 'producer';
     case RETAILER = 'retailer';
-    case BOTH = 'both';
 }
