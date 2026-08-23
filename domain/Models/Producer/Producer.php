@@ -65,4 +65,3 @@ class Producer extends Model
         return $this->morphOne(Address::class, 'addressable');
     }
 }
-
