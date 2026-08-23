@@ -4,7 +4,7 @@ namespace Cultiva\Integrations\Geo\Actions;
 
 use Cultiva\Base\ValueObjects\Cep;
 
-final class SearchCepAction
+class SearchCepAction
 {
 
     public function __construct(

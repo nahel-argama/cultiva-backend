@@ -17,7 +17,7 @@ namespace Cultiva\Integrations\Geo\DTO;
  * tu não precisa converter pra um DTO pra passar pra uma action todas as vezes. Se a action foi desenhada pra rota, tu não precisa.
  * O DTO só vai adicionar complexidade.
  *
- * Mas agora se tu tem um action que tu usa em 30 partes diferentes do projeto, com uma carga de parâmetros chata e instável. Ai
+ * Mas agora se tu tem um action que tu usa em 30 partes diferentes do projeto, com uma carga de parâmetros chata, instável e tipagem é importante. Ai
  * faz sentido, porque você vai proteger as bordas.
  */
 final class GeoAddressDTO

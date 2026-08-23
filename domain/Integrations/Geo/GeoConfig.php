@@ -19,10 +19,11 @@ use Illuminate\Contracts\Config\Repository as Config;
  * Pra acessar os valores da config tu sempre vai usar o caminho na da chave no array contando com o nome do arquivo de config, como
  * se fosse um objeto: config('geo.providers.brasilapi.base_url') vai te dar o valor da chave base_url do array dentro do arquivo geo.php.
  */
-final readonly class GeoConfig
+final class GeoConfig
 {
+
     public function __construct(
-        private Config $config
+        private readonly Config $config
     ) {}
 
     public function getProvider(): string

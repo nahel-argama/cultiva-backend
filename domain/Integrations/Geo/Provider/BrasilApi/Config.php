@@ -4,9 +4,6 @@ namespace Cultiva\Integrations\Geo\Provider\BrasilApi;
 
 use Illuminate\Contracts\Config\Repository as ConfigRepository;
 
-/**
- *
- */
 final class Config
 {
 

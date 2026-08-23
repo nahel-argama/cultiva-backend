@@ -10,7 +10,7 @@ class Client
 {
 
     public function __construct(
-        private readonly Config      $config,
+        private readonly Config $config,
         private readonly HttpFactory $http
     ) {}
 
@@ -19,8 +19,6 @@ class Client
         $timeout = $this->config->getTimeout();
         $baseUrl = $this->config->getBaseUrl();
 
-        return $this->http
-            ->baseUrl($baseUrl)
-            ->timeout($timeout);
+        return $this->http->baseUrl($baseUrl)->timeout($timeout);
     }
 }

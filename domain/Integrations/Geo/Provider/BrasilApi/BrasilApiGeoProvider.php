@@ -5,44 +5,41 @@ namespace Cultiva\Integrations\Geo\Provider\BrasilApi;
 use Cultiva\Base\ValueObjects\Cep;
 use Cultiva\Integrations\Geo\Contracts\GeoProviderContract;
 use Cultiva\Integrations\Geo\DTO\GeoAddressDTO;
-use Cultiva\Integrations\Geo\Provider\BrasilApi\Actions\SearchByCepAction;
-use Illuminate\Contracts\Container\Container;
+use Cultiva\Integrations\Geo\Exceptions\GeoException;
+use Cultiva\Integrations\Geo\Provider\BrasilApi\Clients\Client;
+use Cultiva\Integrations\Geo\Provider\BrasilApi\Transformer\CepAddressTransformer;
+use Illuminate\Support\Facades\Lang;
 use Override;
+use Throwable;
 
 /**
  * @nicolas
  *
- * Na implementação do serviço eu quis experimentar algo diferente. Aqui to tentando imitar como uma controller do laravel
- * chama os métodos dela a partir do arquivo de rotas. Ou seja, quero deixar cada método da implementação isolado em seu
- * contexto. Porque no meu trabalho lidei com uma situação em que não consegui fazer assim e a classe ficou pesada. Só vendo
- * pra entender. Desse jeito achei legal, pode opinar se quiser.
- *
- * Outra técnica que a gente poderia ter utilizado é a pattern saloon, não fui muito a fundo mas fiz um overview dos conceitos.
- * Ela é legal, mas não queria outra layer de arquitetura pro projeto, por isso mantive o fluxo de action mesmo aqui.
+ *  Aqui só faço uma implementação simples do serviço, já que ele tem só um método abstrato na interface
  */
 final class BrasilApiGeoProvider implements GeoProviderContract
 {
 
     public function __construct(
-        private readonly Container $container,
+        private readonly Client $client,
+        private readonly CepAddressTransformer $transformer
     ) {}
 
     #[Override]
     public function searchByCep(Cep $cep): GeoAddressDTO
     {
-        /**
-         * @nicolas
-         *
-         * Um exemplo prático de user o ServiceContainer vonluntariamente. Aqui eu digo pra ele
-         * instancias a classe pra mim.
-         *
-         * Ele vai olhar todas as dependências da classe e instanciar elas também, e assim por diante.
-         *
-         * Sem eu precisar digitar um "new" sequer.
-         *
-         * Tem vários jeitos de chamar ele, resolve(), app()->make(), app()->resolve().
-         * Aqui eu injeto pra conseguir testar caso necessário
-         */
-        return $this->container->make(SearchByCepAction::class)->execute($cep);
+        try {
+            $response = $this->client->make()->get($cep->value());
+
+            if ($response->failed()) {
+                throw new GeoException(Lang::get('integrations.geo.failed_to_search'), 500);
+            }
+
+            return $this->transformer->transform($response->json());
+        } catch (GeoException $e) {
+            throw $e;
+        } catch (Throwable $e) {
+            throw new GeoException(Lang::get('integrations.geo.failed_to_search'), 500, $e);
+        }
     }
 }

@@ -36,8 +36,8 @@ final class CepAddressTransformer
             city: $data['city'],
             neighborhood: $data['neighborhood'],
             street: $data['street'],
-            latitude: (float) ($coordinates['latitude'] ?? 0.0),
-            longitude: (float) ($coordinates['longitude'] ?? 0.0),
+            latitude: $coordinates['latitude'],
+            longitude: $coordinates['longitude'],
         );
     }
 }
