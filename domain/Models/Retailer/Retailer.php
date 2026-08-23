@@ -20,7 +20,7 @@ use Override;
  * @property-read string $document_number
  * @property-read string $trade_name
  * @property-read ?string $legal_name
- * @property-read ?string $business_type
+ * @property-read BusinessType $business_type
  * @property-read string $phone
  * @property-read CarbonImmutable $created_at
  * @property-read ?CarbonImmutable $updated_at
