@@ -18,17 +18,15 @@ use Override;
  * @property-read string $name
  * @property-read string $email
  * @property-read string $password
- * @property-read string $remember_token
- * @property-read CarbonImmutable $last_login
- * @property-read ?int $retailer_id
- * @property-read ?int $producer_id
+ * @property-read ?string $remember_token
+ * @property-read ?CarbonImmutable $last_login
  * @property-read bool $is_active
- * @property-read CarbonImmutable $email_verified_at
+ * @property-read ?CarbonImmutable $email_verified_at
  * @property-read CarbonImmutable $created_at
  * @property-read ?CarbonImmutable $updated_at
  * @property-read ?CarbonImmutable $deleted_at
- * @property-read HasOne $retailer
- * @property-read HasOne $producer
+ * @property-read ?Retailer $retailer
+ * @property-read ?Producer $producer
  */
 class User extends Authenticatable
 {
@@ -41,8 +39,6 @@ class User extends Authenticatable
         'password',
         'email_verified_at',
         'remember_token',
-        'retailer_id',
-        'producer_id',
         'last_login',
         'is_active',
     ];
@@ -56,8 +52,6 @@ class User extends Authenticatable
     protected function casts(): array
     {
         return [
-            'is_retailer'       => 'boolean',
-            'is_producer'       => 'boolean',
             'is_active'         => 'boolean',
             'email_verified_at' => 'datetime',
             'password'          => 'hashed',
@@ -66,18 +60,28 @@ class User extends Authenticatable
     }
 
     /**
-     * @return HasOne<Retailer, User>
+     * @return HasOne<Retailer, $this>
      */
     public function retailer(): HasOne
     {
-        return $this->hasOne(Retailer::class, 'id', 'retailer_id');
+        return $this->hasOne(Retailer::class);
     }
 
     /**
-     * @return HasOne<Producer, User>
+     * @return HasOne<Producer, $this>
      */
     public function producer(): HasOne
     {
-        return $this->hasOne(Producer::class, 'id', 'producer_id');
+        return $this->hasOne(Producer::class);
+    }
+
+    public function isRetailer(): bool
+    {
+        return $this->retailer()->exists();
+    }
+
+    public function isProducer(): bool
+    {
+        return $this->producer()->exists();
     }
 }

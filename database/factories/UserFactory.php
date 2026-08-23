@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Hash;
  */
 class UserFactory extends Factory
 {
+    protected $model = User::class;
+
     /**
      * The current password being used by the factory.
      */
@@ -27,14 +29,13 @@ class UserFactory extends Factory
 
         return [
             'name'              => $this->faker->name(),
-            'email'             => $this->faker->email(),
+            'email'             => $this->faker->unique()->safeEmail(),
             'password'          => Hash::make($password),
             'email_verified_at' => now(),
             'remember_token'    => null,
             'last_login'        => null,
-            'is_retailer'       => false,
-            'is_producer'       => false,
             'is_active'         => true,
         ];
     }
 }
+
