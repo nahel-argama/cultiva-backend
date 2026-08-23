@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Hash;
  */
 class UserFactory extends Factory
 {
+
     protected $model = User::class;
 
     /**
@@ -38,4 +39,3 @@ class UserFactory extends Factory
         ];
     }
 }
-

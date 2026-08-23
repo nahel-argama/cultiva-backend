@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class AddressFactory extends Factory
 {
+
     protected $model = Address::class;
 
     /**
@@ -25,13 +26,13 @@ class AddressFactory extends Factory
             'addressable_id'   => ProducerFactory::new(),
             'zip'              => $this->faker->numerify('########'),
             'street'           => $this->faker->streetName(),
-            'number'           => (string) $this->faker->buildingNumber(),
+            'number'           => $this->faker->buildingNumber(),
             'complement'       => $this->faker->optional()->sentence(3),
             'reference_point'  => $this->faker->optional()->sentence(3),
             'neighborhood'     => $this->faker->citySuffix(),
             'city'             => $this->faker->city(),
-            'state'            => $this->faker->text(2),
-            'coordinate'       => $this->faker->latitude() . ',' . $this->faker->longitude(),
+            'state'            => $this->faker->stateAbbr(),
+            'coordinate'       => "POINT({$this->faker->longitude()} {$this->faker->latitude()})",
         ];
     }
 }

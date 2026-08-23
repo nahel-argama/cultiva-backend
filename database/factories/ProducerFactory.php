@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class ProducerFactory extends Factory
 {
+
     protected $model = Producer::class;
 
     /**

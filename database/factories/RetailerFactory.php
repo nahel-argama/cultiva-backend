@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class RetailerFactory extends Factory
 {
+
     protected $model = Retailer::class;
 
     /**
