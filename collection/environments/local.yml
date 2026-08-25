@@ -1,0 +1,7 @@
+name: local
+variables:
+  - name: base_url
+    value: http://localhost:80
+    enabled: true
+    secret: false
+    type: text

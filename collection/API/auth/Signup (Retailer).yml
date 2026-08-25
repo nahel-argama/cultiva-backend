@@ -1,0 +1,44 @@
+info:
+  name: Signup (Retailer)
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: "{{base_url}}/v1/auth/signup"
+  headers:
+    - name: Accept
+      value: application/json
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |
+      {
+        "user": {
+          "name": "Carlos Mendes",
+          "email": "carlos@example.com",
+          "password": "Password123!",
+          "password_confirmation": "Password123!"
+        },
+        "profile_type": "retailer",
+        "retailer": {
+          "trade_name": "Mercado Central",
+          "legal_name": "Mercado Central LTDA",
+          "document_number": "12345678000195",
+          "business_type": "supermarket",
+          "phone": "5511987654321",
+          "address": {
+            "zip": "89010025",
+            "number": "456",
+            "complement": "Loja 01",
+            "reference_point": "Em frente à praça"
+          }
+        }
+      }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

@@ -1,0 +1,10 @@
+{
+    "phpunit.command": "docker compose exec php php ${phpunit} ${phpunitargs}",
+    "phpunit.config": "phpunit.xml",
+    "php.version": "8.5",
+    "Laravel.phpEnvironment": "docker",
+    "LaravelExtraIntellisense.phpCommand": "docker compose exec php php",
+    "[php]": {
+        "editor.defaultFormatter": "bmewburn.vscode-intelephense-client"
+    }
+}

@@ -1,6 +1,9 @@
 <?php
 
+use Cultiva\Providers\AppServiceProvider;
+use Cultiva\Providers\HorizonServiceProvider;
+
 return [
-    Cultiva\Providers\AppServiceProvider::class,
-    Cultiva\Providers\HorizonServiceProvider::class,
+    AppServiceProvider::class,
+    HorizonServiceProvider::class,
 ];

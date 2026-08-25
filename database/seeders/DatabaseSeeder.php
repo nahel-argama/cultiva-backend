@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use Cultiva\Models\User;
+use Cultiva\Models\User\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 

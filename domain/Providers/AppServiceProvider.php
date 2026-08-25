@@ -3,7 +3,7 @@
 namespace Cultiva\Providers;
 
 use Carbon\CarbonImmutable;
-use Date;
+use Illuminate\Support\Facades\Date;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider

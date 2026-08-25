@@ -1,6 +1,6 @@
 <?php
 
-use Cultiva\Models\User;
+use Cultiva\Models\User\User;
 
 return [
 
@@ -114,4 +114,6 @@ return [
 
     'password_timeout' => env('AUTH_PASSWORD_TIMEOUT', 10800),
 
+    'access_token_lifetime_minutes' => env('AUTH_ACCESS_TOKEN_LIFETIME', 60),
+    'refresh_token_lifetime_minutes' => env('AUTH_REFRESH_TOKEN_LIFETIME', 60 * 3)
 ];
