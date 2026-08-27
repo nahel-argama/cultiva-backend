@@ -3,14 +3,17 @@
 namespace Cultiva\Models\User;
 
 use Carbon\CarbonImmutable;
+use Cultiva\Auth\Enums\ProfileType;
 use Cultiva\Models\Producer\Producer;
 use Cultiva\Models\Retailer\Retailer;
 use Database\Factories\UserFactory;
+use DomainException;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Lang;
 use Laravel\Sanctum\HasApiTokens;
 use Override;
 
@@ -53,10 +56,10 @@ class User extends Authenticatable
     protected function casts(): array
     {
         return [
-            'is_active'         => 'boolean',
+            'is_active' => 'boolean',
             'email_verified_at' => 'datetime',
-            'password'          => 'hashed',
-            'last_login'        => 'datetime',
+            'password' => 'hashed',
+            'last_login' => 'datetime',
         ];
     }
 
@@ -74,6 +77,18 @@ class User extends Authenticatable
     public function producer(): HasOne
     {
         return $this->hasOne(Producer::class);
+    }
+
+    public function getProfileType(): ProfileType
+    {
+        $isProducer = $this->producer !== null;
+        $isRetailer = $this->retailer !== null;
+
+        return match (true) {
+            $isProducer && ! $isRetailer => ProfileType::PRODUCER,
+            $isRetailer && ! $isProducer => ProfileType::RETAILER,
+            default => throw new DomainException(Lang::get('auth.login.invalid_profile'), 409),
+        };
     }
 
     public function isRetailer(): bool
