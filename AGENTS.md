@@ -30,7 +30,7 @@ domain/
 │   ├── Contracts/
 │   │   └── Controller.php
 │   └── Exceptions/
-│       └── DomainException.php
+│       └── CultivaException.php
 ├── Models/                     # Feature modules grouped by entity
 │   ├── User/
 │   │   ├── User.php            # Eloquent model

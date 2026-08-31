@@ -4,10 +4,10 @@ namespace Cultiva\Models\User;
 
 use Carbon\CarbonImmutable;
 use Cultiva\Auth\Enums\ProfileType;
+use Cultiva\Base\Exceptions\CultivaException;
 use Cultiva\Models\Producer\Producer;
 use Cultiva\Models\Retailer\Retailer;
 use Database\Factories\UserFactory;
-use DomainException;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -87,7 +87,7 @@ class User extends Authenticatable
         return match (true) {
             $isProducer && ! $isRetailer => ProfileType::PRODUCER,
             $isRetailer && ! $isProducer => ProfileType::RETAILER,
-            default => throw new DomainException(Lang::get('auth.login.invalid_profile'), 409),
+            default => throw new CultivaException(409, Lang::get('auth.login.invalid_profile')),
         };
     }
 

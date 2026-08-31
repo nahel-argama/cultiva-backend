@@ -4,13 +4,13 @@ namespace Cultiva\Auth\Actions;
 
 use Cultiva\Auth\DTO\ProfileResultDTO;
 use Cultiva\Auth\DTO\SignUpDTO;
+use Cultiva\Base\Exceptions\CultivaException;
 use Cultiva\Base\ValueObjects\Cep;
 use Cultiva\Integrations\Geo\Actions\SearchCepAction;
 use Cultiva\Integrations\Geo\DTO\GeoAddressDTO;
 use Cultiva\Models\Producer\Actions\CreateProducerAction;
 use Cultiva\Models\Retailer\Actions\CreateRetailerAction;
 use Cultiva\Models\User\Actions\CreateUserAction;
-use DomainException;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Lang;
@@ -28,7 +28,7 @@ class SignUpAction
     public function execute(SignUpDTO $dto): ProfileResultDTO
     {
         if ($dto->producer === null && $dto->retailer === null) {
-            throw new DomainException(Lang::get('auth.sign_up.user_without_profile'));
+            throw new CultivaException(422, Lang::get('auth.sign_up.user_without_profile'));
         }
 
         /**
@@ -42,7 +42,7 @@ class SignUpAction
         $lock = Cache::lock("signup:{$dto->user->email}", 60);
 
         if (! $lock->get()) {
-            throw new DomainException(Lang::get('auth.sign_up.in_progress'));
+            throw new CultivaException(422, Lang::get('auth.sign_up.in_progress'));
         }
 
         try {

@@ -2,8 +2,8 @@
 
 namespace Tests\Unit\domain\Models\User;
 
+use Cultiva\Base\Exceptions\CultivaException;
 use Cultiva\Models\User\User;
-use DomainException;
 use Tests\TestCase;
 
 class UserTest extends TestCase
@@ -16,7 +16,7 @@ class UserTest extends TestCase
         $sut->setRelation('retailer', null);
 
         // Action & Assert
-        $this->expectException(DomainException::class);
+        $this->expectException(CultivaException::class);
         $sut->getProfileType();
     }
 }

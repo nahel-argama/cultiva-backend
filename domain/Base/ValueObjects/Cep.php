@@ -2,7 +2,7 @@
 
 namespace Cultiva\Base\ValueObjects;
 
-use InvalidArgumentException;
+use Cultiva\Base\Exceptions\CultivaException;
 
 /**
  * @nicolas
@@ -19,7 +19,6 @@ use InvalidArgumentException;
  */
 final class Cep
 {
-
     private readonly string $value;
 
     public function __construct(string $value)
@@ -27,7 +26,7 @@ final class Cep
         $digits = preg_replace('/\D/', '', $value);
 
         if (\strlen($digits) !== 8) {
-            throw new InvalidArgumentException('CEP must contain exactly 8 digits.');
+            throw new CultivaException(422, 'CEP must contain exactly 8 digits.');
         }
 
         $this->value = $digits;
@@ -40,6 +39,6 @@ final class Cep
 
     public function format(): string
     {
-        return substr($this->value, 0, 5) . '-' . substr($this->value, 5);
+        return substr($this->value, 0, 5).'-'.substr($this->value, 5);
     }
 }

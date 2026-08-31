@@ -18,18 +18,6 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->throttleWithRedis();
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        $exceptions->render(function (DomainException $exception) {
-            $status = $exception->getCode();
-
-            if ($status < 400 || $status > 599) {
-                $status = 422;
-            }
-
-            return response()->json([
-                'message' => $exception->getMessage(),
-            ], $status);
-        });
-
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
         );

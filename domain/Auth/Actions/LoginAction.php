@@ -4,8 +4,8 @@ namespace Cultiva\Auth\Actions;
 
 use Cultiva\Auth\DTO\LoginDTO;
 use Cultiva\Auth\DTO\ProfileResultDTO;
+use Cultiva\Base\Exceptions\CultivaException;
 use Cultiva\Models\User\User;
-use DomainException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Lang;
@@ -23,11 +23,11 @@ class LoginAction
             ->first();
 
         if ($user === null || ! Hash::check($dto->password, $user->password)) {
-            throw new DomainException(Lang::get('auth.login.invalid_credentials'), 401);
+            throw new CultivaException(401, Lang::get('auth.login.invalid_credentials'));
         }
 
         if (! $user->is_active) {
-            throw new DomainException(Lang::get('auth.login.user_not_active'), 403);
+            throw new CultivaException(403, Lang::get('auth.login.user_not_active'));
         }
 
         return DB::transaction(function () use ($user) {

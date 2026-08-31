@@ -7,10 +7,10 @@ use Cultiva\Auth\DTO\AuthTokensDTO;
 use Cultiva\Auth\DTO\LoginDTO;
 use Cultiva\Auth\DTO\ProfileResultDTO;
 use Cultiva\Auth\Enums\ProfileType;
+use Cultiva\Base\Exceptions\CultivaException;
 use Cultiva\Models\Address\Address;
 use Cultiva\Models\Producer\Producer;
 use Cultiva\Models\User\User;
-use DomainException;
 use Illuminate\Support\Facades\Lang;
 use Mockery;
 use Tests\TestCase;
@@ -68,7 +68,7 @@ class LoginControllerTest extends TestCase
             ->assertJsonPath('data.tokens.access_token', 'access-token');
     }
 
-    public function test_should_return_domain_exception_http_status(): void
+    public function test_should_return_cultiva_exception_status(): void
     {
         // Arrange
         $payload = [
@@ -79,7 +79,7 @@ class LoginControllerTest extends TestCase
         $action = Mockery::mock(LoginAction::class);
         $action->shouldReceive('execute')
             ->once()
-            ->andThrow(new DomainException(Lang::get('auth.login.invalid_credentials'), 401));
+            ->andThrow(new CultivaException(401, Lang::get('auth.login.invalid_credentials')));
         $this->app->instance(LoginAction::class, $action);
 
         // Action
