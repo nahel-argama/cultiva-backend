@@ -81,8 +81,8 @@ class User extends Authenticatable
 
     public function getProfileType(): ProfileType
     {
-        $isProducer = $this->producer !== null;
-        $isRetailer = $this->retailer !== null;
+        $isProducer = $this->isProducer();
+        $isRetailer = $this->isRetailer();
 
         return match (true) {
             $isProducer && ! $isRetailer => ProfileType::PRODUCER,
