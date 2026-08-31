@@ -2,21 +2,19 @@
 
 namespace Tests\Feature\domain\Auth\Controllers;
 
-use Cultiva\Auth\Actions\LoginAction;
-use Cultiva\Auth\DTO\AuthTokensDTO;
-use Cultiva\Auth\DTO\LoginDTO;
-use Cultiva\Auth\DTO\ProfileResultDTO;
-use Cultiva\Auth\Enums\ProfileType;
-use Cultiva\Base\Exceptions\CultivaException;
-use Cultiva\Models\Address\Address;
 use Cultiva\Models\Producer\Producer;
-use Cultiva\Models\User\User;
+use Database\Factories\AddressFactory;
+use Database\Factories\ProducerFactory;
+use Database\Factories\UserFactory;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Lang;
-use Mockery;
 use Tests\TestCase;
 
 class LoginControllerTest extends TestCase
 {
+    use RefreshDatabase;
+
     public function test_should_return_authenticated_profile(): void
     {
         // Arrange
@@ -25,62 +23,41 @@ class LoginControllerTest extends TestCase
             'password' => 'valid-password',
         ];
 
-        $user = new User(['name' => 'Producer', 'email' => $payload['email']]);
-        $producer = new Producer([
-            'trade_name' => 'Sítio Teste',
-            'legal_name' => 'Produtor Teste',
-            'is_company' => false,
-            'document_number' => '12345678901',
-            'phone' => '11999999999',
+        $user = UserFactory::new()->create([
+            'email' => $payload['email'],
+            'password' => Hash::make($payload['password']),
         ]);
-        $producer->setRelation('address', new Address([
-            'zip' => '12345678',
-            'street' => 'Rua Teste',
-            'number' => '1',
-            'neighborhood' => 'Centro',
-            'city' => 'São Paulo',
-            'state' => 'SP',
-        ]));
-
-        $result = new ProfileResultDTO(
-            user: $user,
-            profileType: ProfileType::PRODUCER,
-            producer: $producer,
-            retailer: null,
-            tokens: new AuthTokensDTO('access-token', 'refresh-token'),
-        );
-
-        $action = Mockery::mock(LoginAction::class);
-        $action->shouldReceive('execute')
-            ->once()
-            ->with(Mockery::on(
-                fn (LoginDTO $dto) => $dto->email === $payload['email'] && $dto->password === $payload['password'],
-            ))
-            ->andReturn($result);
-        $this->app->instance(LoginAction::class, $action);
+        $producer = ProducerFactory::new()->create(['user_id' => $user->id]);
+        AddressFactory::new()->create([
+            'addressable_type' => Producer::class,
+            'addressable_id' => $producer->id,
+        ]);
 
         // Action
         $response = $this->postJson('/v1/auth/login', $payload);
 
         // Assert
         $response->assertOk()
+            ->assertJsonPath('data.user.email', $payload['email'])
             ->assertJsonPath('data.profile_type', 'producer')
-            ->assertJsonPath('data.tokens.access_token', 'access-token');
+            ->assertJsonPath('data.producer.trade_name', $producer->trade_name)
+            ->assertJsonStructure([
+                'data' => [
+                    'tokens' => ['access_token', 'refresh_token'],
+                ],
+            ]);
+
+        $this->assertDatabaseCount('personal_access_tokens', 2);
+        $this->assertNotNull($user->fresh()->last_login);
     }
 
-    public function test_should_return_cultiva_exception_status(): void
+    public function test_should_return_unauthorized_for_invalid_credentials(): void
     {
         // Arrange
         $payload = [
             'email' => 'missing@example.com',
             'password' => 'invalid-password',
         ];
-
-        $action = Mockery::mock(LoginAction::class);
-        $action->shouldReceive('execute')
-            ->once()
-            ->andThrow(new CultivaException(401, Lang::get('auth.login.invalid_credentials')));
-        $this->app->instance(LoginAction::class, $action);
 
         // Action
         $response = $this->postJson('/v1/auth/login', $payload);
