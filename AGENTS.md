@@ -18,6 +18,8 @@ docker compose exec php php artisan <command>
 docker compose exec php composer <command>
 ```
 
+Never run Laravel Pint (`vendor/bin/pint`, `composer pint`, or equivalent). PHP formatting is handled exclusively by Intelephense.
+
 ---
 
 ## 2. Project Namespaces & Structure
