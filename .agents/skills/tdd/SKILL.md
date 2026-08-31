@@ -94,6 +94,17 @@ tests/Fixtures/
 | **Database** | Real test database interactions (migrations, transactions, direct factories) | In-memory / mocked wherever possible; test input $\to$ output contract |
 | **When to Use** | All public API endpoints, user-facing routes, queue job triggers | Complex business rules, calculations, discrete domain actions, exceptions |
 
+### Feature Test Non-Negotiables
+
+- **Run the real application flow**: route, middleware, `FormRequest`, controller, Action, transformer, and database must execute normally.
+- **Never mock the controller's Action**: binding a mocked Action into the container turns the test into a controller unit test and leaves business integration untested.
+- **Never fake persisted state with models**: do not use `new Model`, `Factory::make()`, or `setRelation()` in Feature tests.
+- **Use direct factories and persist every required relation**: call `UserFactory::new()->create()` and create related records through their factories.
+- **Mock only outbound boundaries**: third-party APIs, webhooks, or equivalent services unavailable in the test environment. Do not mock application Actions, models, requests, or transformers.
+- **Assert contract and side effects**: verify the response plus relevant database writes, state changes, dispatched jobs, or events.
+
+If a test needs to mock the Action under the controller, move that scenario to `tests/Unit/`. It is not a Feature test.
+
 > [!NOTE]
 > Not all features require unit tests. If a feature is straightforward and thoroughly covered by an end-to-end Feature test, write the Feature test. Write Unit tests when business logic in an Action has multiple branching paths, calculations, or isolated failure modes that warrant targeted verification.
 
@@ -565,8 +576,11 @@ Before committing tests or considering a task done, verify against this checklis
 - [ ] **AAA Structure**: Explicit `// Arrange`, `// Expects`, `// Action`, `// Assert` (or `// Action & Assert`) comments.
 - [ ] **SUT Variable**: Subject under test stored in `$sut`.
 - [ ] **Factory Usage**: Direct `Factory::new()->create(...)` / `Factory::new()->make(...)` used (no `Model::factory()`).
+- [ ] **Feature Flow**: Feature tests use real Actions, requests, transformers, and database state without application-layer mocks.
+- [ ] **Feature State**: Feature test models and relations are persisted with direct `Factory::new()->create(...)` calls, never `new Model`, `make()`, or `setRelation()`.
+- [ ] **Mock Boundary**: Feature mocks/fakes are limited to outbound third-party boundaries.
+- [ ] **Side Effects**: Feature tests assert relevant database or asynchronous side effects in addition to the HTTP response.
 - [ ] **Fixtures**: Stored in `tests/Fixtures/` as `.php` files returning multiline strings (heredoc `<<<JSON ... JSON;`), loaded via `require base_path(...)`.
 - [ ] **Array Assertions**: Uses `assertEqualsCanonicalizing` for unordered array checks.
 - [ ] **Independence**: Tests are self-contained without hidden abstraction helpers.
 - [ ] **Action Pattern**: Follows single `execute()` method with DTO input and typed return.
-

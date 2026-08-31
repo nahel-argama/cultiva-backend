@@ -19,7 +19,7 @@ domain/
 │   ├── Contracts/
 │   │   └── Controller.php
 │   └── Exceptions/
-│       └── DomainException.php
+│       └── CultivaException.php
 ├── Models/                     # Feature modules grouped by entity
 │   ├── User/
 │   │   ├── User.php            # Eloquent model
@@ -250,25 +250,23 @@ class CreateOrderAction
 
 ---
 
-## 6. Custom Domain Exceptions
+## 6. Application Exception
 
-- **Location**: `domain/Models/<Entity>/Exceptions/<Domain><Condition>Exception.php`
-- **Rule**: All domain exceptions extend `Cultiva\Base\Exceptions\DomainException`. Never use generic `Exception` or `AppException`.
+- **Location**: `domain/Base/Exceptions/CultivaException.php`
+- **Rule**: Use `CultivaException` for application errors and always pass its HTTP status explicitly.
 
 ```php
-// domain/Base/Exceptions/DomainException.php
+// domain/Base/Exceptions/CultivaException.php
 namespace Cultiva\Base\Exceptions;
 
-use Exception;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
-abstract class DomainException extends Exception {}
+final class CultivaException extends HttpException {}
 
-// domain/Models/User/Exceptions/UserAlreadyExistsException.php
-namespace Cultiva\Models\User\Exceptions;
+// Usage
+use Cultiva\Base\Exceptions\CultivaException;
 
-use Cultiva\Base\Exceptions\DomainException;
-
-class UserAlreadyExistsException extends DomainException {}
+throw new CultivaException(422, 'Email already registered');
 ```
 
 ---

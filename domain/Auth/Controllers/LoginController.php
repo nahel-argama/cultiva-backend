@@ -2,21 +2,21 @@
 
 namespace Cultiva\Auth\Controllers;
 
-use Cultiva\Auth\Actions\SignUpAction;
-use Cultiva\Auth\DTO\SignUpDTO;
-use Cultiva\Auth\Requests\SignUpRequest;
+use Cultiva\Auth\Actions\LoginAction;
+use Cultiva\Auth\DTO\LoginDTO;
+use Cultiva\Auth\Requests\LoginRequest;
 use Cultiva\Auth\Transformers\UserAuthTransformer;
 use Cultiva\Base\Contracts\Controller;
 use Illuminate\Http\JsonResponse;
 
-final class RegisterController extends Controller
+final class LoginController extends Controller
 {
-    public function signUp(
-        SignUpRequest $request,
-        SignUpAction $action,
+    public function login(
+        LoginRequest $request,
+        LoginAction $action,
         UserAuthTransformer $transformer,
     ): JsonResponse {
-        $dto = SignUpDTO::fromArray($request->validated());
+        $dto = LoginDTO::fromArray($request->validated());
 
         $result = $action->execute($dto);
 
@@ -24,6 +24,6 @@ final class RegisterController extends Controller
 
         return response()->json([
             'data' => $data,
-        ], 201);
+        ], 200);
     }
 }

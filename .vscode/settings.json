@@ -4,6 +4,7 @@
     "php.version": "8.5",
     "Laravel.phpEnvironment": "docker",
     "LaravelExtraIntellisense.phpCommand": "docker compose exec php php",
+    "Laravel.pint.runOnSave": false,
     "[php]": {
         "editor.defaultFormatter": "bmewburn.vscode-intelephense-client"
     }

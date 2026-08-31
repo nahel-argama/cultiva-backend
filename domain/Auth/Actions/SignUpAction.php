@@ -2,34 +2,33 @@
 
 namespace Cultiva\Auth\Actions;
 
+use Cultiva\Auth\DTO\ProfileResultDTO;
 use Cultiva\Auth\DTO\SignUpDTO;
-use Cultiva\Auth\DTO\SignUpResultDTO;
+use Cultiva\Base\Exceptions\CultivaException;
 use Cultiva\Base\ValueObjects\Cep;
 use Cultiva\Integrations\Geo\Actions\SearchCepAction;
 use Cultiva\Integrations\Geo\DTO\GeoAddressDTO;
 use Cultiva\Models\Producer\Actions\CreateProducerAction;
 use Cultiva\Models\Retailer\Actions\CreateRetailerAction;
 use Cultiva\Models\User\Actions\CreateUserAction;
-use DomainException;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Lang;
 
 class SignUpAction
 {
-
     public function __construct(
-        private readonly CreateUserAction        $createUser,
-        private readonly CreateProducerAction    $createProducer,
-        private readonly CreateRetailerAction    $createRetailer,
+        private readonly CreateUserAction $createUser,
+        private readonly CreateProducerAction $createProducer,
+        private readonly CreateRetailerAction $createRetailer,
         private readonly GenerateTokenPairAction $generateTokens,
-        private readonly SearchCepAction         $searchCep,
+        private readonly SearchCepAction $searchCep,
     ) {}
 
-    public function execute(SignUpDTO $dto): SignUpResultDTO
+    public function execute(SignUpDTO $dto): ProfileResultDTO
     {
         if ($dto->producer === null && $dto->retailer === null) {
-            throw new DomainException(Lang::get('auth.sign_up.user_without_profile'));
+            throw new CultivaException(422, Lang::get('auth.sign_up.user_without_profile'));
         }
 
         /**
@@ -43,7 +42,7 @@ class SignUpAction
         $lock = Cache::lock("signup:{$dto->user->email}", 60);
 
         if (! $lock->get()) {
-            throw new DomainException(Lang::get('auth.sign_up.in_progress'));
+            throw new CultivaException(422, Lang::get('auth.sign_up.in_progress'));
         }
 
         try {
@@ -56,10 +55,10 @@ class SignUpAction
     }
 
     private function registerUser(
-        SignUpDTO      $dto,
+        SignUpDTO $dto,
         ?GeoAddressDTO $producerGeo,
         ?GeoAddressDTO $retailerGeo,
-    ): SignUpResultDTO {
+    ): ProfileResultDTO {
         return DB::transaction(function () use ($dto, $producerGeo, $retailerGeo) {
             $user = $this->createUser->execute($dto->user);
 
@@ -75,7 +74,7 @@ class SignUpAction
 
             $tokens = $this->generateTokens->execute($user);
 
-            return new SignUpResultDTO(
+            return new ProfileResultDTO(
                 user: $user,
                 profileType: $dto->profileType,
                 producer: $producer,

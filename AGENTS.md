@@ -18,6 +18,8 @@ docker compose exec php php artisan <command>
 docker compose exec php composer <command>
 ```
 
+Never run Laravel Pint (`vendor/bin/pint`, `composer pint`, or equivalent). PHP formatting is handled exclusively by Intelephense.
+
 ---
 
 ## 2. Project Namespaces & Structure
@@ -30,7 +32,7 @@ domain/
 │   ├── Contracts/
 │   │   └── Controller.php
 │   └── Exceptions/
-│       └── DomainException.php
+│       └── CultivaException.php
 ├── Models/                     # Feature modules grouped by entity
 │   ├── User/
 │   │   ├── User.php            # Eloquent model
@@ -69,3 +71,12 @@ All development guidelines, coding standards, and testing patterns are maintaine
 | :--- | :--- | :--- |
 | **`architecture`** | [`.agents/skills/architecture/SKILL.md`](.agents/skills/architecture/SKILL.md) | **Backend Architecture & Action Pattern**: Single-responsibility Action classes, public `execute()`, DTOs/Value Objects, two-layer validation (`FormRequest` vs `Action`), DB transactions, custom domain exceptions, return contracts, design patterns inside actions (`docs/PATTERNS.md`), and anti-patterns. |
 | **`tdd`** | [`.agents/skills/tdd/SKILL.md`](.agents/skills/tdd/SKILL.md) | **Test-Driven Development Standards**: Red-Green-Refactor cycle, path mirroring under `tests/Unit/` & `tests/Feature/`, Arrange-Action-Assert (AAA) structure, `$sut` convention, Mockery expectations, direct factory instantiation (`Factory::new()`), multi-route controller test splitting, and canonical array assertions. |
+
+### Feature Test Non-Negotiables
+
+- A Feature test must execute the real route lifecycle: middleware, request, controller, Action, transformer, and database.
+- Never mock the Action called by the controller. That produces a controller unit test, not a Feature test.
+- Never instantiate Eloquent models with `new`, `make()`, or `setRelation()` to simulate persisted state in a Feature test.
+- Persist test state with direct factories: `UserFactory::new()->create()`, including related records.
+- Mock or fake only outbound boundaries that cannot run locally, such as third-party APIs or webhooks.
+- Assert both the HTTP contract and relevant database side effects.

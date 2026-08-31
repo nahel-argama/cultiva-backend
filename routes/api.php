@@ -1,5 +1,6 @@
 <?php
 
+use Cultiva\Auth\Controllers\LoginController;
 use Cultiva\Auth\Controllers\RegisterController;
 use Cultiva\Integrations\Geo\Controllers\GeoController;
 use Illuminate\Support\Facades\Route;
@@ -9,15 +10,16 @@ Route::group([
 ], function (): void {
     Route::group([
         'prefix' => 'auth',
-        'as'     => 'auth.',
+        'as' => 'auth.',
     ], function (): void {
         Route::post('signup', [RegisterController::class, 'signUp'])->name('signup');
+        Route::post('login', [LoginController::class, 'login'])->name('login');
     });
 
     Route::group([
         'namespace' => 'Consult',
-        'prefix'    => 'consult',
-        'as'        => 'consult.',
+        'prefix' => 'consult',
+        'as' => 'consult.',
     ], function (): void {
         Route::get('cep/{cep}', [GeoController::class, 'search'])->name('search-cep')
             ->middleware('throttle:5,1')
