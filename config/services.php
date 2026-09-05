@@ -4,13 +4,12 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Third Party Services
+    | Serviços de Terceiros
     |--------------------------------------------------------------------------
     |
-    | This file is for storing the credentials for third party services such
-    | as Resend, Postmark, AWS, and more. This file provides the de facto
-    | location for this type of information, allowing packages to have
-    | a conventional file to locate the various service credentials.
+    | Este arquivo armazena configurações e credenciais de serviços de
+    | terceiros, como Resend, Postmark, AWS e outros. Ele fornece o local
+    | convencional para que os pacotes encontrem essas informações.
     |
     */
 
@@ -33,6 +32,11 @@ return [
             'bot_user_oauth_token' => env('SLACK_BOT_USER_OAUTH_TOKEN'),
             'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
         ],
+    ],
+
+    'product_source' => [
+        'base_url' => env('PRODUCT_SOURCE_BASE_URL', 'http://host.docker.internal:8001/api'),
+        'timeout' => env('PRODUCT_SOURCE_TIMEOUT', 5),
     ],
 
 ];
