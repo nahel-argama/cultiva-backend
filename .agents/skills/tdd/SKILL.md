@@ -1,6 +1,6 @@
 ---
 name: tdd
-description: Test-Driven Development (TDD) used .
+description: Test-Driven Development (TDD) used. Enforce Red-Green-Refactor for Cultiva features, bug fixes, and requirement changes, including proof that the targeted test failed before production code changed.
 ---
 
 # Test-Driven Development (TDD) Guide
@@ -26,6 +26,23 @@ flowchart LR
     B --> C["3. Clean Code (Refactor)"]
     C --> D["4. Repeat / Next Scenario"]
 ```
+
+### Mandatory Red Gate
+
+For each behavior, this sequence is mandatory:
+
+1. Create or update the smallest relevant test and any test-only scaffolding it needs.
+2. Before editing production files, run that targeted test inside the `php` container.
+3. Confirm the failure is caused by the missing or incorrect behavior. Syntax, infrastructure, database connectivity, or unrelated failures are not valid Red evidence.
+4. Record the command and concise expected failure reason in the working update or handoff.
+5. Only then edit production code and rerun the targeted test to obtain Green.
+6. Run the relevant broader suite before refactoring or completing the task.
+
+Never combine Red and Green into one task, execute them in parallel, or write production code while the Red run is pending. Dependency-order every implementation task as `Red test -> confirmed expected failure -> minimal production code -> Green test -> refactor`.
+
+If a new test passes before implementation, it does not prove the change: correct or strengthen it until it fails for the expected reason. If a valid Red cannot be produced, stop before editing production code and report the blocker.
+
+For behavior-preserving refactors, where a new failing test would be artificial, run the relevant existing tests first to establish a green characterization baseline, then refactor without changing behavior.
 
 ### Standard Workflows
 
