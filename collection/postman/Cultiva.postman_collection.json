@@ -9,6 +9,36 @@
       "key": "base_url",
       "value": "http://localhost:80",
       "type": "string"
+    },
+    {
+      "key": "producer_access_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "retailer_access_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "offer_id",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "source_product_id",
+      "value": "2",
+      "type": "string"
+    },
+    {
+      "key": "page",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "per_page",
+      "value": "15",
+      "type": "string"
     }
   ],
   "item": [
@@ -126,6 +156,175 @@
                 }
               ]
             }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Offers",
+      "item": [
+        {
+          "name": "List Categories",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{producer_access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/v1/products/categories"
+          }
+        },
+        {
+          "name": "Create Offer",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{producer_access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"source_product_id\": \"{{source_product_id}}\",\n  \"category_id\": 1,\n  \"unit_price\": \"12.50\",\n  \"total_quantity\": 20,\n  \"status\": \"inactive\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{base_url}}/v1/offers"
+          }
+        },
+        {
+          "name": "List My Offers",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{producer_access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/v1/offers?page={{page}}&per_page={{per_page}}"
+          }
+        },
+        {
+          "name": "Show Offer",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{producer_access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/v1/offers/{{offer_id}}"
+          }
+        },
+        {
+          "name": "Update Offer",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{producer_access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"source_product_id\": \"{{source_product_id}}\",\n  \"category_id\": 1,\n  \"unit_price\": \"15.00\",\n  \"total_quantity\": 25,\n  \"status\": \"active\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{base_url}}/v1/offers/{{offer_id}}"
+          }
+        },
+        {
+          "name": "List Available Offers",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{retailer_access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/v1/offers?page={{page}}&per_page={{per_page}}"
           }
         }
       ]

@@ -1,0 +1,38 @@
+info:
+  name: Create Offer
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: "{{base_url}}/v1/offers"
+  headers:
+    - name: Accept
+      value: application/json
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "source_product_id": "{{source_product_id}}",
+        "category_id": 1,
+        "unit_price": "12.50",
+        "total_quantity": 20,
+        "status": "inactive"
+      }
+  auth:
+    type: bearer
+    token: "{{producer_access_token}}"
+
+runtime:
+  variables:
+    - name: source_product_id
+      value: "3"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: true

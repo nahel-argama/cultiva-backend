@@ -1,0 +1,42 @@
+info:
+  name: Update Offer
+  type: http
+  seq: 5
+
+http:
+  method: PATCH
+  url: "{{base_url}}/v1/offers/:offer_id"
+  headers:
+    - name: Accept
+      value: application/json
+    - name: Content-Type
+      value: application/json
+  params:
+    - name: offer_id
+      value: "{{offer_id}}"
+      type: path
+  body:
+    type: json
+    data: |-
+      {
+        "source_product_id": "{{source_product_id}}",
+        "category_id": 1,
+        "unit_price": "15.00",
+        "total_quantity": 25,
+        "status": "active"
+      }
+  auth:
+    type: bearer
+    token: "{{producer_access_token}}"
+
+runtime:
+  variables:
+    - name: offer_id
+      value: "28"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: true
