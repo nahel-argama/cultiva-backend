@@ -37,6 +37,15 @@ http:
         }
       }
 
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        if (res.getStatus() === 201) {
+          const body = res.getBody();
+          bru.setEnvVar(`${body.data.profile_type}_access_token`, body.data.tokens.access_token);
+        }
+
 settings:
   encodeUrl: true
   timeout: 0
