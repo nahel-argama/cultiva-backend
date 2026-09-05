@@ -72,7 +72,6 @@ specs/001-product-offers/
 
 ```text
 .env.example                         # configuração documentada do product-source
-.env.testing.example                 # banco de teste isolado + configuração externa
 bootstrap/app.php                     # aliases de ability e perfil
 config/services.php                   # base URL e timeout do product-source
 routes/api.php                        # seis novas rotas /v1

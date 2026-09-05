@@ -121,12 +121,13 @@
 
 ## 11. Estratégia TDD e ambiente
 
-**Decision**: Desenvolver cada fluxo em Red-Green-Refactor. Feature tests executam route, middleware, FormRequest, controller, Action, transformer e PostgreSQL reais; somente o HTTP do `product-source` é fake. O teste unitário adicional cobre as ramificações da integração. Fixtures externas serão arquivos PHP. O banco de testes será `app_testing`, nunca `app`.
+**Decision**: Desenvolver cada fluxo em Red-Green-Refactor. Feature tests executam route, middleware, FormRequest, controller, Action, transformer e PostgreSQL reais; somente o HTTP do `product-source` é fake. O teste unitário adicional cobre as ramificações da integração. Fixtures externas serão arquivos PHP. Desenvolvimento e testes usam o banco local descartável `app`.
 
-**Rationale**: É a política obrigatória do projeto. A configuração atual de exemplo aponta testes para `app`; isolar `app_testing` evita apagar ou alterar dados de desenvolvimento durante `RefreshDatabase`.
+**Rationale**: É a política obrigatória do projeto. Neste estágio, `app` não contém dados persistentes e pode ser recriado pelos testes, evitando configuração de um segundo banco local.
 
 **Alternatives considered**:
 
 - Mockar Actions em Feature tests: rejeitado porque não testa a feature.
 - SQLite em memória: rejeitado porque as migrations existentes usam PostGIS e os checks devem ser provados em PostgreSQL.
+- Banco local separado para testes: adiado enquanto `app` for descartável; deve voltar se desenvolvimento passar a manter dados locais.
 - Unit tests para cada CRUD simples: rejeitados como duplicação dos Feature tests.

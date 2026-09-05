@@ -28,4 +28,3 @@ Thumbs.db
 db-data/
 redis-data/
 compose.yml
-.env.testing

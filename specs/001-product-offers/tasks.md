@@ -27,8 +27,8 @@
 **Purpose**: Preparar ambiente e trilha de evidência antes de qualquer implementação.
 
 - [X] T001 [P] Criar o modelo de registro Red/Green com colunas para tarefa, comando Docker, falha esperada/observada e resultado Green em `specs/001-product-offers/tdd-evidence.md`
-- [X] T002 [P] Documentar `PRODUCT_SOURCE_BASE_URL=http://host.docker.internal:8001/api`, `PRODUCT_SOURCE_TIMEOUT=5` e corrigir o banco isolado para `DB_DATABASE=app_testing` em `.env.example` e `.env.testing.example`
-- [X] T003 Preparar e conferir exclusivamente o banco `app_testing` pelos comandos Docker descritos em `specs/001-product-offers/quickstart.md`, abortando se `DB_DATABASE` resolver para `app`
+- [X] T002 [P] Documentar `PRODUCT_SOURCE_BASE_URL=http://host.docker.internal:8001/api` e `PRODUCT_SOURCE_TIMEOUT=5` em `.env.example`, reutilizando o banco local `app` nos testes
+- [X] T003 Preparar e conferir o banco local descartável `app` pelos comandos Docker descritos em `specs/001-product-offers/quickstart.md`
 
 ---
 
@@ -148,7 +148,7 @@
 
 **Purpose**: Provar migração, contratos, regressão e aderência sem ampliar o escopo.
 
-- [X] T045 Confirmar `DB_DATABASE=app_testing`, executar migrate fresh/seed somente nesse banco pelo roteiro de `specs/001-product-offers/quickstart.md` e verificar constraints, cinco categorias e rollback da migration `database/migrations/2026_09_04_000000_create_categories_and_offers_tables.php`
+- [X] T045 Confirmar `DB_DATABASE=app`, executar migrate fresh/seed no banco local descartável pelo roteiro de `specs/001-product-offers/quickstart.md` e verificar constraints, cinco categorias e rollback da migration `database/migrations/2026_09_04_000000_create_categories_and_offers_tables.php`
 - [X] T046 Executar no container os testes focados de `tests/Unit/domain/Integrations/ProductSource/Actions/GetProductActionTest.php`, `tests/Feature/domain/Models/Category/Http/Controllers/CategoryControllerTest.php` e `tests/Feature/domain/Models/Offer/Http/Controllers/`, registrando o resultado consolidado em `specs/001-product-offers/tdd-evidence.md`
 - [X] T047 Executar `docker compose exec php php artisan test` para a suíte completa, sem Pint, e registrar o resultado final em `specs/001-product-offers/tdd-evidence.md`
 - [X] T048 Conferir as seis rotas com `docker compose exec php php artisan route:list --path=v1`, comparar request/response/status com `specs/001-product-offers/contracts/openapi.yaml` e a tradução externa com `specs/001-product-offers/contracts/product-source.openapi.yaml`

@@ -4,7 +4,7 @@
 
 - Docker Compose com os serviços `php`, `database` e `redis` do backend.
 - Python 3.14+ e dependências do repositório irmão `../product-source`.
-- Banco PostgreSQL de testes separado, chamado `app_testing`.
+- Banco PostgreSQL local `app`, tratado como descartável em desenvolvimento e testes.
 - `product-source` acessível ao container PHP.
 
 Não execute Laravel Pint.
@@ -45,37 +45,31 @@ PRODUCT_SOURCE_TIMEOUT=5
 
 O serviço `php` já possui o mapeamento `host.docker.internal:host-gateway`. Não é necessário incluir o `product-source` no Compose desta feature.
 
-## 3. Isole o banco de testes
+## 3. Configure o ambiente de testes
 
-Suba o banco e crie a base uma única vez:
+Suba o banco local:
 
 ```bash
 docker compose up -d database
-docker compose exec database createdb -U root app_testing
 ```
 
-Crie `.env.testing` a partir de `.env.testing.example`, gere uma chave de aplicação e confirme:
+Confirme no `.env` local:
 
 ```dotenv
-APP_ENV=testing
-DB_DATABASE=app_testing
+DB_DATABASE=app
 PRODUCT_SOURCE_BASE_URL=http://host.docker.internal:8001/api
 PRODUCT_SOURCE_TIMEOUT=5
 ```
 
-Comando PHP obrigatório dentro do container:
+O `phpunit.xml` define `APP_ENV=testing`; sem um arquivo específico de testes, Laravel reutiliza o `.env` local e sua `APP_KEY`.
 
-```bash
-docker compose exec php php artisan key:generate --env=testing
-```
-
-Nunca execute `RefreshDatabase` com `DB_DATABASE=app`.
+`RefreshDatabase` pode recriar tabelas e apagar dados de `app`. Este roteiro assume que o banco local é descartável e nunca aponta para produção ou dados compartilhados.
 
 ## 4. Prepare banco e categorias
 
 ```bash
-docker compose exec php php artisan migrate --env=testing --force
-docker compose exec php php artisan db:seed --class=CategorySeeder --env=testing --force
+docker compose exec php php artisan migrate --force
+docker compose exec php php artisan db:seed --class=CategorySeeder --force
 ```
 
 Resultado esperado: cinco categorias, com IDs e nomes definidos em [data-model.md](data-model.md).
