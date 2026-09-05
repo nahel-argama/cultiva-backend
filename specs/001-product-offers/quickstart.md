@@ -82,7 +82,7 @@ Primeiro, durante implementação, execute cada novo teste antes do código corr
 docker compose exec php php artisan test --filter=GetProductActionTest
 docker compose exec php php artisan test --filter=CategoryControllerTest
 docker compose exec php php artisan test --filter=OfferController
-docker compose exec php php artisan test --filter=AvailableOfferControllerTest
+docker compose exec php php artisan test --filter=AvailableIndexTest
 docker compose exec php php artisan test
 ```
 

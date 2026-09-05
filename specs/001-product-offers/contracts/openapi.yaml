@@ -8,7 +8,7 @@ servers:
 security:
   - bearerAuth: []
 paths:
-  /v1/producer/categories:
+  /v1/products/categories:
     get:
       operationId: listProducerCategories
       summary: Lista as categorias seedadas disponíveis ao produtor
@@ -32,17 +32,17 @@ paths:
           $ref: "#/components/responses/Unauthenticated"
         "403":
           $ref: "#/components/responses/Forbidden"
-  /v1/producer/offers:
+  /v1/offers:
     get:
-      operationId: listProducerOffers
-      summary: Lista somente as ofertas do produtor autenticado
-      tags: [Producer Offers]
+      operationId: listOffers
+      summary: Lista ofertas conforme o perfil autenticado
+      tags: [Offers]
       parameters:
         - $ref: "#/components/parameters/Page"
         - $ref: "#/components/parameters/PerPage"
       responses:
         "200":
-          description: Ofertas próprias, incluindo inativas e esgotadas
+          description: Produtores recebem suas ofertas; varejistas recebem somente ofertas visíveis
           content:
             application/json:
               schema:
@@ -78,7 +78,7 @@ paths:
           $ref: "#/components/responses/ValidationFailed"
         "503":
           $ref: "#/components/responses/ProductSourceUnavailable"
-  /v1/producer/offers/{offer}:
+  /v1/offers/{offer}:
     parameters:
       - $ref: "#/components/parameters/OfferId"
     get:
@@ -125,27 +125,6 @@ paths:
           $ref: "#/components/responses/ValidationFailed"
         "503":
           $ref: "#/components/responses/ProductSourceUnavailable"
-  /v1/retailer/offers:
-    get:
-      operationId: listAvailableOffers
-      summary: Lista ofertas ativas com saldo para o varejista autenticado
-      tags: [Retailer Offers]
-      parameters:
-        - $ref: "#/components/parameters/Page"
-        - $ref: "#/components/parameters/PerPage"
-      responses:
-        "200":
-          description: Ofertas visíveis, sem ordenação por menor preço
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/OfferPage"
-        "401":
-          $ref: "#/components/responses/Unauthenticated"
-        "403":
-          $ref: "#/components/responses/Forbidden"
-        "422":
-          $ref: "#/components/responses/ValidationFailed"
 components:
   securitySchemes:
     bearerAuth:
@@ -350,12 +329,16 @@ components:
         application/json:
           schema:
             $ref: "#/components/schemas/Error"
+          example:
+            message: Unauthenticated.
     Forbidden:
       description: Token sem ability access ou perfil incompatível
       content:
         application/json:
           schema:
             $ref: "#/components/schemas/Error"
+          example:
+            message: You do not have permission to access this resource.
     OfferNotFound:
       description: Oferta inexistente ou pertencente a outro produtor
       content:

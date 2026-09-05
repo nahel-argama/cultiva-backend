@@ -110,9 +110,7 @@ domain/
     │   │   └── UpdateOfferDTO.php
     │   ├── Enums/OfferStatus.php
     │   ├── Http/
-    │   │   ├── Controllers/
-    │   │   │   ├── AvailableOfferController.php
-    │   │   │   └── OfferController.php
+    │   │   ├── Controllers/OfferController.php
     │   │   └── Requests/
     │   │       ├── ListOffersRequest.php
     │   │       ├── StoreOfferRequest.php
@@ -121,7 +119,7 @@ domain/
     │   └── Offer.php
     └── Producer/Producer.php         # relação offers()
 
-lang/pt_BR/
+lang/en/
 ├── integrations.php
 └── offers.php
 
@@ -129,8 +127,8 @@ tests/
 ├── Feature/domain/Models/
 │   ├── Category/Http/Controllers/CategoryControllerTest.php
 │   └── Offer/Http/Controllers/
-│       ├── AvailableOfferControllerTest.php
 │       └── OfferController/
+│           ├── AvailableIndexTest.php
 │           ├── IndexTest.php
 │           ├── ShowTest.php
 │           ├── StoreTest.php

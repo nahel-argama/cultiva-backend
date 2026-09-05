@@ -8,7 +8,7 @@
 | T021–T024 | `docker compose exec php vendor/bin/phpunit tests/Feature/domain/Models/Category/Http/Controllers/CategoryControllerTest.php` | RED confirmado: rota retorna 404 (4 failures, 4 assertions) | GREEN: 4 passed, 6 assertions |
 | T025–T032 | `docker compose exec php vendor/bin/phpunit tests/Feature/domain/Models/Offer/Http/Controllers/OfferController/IndexTest.php tests/Feature/domain/Models/Offer/Http/Controllers/OfferController/ShowTest.php` | RED confirmado após fortalecer 404: index 405 e show sem mensagem de domínio (13 failures, 15 assertions) | GREEN: 13 passed/25 assertions; regressão Producer: 31 passed/82 assertions |
 | T033–T039 | `docker compose exec php vendor/bin/phpunit tests/Feature/domain/Models/Offer/Http/Controllers/OfferController/UpdateTest.php` | RED confirmado: PATCH retorna 405 (18 failures, 18 assertions) | GREEN: 18 passed/55 assertions; regressão Producer: 49 passed/137 assertions |
-| T040–T044 | `docker compose exec php vendor/bin/phpunit tests/Feature/domain/Models/Offer/Http/Controllers/AvailableOfferControllerTest.php` | RED confirmado: rota retorna 404 (7 failures, 7 assertions) | GREEN: 7 passed, 18 assertions |
+| T040–T044 | `docker compose exec php vendor/bin/phpunit tests/Feature/domain/Models/Offer/Http/Controllers/OfferController/AvailableIndexTest.php` | RED confirmado: rota retorna 404 (7 failures, 7 assertions) | GREEN: 7 passed, 18 assertions |
 
 Infrastructure, syntax, or database connectivity failures are not valid Red evidence.
 
@@ -23,3 +23,11 @@ Architecture review: the feature uses Eloquent directly in Actions, exposes only
 Final gate: all changed PHP files passed `php -l`; the testing database reports the offers migration as applied; `route:list -v` confirms all six endpoints with Sanctum, `access` ability and the expected Producer/Retailer profile middleware. The final full suite remains GREEN with 95 tests and 236 assertions.
 
 Environment consolidation: the dedicated testing environment file was removed. PHPUnit sets `APP_ENV=testing`, Laravel reuses the local `.env`, `config:show database --env=testing` resolves PostgreSQL to disposable `app`, and the full suite remains GREEN with 95 tests and 236 assertions.
+
+An intermediate own-offers route rename (now superseded) produced the expected Red with 7 failures returning 404. After changing the route and contracts, the same command was GREEN with 7 tests and 15 assertions.
+
+Unified offer routes: after changing only the Producer, Retailer and Category feature tests to the prefix-free URLs, the focused run produced the expected Red with 58 failures returning 404. After updating routing and dispatching the shared list by authenticated profile, the same command was GREEN with 58 tests and 159 assertions.
+
+HTTP authentication messages: `docker compose exec php vendor/bin/phpunit tests/Feature/bootstrap/AppTest.php` produced the expected Red with 3 failures containing Laravel's default 401/403 messages. After adding explicit global JSON renderers, the same command was GREEN with 3 tests and 6 assertions, without accessing the database.
+
+English response standardization: after changing only the HTTP expectations and adding `TranslationsTest.php`, the isolated run produced the expected Red with 4 failures because the custom catalogs existed only in Portuguese. After moving all 13 custom messages to `lang/en` and restoring `APP_LOCALE=en`, the same run was GREEN with 4 tests and 19 assertions.

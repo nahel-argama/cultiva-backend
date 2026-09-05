@@ -56,7 +56,7 @@
 
 - [X] T007 [US1] [RED] Criar fixtures PHP de produto com nome e fallback em `tests/Fixtures/Integrations/ProductSource/product_success.php` e `tests/Fixtures/Integrations/ProductSource/product_without_presentation_name.php`, e escrever `tests/Unit/domain/Integrations/ProductSource/Actions/GetProductActionTest.php` cobrindo ID textual exato, fallback `normal_name`, 404→422, timeout/conexão/5xx/payload inválido→503 e ausência de retry; não criar código de produção
 - [X] T008 [US1] [RED-RUN] Executar `docker compose exec php php artisan test --filter=GetProductActionTest`, confirmar falha por ausência do comportamento ProductSource e registrar o Red em `specs/001-product-offers/tdd-evidence.md`; bloquear T009 se a falha for ambiental, sintática ou o teste passar
-- [X] T009 [US1] [GREEN] Implementar o mínimo da integração com HTTP nativo, timeout configurável de 5 segundos e sem retry em `domain/Integrations/ProductSource/DTO/ProductDTO.php`, `domain/Integrations/ProductSource/Actions/GetProductAction.php`, `config/services.php` e `lang/pt_BR/integrations.php`
+- [X] T009 [US1] [GREEN] Implementar o mínimo da integração com HTTP nativo, timeout configurável de 5 segundos e sem retry em `domain/Integrations/ProductSource/DTO/ProductDTO.php`, `domain/Integrations/ProductSource/Actions/GetProductAction.php`, `config/services.php` e `lang/en/integrations.php`
 - [X] T010 [US1] [GREEN-CHECK] Reexecutar `tests/Unit/domain/Integrations/ProductSource/Actions/GetProductActionTest.php` no container e registrar o Green em `specs/001-product-offers/tdd-evidence.md`
 
 ### Create offer route — Red → Green
@@ -68,7 +68,7 @@
 - [X] T015 [US1] [GREEN] Criar o upsert idempotente das cinco categorias fixas em `database/seeders/CategorySeeder.php` e chamá-lo em `database/seeders/DatabaseSeeder.php`
 - [X] T016 [P] [US1] [GREEN] Implementar o middleware parametrizado de perfil em `domain/Auth/Middleware/EnsureProfile.php` e registrar os aliases nativos de `ability` e `profile` em `bootstrap/app.php`, reutilizando Sanctum e os enums de autenticação existentes
 - [X] T017 [US1] [GREEN] Criar o contrato de entrada e validação HTTP de criação em `domain/Models/Offer/DTO/CreateOfferDTO.php` e `domain/Models/Offer/Http/Requests/StoreOfferRequest.php`, normalizando `source_product_id` para string sem remover zeros e proibindo IDs/estoque reservados fornecidos pelo cliente
-- [X] T018 [US1] [GREEN] Implementar o fluxo real mínimo em `domain/Models/Offer/Actions/CreateOfferAction.php`, `domain/Models/Category/Transformers/CategoryTransformer.php`, `domain/Models/Offer/Transformers/OfferTransformer.php`, `domain/Models/Offer/Http/Controllers/OfferController.php`, `routes/api.php` e `lang/pt_BR/offers.php`, validando produto/categoria antes de persistir e obtendo Producer exclusivamente do token
+- [X] T018 [US1] [GREEN] Implementar o fluxo real mínimo em `domain/Models/Offer/Actions/CreateOfferAction.php`, `domain/Models/Category/Transformers/CategoryTransformer.php`, `domain/Models/Offer/Transformers/OfferTransformer.php`, `domain/Models/Offer/Http/Controllers/OfferController.php`, `routes/api.php` e `lang/en/offers.php`, validando produto/categoria antes de persistir e obtendo Producer exclusivamente do token
 - [X] T019 [US1] [GREEN-CHECK] Reexecutar `tests/Feature/domain/Models/Offer/Http/Controllers/OfferController/StoreTest.php` no container, confirmar todos os cenários verdes e registrar o resultado em `specs/001-product-offers/tdd-evidence.md`
 - [X] T020 [US1] [GREEN-CHECK] Executar juntos `tests/Unit/domain/Integrations/ProductSource/Actions/GetProductActionTest.php` e `tests/Feature/domain/Models/Offer/Http/Controllers/OfferController/StoreTest.php` no container e registrar a regressão verde da US1 em `specs/001-product-offers/tdd-evidence.md`
 
@@ -84,7 +84,7 @@
 
 - [X] T021 [US2] [RED] Escrever somente `tests/Feature/domain/Models/Category/Http/Controllers/CategoryControllerTest.php` com ciclo real, `ProducerFactory::new()`, seeder idempotente, conjunto exato das cinco categorias e cenários sem token, refresh token e perfil Retailer
 - [X] T022 [US2] [RED-RUN] Executar `docker compose exec php php artisan test tests/Feature/domain/Models/Category/Http/Controllers/CategoryControllerTest.php`, confirmar falha pela rota/listagem ausente e registrar o Red em `specs/001-product-offers/tdd-evidence.md`; não iniciar T023 sem Red válido
-- [X] T023 [US2] [GREEN] Implementar listagem ordenada por ID em `domain/Models/Category/Actions/ListCategoriesAction.php` e `domain/Models/Category/Http/Controllers/CategoryController.php`, expondo `GET /v1/producer/categories` sob os middlewares Producer em `routes/api.php`
+- [X] T023 [US2] [GREEN] Implementar listagem ordenada por ID em `domain/Models/Category/Actions/ListCategoriesAction.php` e `domain/Models/Category/Http/Controllers/CategoryController.php`, expondo `GET /v1/products/categories` sob os middlewares Producer em `routes/api.php`
 - [X] T024 [US2] [GREEN-CHECK] Reexecutar `tests/Feature/domain/Models/Category/Http/Controllers/CategoryControllerTest.php` no container e registrar o Green em `specs/001-product-offers/tdd-evidence.md`
 
 **Checkpoint**: A tabela de referência é idempotente e consultável somente pelo perfil Producer.
@@ -102,7 +102,7 @@
 - [X] T027 [US3] [RED-RUN] Executar no container `tests/Feature/domain/Models/Offer/Http/Controllers/OfferController/IndexTest.php` e `tests/Feature/domain/Models/Offer/Http/Controllers/OfferController/ShowTest.php`, confirmar falhas pelos endpoints ausentes e registrar ambos os Reds em `specs/001-product-offers/tdd-evidence.md`; bloquear o Green se qualquer Red for inválido
 - [X] T028 [P] [US3] [GREEN] Implementar paginação limitada ao Producer autenticado em `domain/Models/Offer/Actions/ListProducerOffersAction.php` e validar `page`/`per_page` em `domain/Models/Offer/Http/Requests/ListOffersRequest.php`
 - [X] T029 [P] [US3] [GREEN] Implementar busca de detalhe já limitada à relação do Producer em `domain/Models/Offer/Actions/GetOfferAction.php`, retornando 404 indistinguível para oferta alheia ou inexistente
-- [X] T030 [US3] [GREEN] Adicionar os fluxos finos de index/show em `domain/Models/Offer/Http/Controllers/OfferController.php` e as rotas `GET /v1/producer/offers` e `GET /v1/producer/offers/{offer}` em `routes/api.php`
+- [X] T030 [US3] [GREEN] Adicionar os fluxos finos de index/show em `domain/Models/Offer/Http/Controllers/OfferController.php` e as rotas `GET /v1/offers` e `GET /v1/offers/{offer}` em `routes/api.php`
 - [X] T031 [US3] [GREEN-CHECK] Reexecutar `tests/Feature/domain/Models/Offer/Http/Controllers/OfferController/IndexTest.php` e `tests/Feature/domain/Models/Offer/Http/Controllers/OfferController/ShowTest.php` no container e registrar ambos os Greens em `specs/001-product-offers/tdd-evidence.md`
 - [X] T032 [US3] [GREEN-CHECK] Executar todos os testes em `tests/Feature/domain/Models/Offer/Http/Controllers/OfferController/` no container e registrar a regressão verde das rotas Producer em `specs/001-product-offers/tdd-evidence.md`
 
@@ -120,7 +120,7 @@
 - [X] T034 [US4] [RED-RUN] Executar `docker compose exec php php artisan test tests/Feature/domain/Models/Offer/Http/Controllers/OfferController/UpdateTest.php`, confirmar falha pelo endpoint/comportamento ausente e registrar o Red em `specs/001-product-offers/tdd-evidence.md`; não iniciar T035 sem Red válido
 - [X] T035 [US4] [GREEN] Criar PATCH tipado e validação de transporte em `domain/Models/Offer/DTO/UpdateOfferDTO.php` e `domain/Models/Offer/Http/Requests/UpdateOfferRequest.php`, exigindo ao menos um campo editável e proibindo `producer_id`/`reserved_quantity`
 - [X] T036 [US4] [GREEN] Implementar atualização atômica após todas as validações em `domain/Models/Offer/Actions/UpdateOfferAction.php`, sempre consultando o product-source e recusando total efetivo abaixo do reservado sem alterar a Offer
-- [X] T037 [US4] [GREEN] Adicionar o método update fino em `domain/Models/Offer/Http/Controllers/OfferController.php` e `PATCH /v1/producer/offers/{offer}` sob os middlewares Producer em `routes/api.php`
+- [X] T037 [US4] [GREEN] Adicionar o método update fino em `domain/Models/Offer/Http/Controllers/OfferController.php` e `PATCH /v1/offers/{offer}` sob os middlewares Producer em `routes/api.php`
 - [X] T038 [US4] [GREEN-CHECK] Reexecutar `tests/Feature/domain/Models/Offer/Http/Controllers/OfferController/UpdateTest.php` no container e registrar o Green em `specs/001-product-offers/tdd-evidence.md`
 - [X] T039 [US4] [GREEN-CHECK] Executar todos os testes em `tests/Feature/domain/Models/Offer/Http/Controllers/OfferController/` no container e registrar a regressão verde de criação, consulta e edição em `specs/001-product-offers/tdd-evidence.md`
 
@@ -132,13 +132,13 @@
 
 **Goal**: Retailer autenticado enxerga apenas ofertas `active` com `total_quantity > reserved_quantity`, sem ranqueamento por menor preço.
 
-**Independent Test**: Persistir a matriz active/inactive × com saldo/esgotada e verificar que somente active + com saldo aparece, com quantidades derivadas corretas; Producer/refresh recebem 403 e ausência de token recebe 401.
+**Independent Test**: Persistir a matriz active/inactive × com saldo/esgotada e verificar que somente active + com saldo aparece, com quantidades derivadas corretas; refresh recebe 403 e ausência de token recebe 401.
 
-- [X] T040 [US5] [RED] Escrever somente `tests/Feature/domain/Models/Offer/Http/Controllers/AvailableOfferControllerTest.php` com a matriz completa de visibilidade, múltiplos Producers, paginação, `available_quantity`, `is_visible`, ausência de ordenação por menor preço e cenários 401/403
-- [X] T041 [US5] [RED-RUN] Executar `docker compose exec php php artisan test tests/Feature/domain/Models/Offer/Http/Controllers/AvailableOfferControllerTest.php`, confirmar falha pela rota/listagem ausente e registrar o Red em `specs/001-product-offers/tdd-evidence.md`; não iniciar T042 sem Red válido
+- [X] T040 [US5] [RED] Escrever somente `tests/Feature/domain/Models/Offer/Http/Controllers/OfferController/AvailableIndexTest.php` com a matriz completa de visibilidade, múltiplos Producers, paginação, `available_quantity`, `is_visible`, ausência de ordenação por menor preço e cenários 401/403
+- [X] T041 [US5] [RED-RUN] Executar `docker compose exec php php artisan test tests/Feature/domain/Models/Offer/Http/Controllers/OfferController/AvailableIndexTest.php`, confirmar falha pela rota/listagem ausente e registrar o Red em `specs/001-product-offers/tdd-evidence.md`; não iniciar T042 sem Red válido
 - [X] T042 [US5] [GREEN] Implementar a consulta Eloquent mínima de ofertas visíveis e paginadas em `domain/Models/Offer/Actions/ListAvailableOffersAction.php`, filtrando status e saldo sem repository ou ordenação por preço
-- [X] T043 [US5] [GREEN] Criar o controller fino em `domain/Models/Offer/Http/Controllers/AvailableOfferController.php` e expor `GET /v1/retailer/offers` sob os middlewares Retailer em `routes/api.php`
-- [X] T044 [US5] [GREEN-CHECK] Reexecutar `tests/Feature/domain/Models/Offer/Http/Controllers/AvailableOfferControllerTest.php` no container e registrar o Green em `specs/001-product-offers/tdd-evidence.md`
+- [X] T043 [US5] [GREEN] Integrar a listagem por perfil em `domain/Models/Offer/Http/Controllers/OfferController.php` e expor `GET /v1/offers` para Producer e Retailer autenticados em `routes/api.php`
+- [X] T044 [US5] [GREEN-CHECK] Reexecutar `tests/Feature/domain/Models/Offer/Http/Controllers/OfferController/AvailableIndexTest.php` no container e registrar o Green em `specs/001-product-offers/tdd-evidence.md`
 
 **Checkpoint**: A vitrine do Retailer contém somente ofertas efetivamente vendáveis.
 
