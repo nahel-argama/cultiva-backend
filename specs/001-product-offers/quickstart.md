@@ -1,0 +1,131 @@
+# Quickstart Validation: Ofertas de Produtos
+
+## Prerequisites
+
+- Docker Compose com os serviços `php`, `database` e `redis` do backend.
+- Python 3.14+ e dependências do repositório irmão `../product-source`.
+- Banco PostgreSQL de testes separado, chamado `app_testing`.
+- `product-source` acessível ao container PHP.
+
+Não execute Laravel Pint.
+
+## 1. Configure o catálogo externo
+
+No repositório `../product-source`, configure:
+
+```dotenv
+API_HOST=0.0.0.0
+API_PORT=8001
+```
+
+O bind `0.0.0.0` é necessário porque o backend acessa o processo do host a partir do container.
+
+Inicie o catálogo no host:
+
+```bash
+cd ../product-source
+python api.py
+```
+
+Valide no host:
+
+```bash
+curl http://127.0.0.1:8001/health
+curl http://127.0.0.1:8001/api/products/2
+```
+
+## 2. Configure o backend
+
+As configurações de desenvolvimento devem conter:
+
+```dotenv
+PRODUCT_SOURCE_BASE_URL=http://host.docker.internal:8001/api
+PRODUCT_SOURCE_TIMEOUT=5
+```
+
+O serviço `php` já possui o mapeamento `host.docker.internal:host-gateway`. Não é necessário incluir o `product-source` no Compose desta feature.
+
+## 3. Isole o banco de testes
+
+Suba o banco e crie a base uma única vez:
+
+```bash
+docker compose up -d database
+docker compose exec database createdb -U root app_testing
+```
+
+Crie `.env.testing` a partir de `.env.testing.example`, gere uma chave de aplicação e confirme:
+
+```dotenv
+APP_ENV=testing
+DB_DATABASE=app_testing
+PRODUCT_SOURCE_BASE_URL=http://host.docker.internal:8001/api
+PRODUCT_SOURCE_TIMEOUT=5
+```
+
+Comando PHP obrigatório dentro do container:
+
+```bash
+docker compose exec php php artisan key:generate --env=testing
+```
+
+Nunca execute `RefreshDatabase` com `DB_DATABASE=app`.
+
+## 4. Prepare banco e categorias
+
+```bash
+docker compose exec php php artisan migrate --env=testing --force
+docker compose exec php php artisan db:seed --class=CategorySeeder --env=testing --force
+```
+
+Resultado esperado: cinco categorias, com IDs e nomes definidos em [data-model.md](data-model.md).
+
+## 5. Execute a validação automatizada
+
+Primeiro, durante implementação, execute cada novo teste antes do código correspondente e confirme Red pelo motivo esperado. Depois do Green:
+
+```bash
+docker compose exec php php artisan test --filter=GetProductActionTest
+docker compose exec php php artisan test --filter=CategoryControllerTest
+docker compose exec php php artisan test --filter=OfferController
+docker compose exec php php artisan test --filter=AvailableOfferControllerTest
+docker compose exec php php artisan test
+```
+
+Feature tests devem manter Actions, requests, transformers e PostgreSQL reais. Somente as respostas HTTP do catálogo são simuladas.
+
+## 6. Cenários end-to-end obrigatórios
+
+Use [contracts/openapi.yaml](contracts/openapi.yaml) como contrato dos endpoints e [contracts/product-source.openapi.yaml](contracts/product-source.openapi.yaml) como contrato externo.
+
+### Criação
+
+- Access token de Producer + produto/categoria válidos retorna 201.
+- Oferta pertence ao Producer do token, inicia `reserved_quantity=0` e usa `status=inactive` se omitido.
+- ID textual como `"0002"` permanece inalterado.
+- `producer_id` ou `reserved_quantity` no payload retorna 422.
+- Produto externo 404 retorna 422; timeout, 5xx ou payload inválido retorna 503.
+- Falha não deixa linha em `offers`.
+
+### Administração do produtor
+
+- Index retorna somente ofertas próprias, inclusive inativas e esgotadas.
+- Show/update de oferta alheia retorna 404.
+- PATCH consulta o catálogo mesmo sem mudar `source_product_id`.
+- Estoque total abaixo do reservado retorna 422 sem alterar nenhum campo.
+
+### Varejista e visibilidade
+
+- Somente Retailer com access token acessa a listagem comercial.
+- A matriz `active|inactive` × `com saldo|esgotada` retorna apenas `active + com saldo`.
+- Nenhuma listagem ordena ofertas por menor preço.
+
+### Autorização
+
+- Sem token retorna 401.
+- Refresh token nas rotas retorna 403.
+- Perfil incorreto retorna 403.
+
+## 7. Stop condition
+
+O planejamento está provado quando todos os testes relevantes e a suíte completa passam no container PHP, os seis endpoints respeitam os contratos e nenhuma Action/repository/interface extra foi adicionada sem uma pressão concreta.

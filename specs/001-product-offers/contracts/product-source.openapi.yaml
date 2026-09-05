@@ -1,0 +1,67 @@
+openapi: 3.1.0
+info:
+  title: Product Source Contract Used by Cultiva
+  version: 1.0.0
+  description: Subconjunto do contrato externo necessário para validar e snapshotar produtos.
+servers:
+  - url: "{baseUrl}"
+    variables:
+      baseUrl:
+        default: http://host.docker.internal:8001
+paths:
+  /api/products/{product_id}:
+    get:
+      operationId: getSourceProduct
+      parameters:
+        - name: product_id
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+      responses:
+        "200":
+          description: Produto encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SourceProduct"
+        "404":
+          description: Produto não encontrado; o backend traduz para 422
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [detail]
+                properties:
+                  detail:
+                    const: Product not found
+        default:
+          description: Qualquer outra falha é traduzida pelo backend para 503
+components:
+  schemas:
+    SourceProduct:
+      type: object
+      additionalProperties: true
+      required: [id, name, normal_name, created_at]
+      properties:
+        id:
+          type: string
+        name:
+          type: [string, "null"]
+        normal_name:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+x-cultiva-validation:
+  timeout_seconds: 5
+  retries: 0
+  success_rules:
+    - Response id must exactly match the requested textual id.
+    - Snapshot uses non-empty name, falling back to non-empty normal_name.
+  error_mapping:
+    external_404: 422
+    timeout_or_connection: 503
+    other_external_error: 503
+    malformed_success_payload: 503
