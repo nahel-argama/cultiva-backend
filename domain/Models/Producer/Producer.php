@@ -4,11 +4,13 @@ namespace Cultiva\Models\Producer;
 
 use Carbon\CarbonImmutable;
 use Cultiva\Models\Address\Address;
+use Cultiva\Models\Offer\Offer;
 use Cultiva\Models\User\User;
 use Database\Factories\ProducerFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Override;
@@ -63,5 +65,13 @@ class Producer extends Model
     public function address(): MorphOne
     {
         return $this->morphOne(Address::class, 'addressable');
+    }
+
+    /**
+     * @return HasMany<Offer, $this>
+     */
+    public function offers(): HasMany
+    {
+        return $this->hasMany(Offer::class);
     }
 }
