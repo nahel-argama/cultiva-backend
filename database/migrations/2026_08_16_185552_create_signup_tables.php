@@ -12,6 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
+            $table->string('profile_type');
             $table->timestamp('last_login')->nullable()->after('remember_token');
             $table->boolean('is_active')->default(true)->after('last_login');
             $table->softDeletes()->after('updated_at');
@@ -34,11 +35,10 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        Schema::create('producers', function (Blueprint $table) {
+        Schema::create('companies', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->unique()->constrained('users')->cascadeOnDelete();
 
-            $table->boolean('is_company')->default(false);
             $table->string('document_number', 14)->unique();
             $table->string('trade_name', 100);
             $table->string('legal_name', 100)->nullable();
@@ -48,15 +48,43 @@ return new class extends Migration
             $table->softDeletes();
         });
 
+        Schema::create('producers', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('company_id')->unique()->constrained('companies')->cascadeOnDelete();
+
+            $table->string('activity_segment', 30);
+
+            $table->timestamps();
+            $table->softDeletes();
+        });
+
         Schema::create('retailers', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->unique()->constrained('users')->cascadeOnDelete();
+            $table->foreignId('company_id')->unique()->constrained('companies')->cascadeOnDelete();
 
-            $table->string('document_number', 14)->unique();
-            $table->string('trade_name', 100);
-            $table->string('legal_name', 100)->nullable();
             $table->string('business_type', 30);
-            $table->string('phone', 15);
+
+            $table->timestamps();
+            $table->softDeletes();
+        });
+
+        Schema::create('deliveries', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('company_id')->unique()->constrained('companies')->cascadeOnDelete();
+
+            $table->string('cnh_number', 11)->unique();
+            $table->string('cnh_category', 5);
+
+            $table->timestamps();
+            $table->softDeletes();
+        });
+
+        Schema::create('vehicles', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('delivery_id')->constrained('deliveries')->cascadeOnDelete();
+
+            $table->string('plate', 8)->unique();
+            $table->string('cargo_type', 30);
 
             $table->timestamps();
             $table->softDeletes();
