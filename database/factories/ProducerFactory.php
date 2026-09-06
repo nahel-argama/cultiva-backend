@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use Cultiva\Models\Producer\Enums\ActivitySegment;
 use Cultiva\Models\Producer\Producer;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -10,7 +11,6 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class ProducerFactory extends Factory
 {
-
     protected $model = Producer::class;
 
     /**
@@ -21,21 +21,8 @@ class ProducerFactory extends Factory
     public function definition(): array
     {
         return [
-            'user_id'         => UserFactory::new(),
-            'is_company'      => false,
-            'document_number' => $this->faker->unique()->numerify('###########'),
-            'trade_name'      => 'Sítio ' . $this->faker->lastName(),
-            'legal_name'      => $this->faker->name(),
-            'phone'           => $this->faker->numerify('119########'),
+            'company_id'       => CompanyFactory::new(),
+            'activity_segment' => $this->faker->randomElement(ActivitySegment::cases()),
         ];
-    }
-
-    public function company(): static
-    {
-        return $this->state(fn(array $attributes) => [
-            'is_company'      => true,
-            'document_number' => $this->faker->unique()->numerify('##############'),
-            'legal_name'      => $this->faker->company() . ' LTDA',
-        ]);
     }
 }

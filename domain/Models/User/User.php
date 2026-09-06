@@ -4,16 +4,17 @@ namespace Cultiva\Models\User;
 
 use Carbon\CarbonImmutable;
 use Cultiva\Auth\Enums\ProfileType;
-use Cultiva\Base\Exceptions\CultivaException;
+use Cultiva\Models\Company\Company;
+use Cultiva\Models\Delivery\Delivery;
 use Cultiva\Models\Producer\Producer;
 use Cultiva\Models\Retailer\Retailer;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Support\Facades\Lang;
 use Laravel\Sanctum\HasApiTokens;
 use Override;
 
@@ -25,12 +26,15 @@ use Override;
  * @property-read ?string $remember_token
  * @property-read ?CarbonImmutable $last_login
  * @property-read bool $is_active
+ * @property-read ProfileType $profile_type
  * @property-read ?CarbonImmutable $email_verified_at
  * @property-read CarbonImmutable $created_at
  * @property-read ?CarbonImmutable $updated_at
  * @property-read ?CarbonImmutable $deleted_at
+ * @property-read ?Company $company
  * @property-read ?Retailer $retailer
  * @property-read ?Producer $producer
+ * @property-read ?Delivery $delivery
  */
 class User extends Authenticatable
 {
@@ -45,6 +49,7 @@ class User extends Authenticatable
         'remember_token',
         'last_login',
         'is_active',
+        'profile_type',
     ];
 
     protected $hidden = [
@@ -60,44 +65,59 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'last_login' => 'datetime',
+            'profile_type' => ProfileType::class,
         ];
     }
 
     /**
-     * @return HasOne<Retailer, $this>
+     * @return HasOne<Company, $this>
      */
-    public function retailer(): HasOne
+    public function company(): HasOne
     {
-        return $this->hasOne(Retailer::class);
+        return $this->hasOne(Company::class);
     }
 
     /**
-     * @return HasOne<Producer, $this>
+     * @return HasOneThrough<Retailer, Company, $this>
      */
-    public function producer(): HasOne
+    public function retailer(): HasOneThrough
     {
-        return $this->hasOne(Producer::class);
+        return $this->hasOneThrough(Retailer::class, Company::class, 'user_id', 'company_id');
+    }
+
+    /**
+     * @return HasOneThrough<Producer, Company, $this>
+     */
+    public function producer(): HasOneThrough
+    {
+        return $this->hasOneThrough(Producer::class, Company::class, 'user_id', 'company_id');
+    }
+
+    /**
+     * @return HasOneThrough<Delivery, Company, $this>
+     */
+    public function delivery(): HasOneThrough
+    {
+        return $this->hasOneThrough(Delivery::class, Company::class, 'user_id', 'company_id');
     }
 
     public function getProfileType(): ProfileType
     {
-        $isProducer = $this->isProducer();
-        $isRetailer = $this->isRetailer();
-
-        return match (true) {
-            $isProducer && ! $isRetailer => ProfileType::PRODUCER,
-            $isRetailer && ! $isProducer => ProfileType::RETAILER,
-            default => throw new CultivaException(409, Lang::get('auth.login.invalid_profile')),
-        };
+        return $this->profile_type;
     }
 
     public function isRetailer(): bool
     {
-        return $this->retailer()->exists();
+        return $this->profile_type === ProfileType::RETAILER;
     }
 
     public function isProducer(): bool
     {
-        return $this->producer()->exists();
+        return $this->profile_type === ProfileType::PRODUCER;
+    }
+
+    public function isDelivery(): bool
+    {
+        return $this->profile_type === ProfileType::DELIVERY;
     }
 }
