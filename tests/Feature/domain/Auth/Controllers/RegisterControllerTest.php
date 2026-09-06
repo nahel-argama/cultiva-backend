@@ -56,7 +56,7 @@ class RegisterControllerTest extends TestCase
                     'user' => ['name', 'email'],
                     'profile_type',
                     'tokens' => ['access_token', 'refresh_token'],
-                    'profile' => ['trade_name', 'document_number', 'activity_segment'],
+                    'profile' => ['trade_name', 'activity_segment'],
                 ],
             ]);
 
@@ -128,7 +128,7 @@ class RegisterControllerTest extends TestCase
                     'user' => ['name', 'email'],
                     'profile_type',
                     'tokens' => ['access_token', 'refresh_token'],
-                    'profile' => ['trade_name', 'document_number'],
+                    'profile' => ['trade_name', 'business_type'],
                 ],
             ]);
 
@@ -207,8 +207,6 @@ class RegisterControllerTest extends TestCase
                     'tokens' => ['access_token', 'refresh_token'],
                     'profile' => [
                         'trade_name',
-                        'document_number',
-                        'cnh_number',
                         'cnh_category',
                         'vehicle' => ['plate', 'cargo_type'],
                     ],

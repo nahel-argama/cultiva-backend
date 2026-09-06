@@ -34,7 +34,7 @@ class LoginControllerTest extends TestCase
 
         $company = CompanyFactory::new()->create(['user_id' => $user->id]);
 
-        ProducerFactory::new()->create(['company_id' => $company->id]);
+        $producer = ProducerFactory::new()->create(['company_id' => $company->id]);
 
         AddressFactory::new()->create([
             'addressable_type' => Company::class,
@@ -49,6 +49,7 @@ class LoginControllerTest extends TestCase
             ->assertJsonPath('data.user.email', $payload['email'])
             ->assertJsonPath('data.profile_type', 'producer')
             ->assertJsonPath('data.profile.trade_name', $company->trade_name)
+            ->assertJsonPath('data.profile.activity_segment', $producer->activity_segment->value)
             ->assertJsonStructure([
                 'data' => [
                     'tokens' => ['access_token', 'refresh_token'],
@@ -74,7 +75,7 @@ class LoginControllerTest extends TestCase
 
         $company = CompanyFactory::new()->create(['user_id' => $user->id]);
 
-        RetailerFactory::new()->create(['company_id' => $company->id]);
+        $retailer = RetailerFactory::new()->create(['company_id' => $company->id]);
 
         AddressFactory::new()->create([
             'addressable_type' => Company::class,
@@ -89,6 +90,7 @@ class LoginControllerTest extends TestCase
             ->assertJsonPath('data.user.email', $payload['email'])
             ->assertJsonPath('data.profile_type', 'retailer')
             ->assertJsonPath('data.profile.trade_name', $company->trade_name)
+            ->assertJsonPath('data.profile.business_type', $retailer->business_type->value)
             ->assertJsonStructure([
                 'data' => [
                     'tokens' => ['access_token', 'refresh_token'],
@@ -131,7 +133,7 @@ class LoginControllerTest extends TestCase
             ->assertJsonPath('data.user.email', $payload['email'])
             ->assertJsonPath('data.profile_type', 'delivery')
             ->assertJsonPath('data.profile.trade_name', $company->trade_name)
-            ->assertJsonPath('data.profile.cnh_number', $delivery->cnh_number)
+            ->assertJsonPath('data.profile.cnh_category', $delivery->cnh_category->value)
             ->assertJsonStructure([
                 'data' => [
                     'tokens' => ['access_token', 'refresh_token'],
