@@ -2,10 +2,14 @@
 
 namespace Tests\Feature\domain\Auth\Controllers;
 
-use Cultiva\Models\Producer\Producer;
+use Cultiva\Models\Company\Company;
 use Database\Factories\AddressFactory;
+use Database\Factories\CompanyFactory;
+use Database\Factories\DeliveryFactory;
 use Database\Factories\ProducerFactory;
+use Database\Factories\RetailerFactory;
 use Database\Factories\UserFactory;
+use Database\Factories\VehicleFactory;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Lang;
@@ -27,10 +31,14 @@ class LoginControllerTest extends TestCase
             'email' => $payload['email'],
             'password' => Hash::make($payload['password']),
         ]);
-        $producer = ProducerFactory::new()->create(['user_id' => $user->id]);
+
+        $company = CompanyFactory::new()->create(['user_id' => $user->id]);
+
+        ProducerFactory::new()->create(['company_id' => $company->id]);
+
         AddressFactory::new()->create([
-            'addressable_type' => Producer::class,
-            'addressable_id' => $producer->id,
+            'addressable_type' => Company::class,
+            'addressable_id' => $company->id,
         ]);
 
         // Action
@@ -40,10 +48,96 @@ class LoginControllerTest extends TestCase
         $response->assertOk()
             ->assertJsonPath('data.user.email', $payload['email'])
             ->assertJsonPath('data.profile_type', 'producer')
-            ->assertJsonPath('data.producer.trade_name', $producer->trade_name)
+            ->assertJsonPath('data.profile.trade_name', $company->trade_name)
             ->assertJsonStructure([
                 'data' => [
                     'tokens' => ['access_token', 'refresh_token'],
+                ],
+            ]);
+
+        $this->assertDatabaseCount('personal_access_tokens', 2);
+        $this->assertNotNull($user->fresh()->last_login);
+    }
+
+    public function test_should_return_authenticated_retailer_profile(): void
+    {
+        // Arrange
+        $payload = [
+            'email' => 'retailer@example.com',
+            'password' => 'valid-password',
+        ];
+
+        $user = UserFactory::new()->retailer()->create([
+            'email' => $payload['email'],
+            'password' => Hash::make($payload['password']),
+        ]);
+
+        $company = CompanyFactory::new()->create(['user_id' => $user->id]);
+
+        RetailerFactory::new()->create(['company_id' => $company->id]);
+
+        AddressFactory::new()->create([
+            'addressable_type' => Company::class,
+            'addressable_id' => $company->id,
+        ]);
+
+        // Action
+        $response = $this->postJson('/v1/auth/login', $payload);
+
+        // Assert
+        $response->assertOk()
+            ->assertJsonPath('data.user.email', $payload['email'])
+            ->assertJsonPath('data.profile_type', 'retailer')
+            ->assertJsonPath('data.profile.trade_name', $company->trade_name)
+            ->assertJsonStructure([
+                'data' => [
+                    'tokens' => ['access_token', 'refresh_token'],
+                ],
+            ]);
+
+        $this->assertDatabaseCount('personal_access_tokens', 2);
+        $this->assertNotNull($user->fresh()->last_login);
+    }
+
+    public function test_should_return_authenticated_delivery_profile(): void
+    {
+        // Arrange
+        $payload = [
+            'email' => 'delivery@example.com',
+            'password' => 'valid-password',
+        ];
+
+        $user = UserFactory::new()->delivery()->create([
+            'email' => $payload['email'],
+            'password' => Hash::make($payload['password']),
+        ]);
+
+        $company = CompanyFactory::new()->create(['user_id' => $user->id]);
+
+        $delivery = DeliveryFactory::new()->create(['company_id' => $company->id]);
+
+        VehicleFactory::new()->create(['delivery_id' => $delivery->id]);
+
+        AddressFactory::new()->create([
+            'addressable_type' => Company::class,
+            'addressable_id' => $company->id,
+        ]);
+
+        // Action
+        $response = $this->postJson('/v1/auth/login', $payload);
+
+        // Assert
+        $response->assertOk()
+            ->assertJsonPath('data.user.email', $payload['email'])
+            ->assertJsonPath('data.profile_type', 'delivery')
+            ->assertJsonPath('data.profile.trade_name', $company->trade_name)
+            ->assertJsonPath('data.profile.cnh_number', $delivery->cnh_number)
+            ->assertJsonStructure([
+                'data' => [
+                    'tokens' => ['access_token', 'refresh_token'],
+                    'profile' => [
+                        'vehicle' => ['plate', 'cargo_type'],
+                    ],
                 ],
             ]);
 

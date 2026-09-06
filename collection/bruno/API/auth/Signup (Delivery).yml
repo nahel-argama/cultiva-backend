@@ -1,7 +1,7 @@
 info:
-  name: Signup (Retailer)
+  name: Signup (Delivery)
   type: http
-  seq: 2
+  seq: 4
 
 http:
   method: POST
@@ -16,26 +16,31 @@ http:
     data: |
       {
         "user": {
-          "name": "Carlos Mendes",
-          "email": "carlos@example.com",
+          "name": "Rafael Santos",
+          "email": "rafael@example.com",
           "password": "Password123!",
           "password_confirmation": "Password123!"
         },
-        "profile_type": "retailer",
+        "profile_type": "delivery",
         "company": {
-          "trade_name": "Mercado Central",
-          "legal_name": "Mercado Central LTDA",
+          "trade_name": "Santos Log Express",
+          "legal_name": "Santos Transportes LTDA",
           "document_number": "12345678000195",
           "phone": "5511987654321",
           "address": {
             "zip": "89010025",
-            "number": "456",
-            "complement": "Loja 01",
-            "reference_point": "Em frente à praça"
+            "number": "789",
+            "complement": "Galpão B",
+            "reference_point": "Próximo à rodovia"
           }
         },
-        "retailer": {
-          "business_type": "supermarket"
+        "delivery": {
+          "cnh_number": "12345678901",
+          "cnh_category": "B",
+          "vehicle": {
+            "plate": "BRA2E19",
+            "cargo_type": "refrigerated"
+          }
         }
       }
 

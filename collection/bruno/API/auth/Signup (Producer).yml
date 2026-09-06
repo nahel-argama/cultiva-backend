@@ -22,11 +22,10 @@ http:
           "password_confirmation": "Password123!"
         },
         "profile_type": "producer",
-        "producer": {
+        "company": {
           "trade_name": "Sítio Primavera",
           "legal_name": "Sítio Primavera LTDA",
-          "is_company": false,
-          "document_number": "12345678901",
+          "document_number": "12345678000195",
           "phone": "5511987654321",
           "address": {
             "zip": "89010025",
@@ -34,6 +33,9 @@ http:
             "complement": "Portão Azul",
             "reference_point": "Perto da ponte"
           }
+        },
+        "producer": {
+          "activity_segment": "vegetables"
         }
       }
 
