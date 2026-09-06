@@ -14,7 +14,7 @@ class CreateCompanyAction
         private readonly CreateAddressAction $createAddress,
     ) {}
 
-    public function execute(int $userId, CompanyRegisterDTO $dto, ?GeoAddressDTO $geo = null): Company
+    public function execute(int $userId, CompanyRegisterDTO $dto, GeoAddressDTO $geo): Company
     {
         return DB::transaction(function () use ($dto, $userId, $geo) {
             $company = Company::query()->create([

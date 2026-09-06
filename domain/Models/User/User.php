@@ -90,7 +90,7 @@ class User extends Authenticatable
      */
     public function producer(): HasOneThrough
     {
-        return $this->hasOneThrough(Producer::class, Company::class);
+        return $this->hasOneThrough(Producer::class, Company::class, 'user_id', 'company_id');
     }
 
     /**
@@ -98,7 +98,7 @@ class User extends Authenticatable
      */
     public function delivery(): HasOneThrough
     {
-        return $this->hasOneThrough(Delivery::class, Company::class);
+        return $this->hasOneThrough(Delivery::class, Company::class, 'user_id', 'company_id');
     }
 
     public function getProfileType(): ProfileType
