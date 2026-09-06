@@ -3,29 +3,23 @@
 namespace Cultiva\Models\Producer;
 
 use Carbon\CarbonImmutable;
-use Cultiva\Models\Address\Address;
-use Cultiva\Models\User\User;
+use Cultiva\Models\Company\Company;
+use Cultiva\Models\Producer\Enums\ActivitySegment;
 use Database\Factories\ProducerFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Override;
 
 /**
  * @property-read int $id
- * @property-read int $user_id
- * @property-read bool $is_company
- * @property-read string $document_number
- * @property-read string $trade_name
- * @property-read ?string $legal_name
- * @property-read string $phone
+ * @property-read int $company_id
+ * @property-read ActivitySegment $activity_segment
  * @property-read CarbonImmutable $created_at
  * @property-read ?CarbonImmutable $updated_at
  * @property-read ?CarbonImmutable $deleted_at
- * @property-read ?User $user
- * @property-read ?Address $address
+ * @property-read ?Company $company
  */
 class Producer extends Model
 {
@@ -33,35 +27,23 @@ class Producer extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'user_id',
-        'is_company',
-        'document_number',
-        'trade_name',
-        'legal_name',
-        'phone',
+        'company_id',
+        'activity_segment',
     ];
 
     #[Override]
     protected function casts(): array
     {
         return [
-            'is_company' => 'boolean',
+            'activity_segment' => ActivitySegment::class,
         ];
     }
 
     /**
-     * @return BelongsTo<User, $this>
+     * @return BelongsTo<Company, $this>
      */
-    public function user(): BelongsTo
+    public function company(): BelongsTo
     {
-        return $this->belongsTo(User::class);
-    }
-
-    /**
-     * @return MorphOne<Address, $this>
-     */
-    public function address(): MorphOne
-    {
-        return $this->morphOne(Address::class, 'addressable');
+        return $this->belongsTo(Company::class);
     }
 }

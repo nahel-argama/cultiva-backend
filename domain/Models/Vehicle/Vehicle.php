@@ -1,11 +1,11 @@
 <?php
 
-namespace Cultiva\Models\Retailer;
+namespace Cultiva\Models\Vehicle;
 
 use Carbon\CarbonImmutable;
-use Cultiva\Models\Company\Company;
-use Cultiva\Models\Retailer\Enums\BusinessType;
-use Database\Factories\RetailerFactory;
+use Cultiva\Models\Delivery\Delivery;
+use Cultiva\Models\Vehicle\Enums\CargoType;
+use Database\Factories\VehicleFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -14,36 +14,38 @@ use Override;
 
 /**
  * @property-read int $id
- * @property-read int $company_id
- * @property-read BusinessType $business_type
+ * @property-read int $delivery_id
+ * @property-read string $plate
+ * @property-read CargoType $cargo_type
  * @property-read CarbonImmutable $created_at
  * @property-read ?CarbonImmutable $updated_at
  * @property-read ?CarbonImmutable $deleted_at
- * @property-read ?Company $company
+ * @property-read ?Delivery $delivery
  */
-class Retailer extends Model
+class Vehicle extends Model
 {
-    /** @use HasFactory<RetailerFactory> */
+    /** @use HasFactory<VehicleFactory> */
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'company_id',
-        'business_type',
+        'delivery_id',
+        'plate',
+        'cargo_type',
     ];
 
     #[Override]
     protected function casts(): array
     {
         return [
-            'business_type' => BusinessType::class,
+            'cargo_type' => CargoType::class,
         ];
     }
 
     /**
-     * @return BelongsTo<Company, $this>
+     * @return BelongsTo<Delivery, $this>
      */
-    public function company(): BelongsTo
+    public function delivery(): BelongsTo
     {
-        return $this->belongsTo(Company::class);
+        return $this->belongsTo(Delivery::class);
     }
 }

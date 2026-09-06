@@ -13,13 +13,15 @@ final class ProducerTransformer
 
     public function transform(Producer $producer): array
     {
+        $company = $producer->company;
+
         return [
-            'trade_name' => $producer->trade_name,
-            'legal_name' => $producer->legal_name,
-            'is_company' => $producer->is_company,
-            'document_number' => $producer->document_number,
-            'phone' => $producer->phone,
-            'address' => $this->addressTransformer->transform($producer->address),
+            'trade_name'       => $company->trade_name,
+            'legal_name'       => $company->legal_name,
+            'document_number'  => $company->document_number,
+            'activity_segment' => $producer->activity_segment->value,
+            'phone'            => $company->phone,
+            'address'          => $this->addressTransformer->transform($company->address),
         ];
     }
 }

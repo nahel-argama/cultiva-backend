@@ -13,13 +13,15 @@ final class RetailerTransformer
 
     public function transform(Retailer $retailer): array
     {
+        $company = $retailer->company;
+
         return [
-            'trade_name' => $retailer->trade_name,
-            'legal_name' => $retailer->legal_name,
-            'document_number' => $retailer->document_number,
-            'business_type' => $retailer->business_type->value,
-            'phone' => $retailer->phone,
-            'address' => $this->addressTransformer->transform($retailer->address),
+            'trade_name'      => $company->trade_name,
+            'legal_name'      => $company->legal_name,
+            'document_number' => $company->document_number,
+            'business_type'   => $retailer->business_type->value,
+            'phone'           => $company->phone,
+            'address'         => $this->addressTransformer->transform($company->address),
         ];
     }
 }

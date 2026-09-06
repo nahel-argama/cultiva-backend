@@ -13,7 +13,9 @@ final class CultivaException extends HttpException
         string $message = '',
         ?\Throwable $previous = null,
         private array $context = [],
-    ) {}
+    ) {
+        parent::__construct($statusCode, $message, $previous);
+    }
 
     public function render(): JsonResponse
     {
