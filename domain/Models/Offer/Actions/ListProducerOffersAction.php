@@ -7,7 +7,7 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 final class ListProducerOffersAction
 {
-    public function execute(Producer $producer, int $page = 1, int $perPage = 15): LengthAwarePaginator
+    public function execute(Producer $producer, int $page, int $perPage): LengthAwarePaginator
     {
         return $producer->offers()
             ->with('category')

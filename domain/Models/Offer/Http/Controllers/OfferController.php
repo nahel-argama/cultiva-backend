@@ -39,15 +39,14 @@ final class OfferController extends Controller
         };
 
         return response()->json([
-            'data' => collect($offers->items())
-                ->map(fn (Offer $offer): array => $transformer->transform($offer))
-                ->all(),
-            'meta' => [
-                'current_page' => $offers->currentPage(),
-                'per_page' => $offers->perPage(),
-                'total' => $offers->total(),
-                'last_page' => $offers->lastPage(),
-            ],
+            'data' => $offers->through(
+                fn (Offer $offer): array => $transformer->transform($offer),
+            )->items(),
+            'current_page' => $offers->currentPage(),
+            'per_page' => $offers->perPage(),
+            'total' => $offers->total(),
+            'has_previous_page' => ! $offers->onFirstPage(),
+            'has_next_page' => $offers->hasMorePages(),
         ]);
     }
 

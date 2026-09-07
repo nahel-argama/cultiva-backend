@@ -8,7 +8,7 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 final class ListAvailableOffersAction
 {
-    public function execute(int $page = 1, int $perPage = 15): LengthAwarePaginator
+    public function execute(int $page, int $perPage): LengthAwarePaginator
     {
         return Offer::query()
             ->with('category')
