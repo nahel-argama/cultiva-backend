@@ -74,11 +74,18 @@ class AvailableIndexTest extends TestCase
             ->assertJsonPath('data.0.is_visible', true)
             ->assertJsonPath('data.1.id', $olderCheapVisible->id)
             ->assertJsonPath('data.1.available_quantity', 8)
-            ->assertJsonPath('meta.current_page', 1)
-            ->assertJsonPath('meta.per_page', 10)
-            ->assertJsonPath('meta.total', 2)
-            ->assertJsonPath('meta.last_page', 1)
-            ->assertJsonMissingPath('data.0.producer_id');
+            ->assertJsonPath('current_page', 1)
+            ->assertJsonPath('per_page', 10)
+            ->assertJsonPath('total', 2)
+            ->assertJsonPath('has_previous_page', false)
+            ->assertJsonPath('has_next_page', false)
+            ->assertJsonMissingPath('pagination')
+            ->assertJsonMissingPath('meta')
+            ->assertJsonMissingPath('data.0.producer_id')
+            ->assertExactJsonStructure([
+                'data', 'current_page', 'per_page', 'total',
+                'has_previous_page', 'has_next_page',
+            ]);
         $this->assertCount(2, $response->json('data'));
     }
 
