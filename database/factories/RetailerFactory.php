@@ -11,7 +11,6 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class RetailerFactory extends Factory
 {
-
     protected $model = Retailer::class;
 
     /**
@@ -22,12 +21,8 @@ class RetailerFactory extends Factory
     public function definition(): array
     {
         return [
-            'user_id'         => UserFactory::new(),
-            'document_number' => $this->faker->unique()->numerify('##############'),
-            'trade_name'      => 'Hortifruti ' . $this->faker->lastName(),
-            'legal_name'      => $this->faker->company() . ' LTDA',
-            'business_type'   => $this->faker->randomElement(BusinessType::cases()),
-            'phone'           => $this->faker->numerify('119########'),
+            'company_id'    => CompanyFactory::new()->for(UserFactory::new()->retailer()),
+            'business_type' => $this->faker->randomElement(BusinessType::cases()),
         ];
     }
 }

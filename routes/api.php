@@ -15,6 +15,7 @@ Route::group([
         'as' => 'auth.',
     ], function (): void {
         Route::post('signup', [RegisterController::class, 'signUp'])->name('signup');
+        Route::get('signup/metadata', [RegisterController::class, 'metadata'])->name('signup.metadata');
         Route::post('login', [LoginController::class, 'login'])->name('login');
     });
 

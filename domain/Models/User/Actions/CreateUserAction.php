@@ -11,9 +11,10 @@ final class CreateUserAction
     public function execute(UserRegisterDTO $dto): User
     {
         return User::query()->create([
-            'name'     => $dto->name,
-            'email'    => $dto->email,
-            'password' => $dto->password,
+            'name'         => $dto->name,
+            'email'        => $dto->email,
+            'password'     => $dto->password,
+            'profile_type' => $dto->profileType,
         ]);
     }
 }

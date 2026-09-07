@@ -14,7 +14,7 @@ final class EnsureProfile
     {
         $user = $request->user();
 
-        if (! $user instanceof User || $user->getProfileType() !== ProfileType::tryFrom($profile)) {
+        if (! $user instanceof User || $user->profile_type !== ProfileType::tryFrom($profile)) {
             abort(403);
         }
 

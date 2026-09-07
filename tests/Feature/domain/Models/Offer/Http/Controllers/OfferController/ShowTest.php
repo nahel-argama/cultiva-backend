@@ -19,7 +19,7 @@ class ShowTest extends TestCase
         // Arrange
         $producer = ProducerFactory::new()->create();
         $offer = OfferFactory::new()->create(['producer_id' => $producer->id]);
-        Sanctum::actingAs($producer->user, ['access']);
+        Sanctum::actingAs($producer->company->user, ['access']);
 
         // Action
         $response = $this->getJson('/v1/offers/'.$offer->id);
@@ -36,7 +36,7 @@ class ShowTest extends TestCase
         $producer = ProducerFactory::new()->create();
         $otherProducer = ProducerFactory::new()->create();
         $offer = OfferFactory::new()->create(['producer_id' => $otherProducer->id]);
-        Sanctum::actingAs($producer->user, ['access']);
+        Sanctum::actingAs($producer->company->user, ['access']);
 
         // Action
         $response = $this->getJson('/v1/offers/'.$offer->id);
@@ -50,7 +50,7 @@ class ShowTest extends TestCase
     {
         // Arrange
         $producer = ProducerFactory::new()->create();
-        Sanctum::actingAs($producer->user, ['access']);
+        Sanctum::actingAs($producer->company->user, ['access']);
 
         // Action
         $response = $this->getJson('/v1/offers/999999');
@@ -76,7 +76,7 @@ class ShowTest extends TestCase
     {
         // Arrange
         $producer = ProducerFactory::new()->create();
-        Sanctum::actingAs($producer->user, ['refresh']);
+        Sanctum::actingAs($producer->company->user, ['refresh']);
 
         // Action
         $response = $this->getJson('/v1/offers/1');
@@ -89,7 +89,7 @@ class ShowTest extends TestCase
     {
         // Arrange
         $retailer = RetailerFactory::new()->create();
-        Sanctum::actingAs($retailer->user, ['access']);
+        Sanctum::actingAs($retailer->company->user, ['access']);
 
         // Action
         $response = $this->getJson('/v1/offers/1');

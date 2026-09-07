@@ -38,7 +38,7 @@ class UpdateTest extends TestCase
             'total_quantity' => 10,
             'reserved_quantity' => 2,
         ]);
-        Sanctum::actingAs($producer->user, ['access']);
+        Sanctum::actingAs($producer->company->user, ['access']);
         $payload = [
             'source_product_id' => '0002',
             'category_id' => $newCategory->id,
@@ -90,7 +90,7 @@ class UpdateTest extends TestCase
             'source_product_id' => '2',
             'product_name' => 'Tomate antigo',
         ]);
-        Sanctum::actingAs($producer->user, ['access']);
+        Sanctum::actingAs($producer->company->user, ['access']);
 
         // Action
         $response = $this->patchJson('/v1/offers/'.$offer->id, [
@@ -117,7 +117,7 @@ class UpdateTest extends TestCase
         Http::fake();
         $producer = ProducerFactory::new()->create();
         $offer = OfferFactory::new()->create(['producer_id' => $producer->id]);
-        Sanctum::actingAs($producer->user, ['access']);
+        Sanctum::actingAs($producer->company->user, ['access']);
 
         // Action
         $response = $this->patchJson('/v1/offers/'.$offer->id, $payload);
@@ -156,7 +156,7 @@ class UpdateTest extends TestCase
             'total_quantity' => 10,
             'reserved_quantity' => 5,
         ]);
-        Sanctum::actingAs($producer->user, ['access']);
+        Sanctum::actingAs($producer->company->user, ['access']);
 
         // Action
         $response = $this->patchJson('/v1/offers/'.$offer->id, [
@@ -178,7 +178,7 @@ class UpdateTest extends TestCase
         // Arrange
         $producer = ProducerFactory::new()->create();
         $offer = OfferFactory::new()->create(['producer_id' => $producer->id]);
-        Sanctum::actingAs($producer->user, ['access']);
+        Sanctum::actingAs($producer->company->user, ['access']);
 
         // Action
         $response = $this->patchJson('/v1/offers/'.$offer->id, [
@@ -207,7 +207,7 @@ class UpdateTest extends TestCase
             'source_product_id' => '2',
             'product_name' => 'Tomate',
         ]);
-        Sanctum::actingAs($producer->user, ['access']);
+        Sanctum::actingAs($producer->company->user, ['access']);
 
         // Action
         $response = $this->patchJson('/v1/offers/'.$offer->id, [
@@ -236,7 +236,7 @@ class UpdateTest extends TestCase
             'source_product_id' => '2',
             'unit_price' => '10.00',
         ]);
-        Sanctum::actingAs($producer->user, ['access']);
+        Sanctum::actingAs($producer->company->user, ['access']);
 
         // Action
         $response = $this->patchJson('/v1/offers/'.$offer->id, [
@@ -258,7 +258,7 @@ class UpdateTest extends TestCase
         $producer = ProducerFactory::new()->create();
         $otherProducer = ProducerFactory::new()->create();
         $offer = OfferFactory::new()->create(['producer_id' => $otherProducer->id]);
-        Sanctum::actingAs($producer->user, ['access']);
+        Sanctum::actingAs($producer->company->user, ['access']);
 
         // Action
         $response = $this->patchJson('/v1/offers/'.$offer->id, [
@@ -287,7 +287,7 @@ class UpdateTest extends TestCase
     {
         // Arrange
         $producer = ProducerFactory::new()->create();
-        Sanctum::actingAs($producer->user, ['refresh']);
+        Sanctum::actingAs($producer->company->user, ['refresh']);
 
         // Action
         $response = $this->patchJson('/v1/offers/1', []);
@@ -300,7 +300,7 @@ class UpdateTest extends TestCase
     {
         // Arrange
         $retailer = RetailerFactory::new()->create();
-        Sanctum::actingAs($retailer->user, ['access']);
+        Sanctum::actingAs($retailer->company->user, ['access']);
 
         // Action
         $response = $this->patchJson('/v1/offers/1', []);

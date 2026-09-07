@@ -41,7 +41,7 @@ class IndexTest extends TestCase
             'producer_id' => $otherProducer->id,
             'category_id' => $category->id,
         ]);
-        Sanctum::actingAs($producer->user, ['access']);
+        Sanctum::actingAs($producer->company->user, ['access']);
 
         // Action
         $response = $this->getJson('/v1/offers?per_page=2');
@@ -65,7 +65,7 @@ class IndexTest extends TestCase
     {
         // Arrange
         $producer = ProducerFactory::new()->create();
-        Sanctum::actingAs($producer->user, ['access']);
+        Sanctum::actingAs($producer->company->user, ['access']);
 
         // Action
         $response = $this->getJson('/v1/offers');
@@ -97,7 +97,7 @@ class IndexTest extends TestCase
             'producer_id' => $producer->id,
             'category_id' => $category->id,
         ]);
-        Sanctum::actingAs($producer->user, ['access']);
+        Sanctum::actingAs($producer->company->user, ['access']);
 
         // Action
         $response = $this->getJson('/v1/offers?page='.$page.'&per_page='.$perPage);
@@ -133,7 +133,7 @@ class IndexTest extends TestCase
     {
         // Arrange
         $producer = ProducerFactory::new()->create();
-        Sanctum::actingAs($producer->user, ['access']);
+        Sanctum::actingAs($producer->company->user, ['access']);
 
         // Action
         $response = $this->getJson('/v1/offers?'.$query);
@@ -169,7 +169,7 @@ class IndexTest extends TestCase
     {
         // Arrange
         $producer = ProducerFactory::new()->create();
-        Sanctum::actingAs($producer->user, ['refresh']);
+        Sanctum::actingAs($producer->company->user, ['refresh']);
 
         // Action
         $response = $this->getJson('/v1/offers');

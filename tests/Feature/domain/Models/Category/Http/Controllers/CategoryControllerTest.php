@@ -19,7 +19,7 @@ class CategoryControllerTest extends TestCase
         $this->seed(CategorySeeder::class);
         $this->seed(CategorySeeder::class);
         $producer = ProducerFactory::new()->create();
-        Sanctum::actingAs($producer->user, ['access']);
+        Sanctum::actingAs($producer->company->user, ['access']);
 
         // Action
         $response = $this->getJson('/v1/products/categories');
@@ -53,7 +53,7 @@ class CategoryControllerTest extends TestCase
     {
         // Arrange
         $producer = ProducerFactory::new()->create();
-        Sanctum::actingAs($producer->user, ['refresh']);
+        Sanctum::actingAs($producer->company->user, ['refresh']);
 
         // Action
         $response = $this->getJson('/v1/products/categories');
@@ -66,7 +66,7 @@ class CategoryControllerTest extends TestCase
     {
         // Arrange
         $retailer = RetailerFactory::new()->create();
-        Sanctum::actingAs($retailer->user, ['access']);
+        Sanctum::actingAs($retailer->company->user, ['access']);
 
         // Action
         $response = $this->getJson('/v1/products/categories');

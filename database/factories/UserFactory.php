@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use Cultiva\Auth\Enums\ProfileType;
 use Cultiva\Models\User\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
@@ -11,7 +12,6 @@ use Illuminate\Support\Facades\Hash;
  */
 class UserFactory extends Factory
 {
-
     protected $model = User::class;
 
     /**
@@ -36,6 +36,21 @@ class UserFactory extends Factory
             'remember_token'    => null,
             'last_login'        => null,
             'is_active'         => true,
+            'profile_type'      => ProfileType::PRODUCER,
         ];
+    }
+
+    public function retailer(): static
+    {
+        return $this->state(fn() => [
+            'profile_type' => ProfileType::RETAILER,
+        ]);
+    }
+
+    public function delivery(): static
+    {
+        return $this->state(fn() => [
+            'profile_type' => ProfileType::DELIVERY,
+        ]);
     }
 }

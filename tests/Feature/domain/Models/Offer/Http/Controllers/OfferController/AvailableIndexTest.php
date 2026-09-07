@@ -62,7 +62,7 @@ class AvailableIndexTest extends TestCase
             'reserved_quantity' => 5,
             'status' => OfferStatus::INACTIVE,
         ]);
-        Sanctum::actingAs($retailer->user, ['access']);
+        Sanctum::actingAs($retailer->company->user, ['access']);
 
         // Action
         $response = $this->getJson('/v1/offers?per_page=10');
@@ -94,7 +94,7 @@ class AvailableIndexTest extends TestCase
     {
         // Arrange
         $retailer = RetailerFactory::new()->create();
-        Sanctum::actingAs($retailer->user, ['access']);
+        Sanctum::actingAs($retailer->company->user, ['access']);
 
         // Action
         $response = $this->getJson('/v1/offers?'.$query);
@@ -128,7 +128,7 @@ class AvailableIndexTest extends TestCase
     {
         // Arrange
         $retailer = RetailerFactory::new()->create();
-        Sanctum::actingAs($retailer->user, ['refresh']);
+        Sanctum::actingAs($retailer->company->user, ['refresh']);
 
         // Action
         $response = $this->getJson('/v1/offers');

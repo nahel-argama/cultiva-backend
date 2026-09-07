@@ -1,0 +1,51 @@
+info:
+  name: Signup (Delivery)
+  type: http
+  seq: 4
+
+http:
+  method: POST
+  url: "{{base_url}}/v1/auth/signup"
+  headers:
+    - name: Accept
+      value: application/json
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |
+      {
+        "user": {
+          "name": "Rafael Santos",
+          "email": "rafael@example.com",
+          "password": "Password123!",
+          "password_confirmation": "Password123!"
+        },
+        "profile_type": "delivery",
+        "company": {
+          "trade_name": "Santos Log Express",
+          "legal_name": "Santos Transportes LTDA",
+          "document_number": "12345678000195",
+          "phone": "5511987654321",
+          "address": {
+            "zip": "89010025",
+            "number": "789",
+            "complement": "Galpão B",
+            "reference_point": "Próximo à rodovia"
+          }
+        },
+        "delivery": {
+          "cnh_number": "12345678901",
+          "cnh_category": "B",
+          "vehicle": {
+            "plate": "BRA2E19",
+            "cargo_type": "refrigerated"
+          }
+        }
+      }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

@@ -39,9 +39,6 @@ class LoginAction
 
             return new ProfileResultDTO(
                 user: $user,
-                profileType: $user->getProfileType(),
-                producer: $user->producer,
-                retailer: $user->retailer,
                 tokens: $tokens,
             );
         });

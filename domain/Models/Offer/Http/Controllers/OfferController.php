@@ -29,7 +29,7 @@ final class OfferController extends Controller
     ): JsonResponse {
         $page = $request->integer('page', 1);
         $perPage = $request->integer('per_page', 15);
-        $offers = match ($request->user()->getProfileType()) {
+        $offers = match ($request->user()->profile_type) {
             ProfileType::PRODUCER => $producerAction->execute(
                 $request->user()->producer()->firstOrFail(),
                 $page,

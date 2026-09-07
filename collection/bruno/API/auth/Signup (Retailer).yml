@@ -22,11 +22,10 @@ http:
           "password_confirmation": "Password123!"
         },
         "profile_type": "retailer",
-        "retailer": {
+        "company": {
           "trade_name": "Mercado Central",
           "legal_name": "Mercado Central LTDA",
           "document_number": "12345678000195",
-          "business_type": "supermarket",
           "phone": "5511987654321",
           "address": {
             "zip": "89010025",
@@ -34,6 +33,9 @@ http:
             "complement": "Loja 01",
             "reference_point": "Em frente à praça"
           }
+        },
+        "retailer": {
+          "business_type": "supermarket"
         }
       }
 

@@ -26,7 +26,7 @@ class StoreTest extends TestCase
         ]);
         $producer = ProducerFactory::new()->create();
         $category = CategoryFactory::new()->create(['id' => 1, 'name' => 'Frutas']);
-        Sanctum::actingAs($producer->user, ['access']);
+        Sanctum::actingAs($producer->company->user, ['access']);
         $payload = [
             'source_product_id' => '0002',
             'category_id' => $category->id,
@@ -70,7 +70,7 @@ class StoreTest extends TestCase
         ]);
         $producer = ProducerFactory::new()->create();
         $category = CategoryFactory::new()->create();
-        Sanctum::actingAs($producer->user, ['access']);
+        Sanctum::actingAs($producer->company->user, ['access']);
         $payload = [
             'source_product_id' => 2,
             'category_id' => $category->id,
@@ -101,7 +101,7 @@ class StoreTest extends TestCase
         // Arrange
         Http::fake();
         $producer = ProducerFactory::new()->create();
-        Sanctum::actingAs($producer->user, ['access']);
+        Sanctum::actingAs($producer->company->user, ['access']);
         $payload = array_merge([
             'source_product_id' => '2',
             'category_id' => 1,
@@ -141,7 +141,7 @@ class StoreTest extends TestCase
             'http://product-source.test/api/products/2' => Http::response($fixture, 200),
         ]);
         $producer = ProducerFactory::new()->create();
-        Sanctum::actingAs($producer->user, ['access']);
+        Sanctum::actingAs($producer->company->user, ['access']);
         $payload = [
             'source_product_id' => '2',
             'category_id' => 999,
@@ -166,7 +166,7 @@ class StoreTest extends TestCase
         ]);
         $producer = ProducerFactory::new()->create();
         $category = CategoryFactory::new()->create();
-        Sanctum::actingAs($producer->user, ['access']);
+        Sanctum::actingAs($producer->company->user, ['access']);
         $payload = [
             'source_product_id' => '99',
             'category_id' => $category->id,
@@ -191,7 +191,7 @@ class StoreTest extends TestCase
         ]);
         $producer = ProducerFactory::new()->create();
         $category = CategoryFactory::new()->create();
-        Sanctum::actingAs($producer->user, ['access']);
+        Sanctum::actingAs($producer->company->user, ['access']);
         $payload = [
             'source_product_id' => '2',
             'category_id' => $category->id,
@@ -216,7 +216,7 @@ class StoreTest extends TestCase
         ]);
         $producer = ProducerFactory::new()->create();
         $category = CategoryFactory::new()->create();
-        Sanctum::actingAs($producer->user, ['access']);
+        Sanctum::actingAs($producer->company->user, ['access']);
         $payload = [
             'source_product_id' => '2',
             'category_id' => $category->id,
@@ -242,7 +242,7 @@ class StoreTest extends TestCase
         ]);
         $producer = ProducerFactory::new()->create();
         $category = CategoryFactory::new()->create();
-        Sanctum::actingAs($producer->user, ['access']);
+        Sanctum::actingAs($producer->company->user, ['access']);
         $payload = [
             'source_product_id' => '2',
             'category_id' => $category->id,
@@ -274,7 +274,7 @@ class StoreTest extends TestCase
     {
         // Arrange
         $producer = ProducerFactory::new()->create();
-        Sanctum::actingAs($producer->user, ['refresh']);
+        Sanctum::actingAs($producer->company->user, ['refresh']);
 
         // Action
         $response = $this->postJson('/v1/offers', []);
@@ -288,7 +288,7 @@ class StoreTest extends TestCase
     {
         // Arrange
         $retailer = RetailerFactory::new()->create();
-        Sanctum::actingAs($retailer->user, ['access']);
+        Sanctum::actingAs($retailer->company->user, ['access']);
 
         // Action
         $response = $this->postJson('/v1/offers', []);
