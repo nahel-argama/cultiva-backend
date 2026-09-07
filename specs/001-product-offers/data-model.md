@@ -116,7 +116,8 @@ Nenhum payload cru do fornecedor atravessa a integração.
 - `producer_id`: prohibited.
 - `reserved_quantity`: prohibited.
 - PATCH exige ao menos um campo editável.
-- `page`: inteiro positivo; `per_page`: inteiro entre 1 e 100.
+- `page`: inteiro positivo, default 1; `per_page`: inteiro entre 1 e 100, default 15.
+- Listagens usam o paginator nativo para obter `current_page`, `per_page`, `total` e os booleanos de navegação; nenhuma contagem adicional é feita na resposta.
 
 ### Domain/Action
 

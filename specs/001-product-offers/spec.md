@@ -134,6 +134,10 @@ Como varejista autenticado, quero ver apenas ofertas efetivamente disponíveis p
 - **FR-024**: O sistema MUST retornar os dados essenciais da oferta nas consultas: produto e nome snapshotado, categoria, preço unitário, estoque total, quantidade reservada, estado e visibilidade.
 - **FR-025**: O sistema MUST manter registros suficientes de criação e última atualização para apoiar rastreabilidade e suporte.
 
+- **FR-026**: Toda listagem paginada MUST usar `paginate()` na query e retornar exatamente `data`, `current_page`, `per_page`, `total`, `has_previous_page` e `has_next_page` na raiz, sem links ou wrappers.
+- **FR-027**: Parâmetros MUST ser inteiros positivos, com defaults `page=1` e `per_page=15`, máximo de 100 itens e HTTP 422 para entradas inválidas.
+- **FR-028**: A serialização MUST reaproveitar a contagem do paginator e preservar eager loading de relações. Página acima da última retorna lista vazia; resultado vazio na página 1 retorna ambos os booleanos false. A navegação usa `! onFirstPage()` e `hasMorePages()` do paginator.
+
 ### Key Entities
 
 - **Offer**: Oferta comercial de um produtor para um produto do catálogo. Possui proprietário, identificador textual e nome snapshotado do produto, categoria, preço unitário, quantidade total, quantidade reservada, estado, visibilidade calculada e datas de criação e atualização.

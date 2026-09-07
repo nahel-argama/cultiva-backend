@@ -109,15 +109,11 @@
 
 ## 10. Contrato HTTP e paginação
 
-**Decision**: Expor cinco rotas de produtor e uma de varejista sob `/v1`. Listagens serão paginadas por `page` e `per_page`, com default 15 e máximo 100, ordenadas da mais recente para a mais antiga. Respostas usam `data` e, em listas paginadas, `meta`. Oferta expõe status e visibilidade calculada, mas não `producer_id`.
+**Decision**: `GET /v1/offers` retorna ofertas conforme o perfil autenticado. Actions usam `paginate()`; o controller aplica o transformer via `through()` e retorna somente `data`, `current_page`, `per_page`, `total`, `has_previous_page` e `has_next_page`. O FormRequest valida page/per_page (defaults 1/15, máximo 100).
 
-**Rationale**: O prefixo segue o backend atual, a paginação limita payloads em redes lentas e a ausência de `producer_id` reduz exposição desnecessária.
+**Rationale**: O paginator já fornece valores e navegação via `! onFirstPage()` e `hasMorePages()`. Basta selecionar esses campos na resposta, sem classe extra nem gerar URLs. COUNT é executado uma vez, itens usam consulta limitada e categorias são carregadas antecipadamente, evitando N+1.
 
-**Alternatives considered**:
-
-- Lista ilimitada: rejeitada por desempenho e tamanho de resposta.
-- Uma rota que muda conforme o perfil: rejeitada porque cria comportamento implícito e ramificações desnecessárias.
-- Ordenar por menor preço: rejeitado por não ser requisito e contrariar concorrência não predatória.
+**Compatibility**: O contrato final substitui `meta` e o JSON nativo completo por seis campos na raiz, sem links ou `last_page`. Clientes usam os dois booleanos para habilitar navegação. A ordenação da mais recente para a mais antiga permanece.
 
 ## 11. Estratégia TDD e ambiente
 

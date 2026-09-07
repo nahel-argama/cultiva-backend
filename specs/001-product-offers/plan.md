@@ -153,3 +153,7 @@ As decisões e alternativas estão consolidadas em [research.md](research.md). T
 - [quickstart.md](quickstart.md): validação do ambiente e cenários end-to-end.
 
 O desenho pós-Phase 1 continua aprovado em todos os gates constitucionais. A próxima etapa é `$speckit-tasks`; este comando não cria `tasks.md`.
+
+## Paginação nativa da API
+
+As duas Actions de listagem mantêm `paginate()`. `OfferController@index` aplica `OfferTransformer` via `through()` e serializa somente `data`, `current_page`, `per_page`, `total`, `has_previous_page` e `has_next_page`. `ListOffersRequest` mantém validação e limites. Não existem classes próprias de paginação; os testes Feature de Producer e Retailer validam o contrato exato, sem links.

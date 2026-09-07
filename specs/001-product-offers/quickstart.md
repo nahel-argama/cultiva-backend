@@ -110,7 +110,7 @@ Use [contracts/openapi.yaml](contracts/openapi.yaml) como contrato dos endpoints
 
 ### Varejista e visibilidade
 
-- Somente Retailer com access token acessa a listagem comercial.
+- Retailer com access token recebe a listagem comercial; Producer recebe suas próprias ofertas na mesma URL.
 - A matriz `active|inactive` × `com saldo|esgotada` retorna apenas `active + com saldo`.
 - Nenhuma listagem ordena ofertas por menor preço.
 
@@ -123,3 +123,26 @@ Use [contracts/openapi.yaml](contracts/openapi.yaml) como contrato dos endpoints
 ## 7. Stop condition
 
 O planejamento está provado quando todos os testes relevantes e a suíte completa passam no container PHP, os seis endpoints respeitam os contratos e nenhuma Action/repository/interface extra foi adicionada sem uma pressão concreta.
+
+## Paginação com Laravel
+
+`GET /v1/offers?page=1&per_page=15` retorna exatamente:
+
+```json
+{
+  "data": [],
+  "current_page": 1,
+  "per_page": 15,
+  "total": 0,
+  "has_previous_page": false,
+  "has_next_page": false
+}
+```
+
+- Defaults: `page=1`, `per_page=15`. Ambos inteiros positivos, máximo 100 itens por página; inválidos retornam 422.
+- `total` é o total de registros, não o tamanho da página atual.
+- `has_previous_page` vem de `! onFirstPage()`; `has_next_page` vem de `hasMorePages()`.
+- Página acima da última mantém `current_page` solicitado e retorna `data: []`, sem próxima página. O indicador de anterior permanece true quando page > 1.
+- Compatibilidade: não existem links, `last_page`, `meta` ou objeto `pagination`.
+- Novos endpoints devem usar `paginate()` na query, transformar itens com `through()` e ler os cinco metadados do próprio paginator. Não criar classes ou middleware de paginação.
+- A contagem é a do próprio paginator; serialização não faz consultas. Relações usadas pelo transformer devem usar eager loading.

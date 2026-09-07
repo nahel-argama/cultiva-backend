@@ -283,3 +283,21 @@ A feature termina quando os seis endpoints e seus cenários do contrato estivere
 - Somente o HTTP outbound do product-source pode ser fakeado.
 - Cada Green deve ser o mínimo que satisfaz o teste e os contratos existentes.
 - Faça commit apenas após um Green confirmado; nunca entre Red e Green.
+
+## Revisão: paginação nativa (histórico; contrato refinado abaixo)
+
+- [X] T053 [RED] Atualizar os testes Feature de Producer e Retailer para exigir campos nativos na raiz e ausência de wrappers.
+- [X] T054 [RED-RUN] Confirmar Red: 3 falhas porque `current_page` ainda não existia na raiz.
+- [X] T055 [GREEN] Retornar o paginator com `through()` e `withQueryString()`; remover classes/testes exclusivos da abstração customizada e manter `ListOffersRequest`.
+- [X] T056 [GREEN-CHECK] Confirmar Green focado: 13 testes, 50 assertions.
+- [X] T057 Atualizar arquitetura, convenções, specs e contrato OpenAPI para o JSON nativo.
+- [X] T058 Executar regressão e checagem de sintaxe no container: 106 testes, 322 assertions, PHP sem erros de sintaxe.
+
+## Contrato final: navegação booleana
+
+- [X] T059 [RED] Adaptar testes Feature existentes para os seis campos exatos, ambos os booleanos e ausência de links.
+- [X] T060 [RED-RUN] Confirmar Red: 21 testes, 71 assertions, 9 falhas por booleanos ausentes e campos extras.
+- [X] T061 [GREEN] Serializar dados e metadados do paginator usando `! onFirstPage()` e `hasMorePages()`, sem novas classes.
+- [X] T062 [GREEN-CHECK] Confirmar Green focado: 21 testes, 148 assertions.
+- [X] T063 Atualizar regras e documentação para o contrato final.
+- [X] T064 Executar regressão, validar sintaxe e commitar testes, implementação, regras e documentação nessa ordem. Regressão: 106 testes, 370 assertions.
