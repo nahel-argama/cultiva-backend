@@ -308,6 +308,31 @@ public function execute(string $query): SearchResult
 
 ## 8. Integration in Controllers & Jobs
 
+### API Pagination with Laravel (Mandatory)
+
+Every paginated query MUST use native `paginate()` on Eloquent or Query Builder before fetching records. Read Actions return `LengthAwarePaginator`; do not paginate manually or discard it before serializing metadata.
+
+The endpoint FormRequest validates positive integer `page` and integer `per_page` between 1 and 100; defaults are 1 and 15. Invalid input returns 422.
+
+Use the existing transformer for items and native paginator methods for metadata:
+
+```php
+return response()->json([
+    'data' => $offers->through(
+        fn (Offer $offer): array => $transformer->transform($offer),
+    )->items(),
+    'current_page' => $offers->currentPage(),
+    'per_page' => $offers->perPage(),
+    'total' => $offers->total(),
+    'has_previous_page' => ! $offers->onFirstPage(),
+    'has_next_page' => $offers->hasMorePages(),
+]);
+```
+
+Every current and future paginated endpoint MUST follow this exact six-field contract. Do not add links, last-page numbers or nested metadata. No custom paginator class, serializer or middleware is required. The complete response example is in `specs/001-product-offers/quickstart.md`.
+
+The paginator performs one SQL count and a limited item query (skipped when total is zero); serialization reuses those results. Eager-load relationships needed by the transformer to avoid N+1. Empty results on page 1 have both flags false. Pages above the last return empty data, retain the requested page, and expose no next page; the previous flag follows native `onFirstPage()` semantics. Exact totals retain the cost of COUNT, without an extra count or cache.
+
 ### Usage in Controller
 Controllers inject the Action via method injection (or constructor), map `$request->validated()` into the DTO, and invoke `execute()`.
 
