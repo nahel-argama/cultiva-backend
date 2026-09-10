@@ -153,8 +153,7 @@
 - [X] T047 Executar `docker compose exec php php artisan test` para a suíte completa, sem Pint, e registrar o resultado final em `specs/001-product-offers/tdd-evidence.md`
 - [X] T048 Conferir as seis rotas com `docker compose exec php php artisan route:list --path=v1`, comparar request/response/status com `specs/001-product-offers/contracts/openapi.yaml` e a tradução externa com `specs/001-product-offers/contracts/product-source.openapi.yaml`
 - [X] T049 [P] Adicionar uma pasta Offers com as seis requisições autenticadas — categorias, criar, listar próprias, detalhar, editar e listar disponíveis — em `collection/bruno/API/Offers/folder.yml`, `collection/bruno/API/Offers/List Categories.yml`, `collection/bruno/API/Offers/Create Offer.yml`, `collection/bruno/API/Offers/List Producer Offers.yml`, `collection/bruno/API/Offers/Show Offer.yml`, `collection/bruno/API/Offers/Update Offer.yml` e `collection/bruno/API/Offers/List Available Offers.yml`, parametrizando tokens/IDs em `collection/bruno/environments/local.yml`
-- [X] T050 [P] Adicionar uma pasta Offers com as mesmas seis requisições, payloads e autenticação bearer em `collection/postman/Cultiva.postman_collection.json`, incluindo variáveis distintas para access tokens de Producer/Retailer, `offer_id` e `source_product_id`
-- [X] T051 Validar que Bruno e Postman importam sem erro e possuem paridade de método, URL, headers, autenticação, parâmetros e payloads com os seis endpoints de `specs/001-product-offers/contracts/openapi.yaml`, sem armazenar tokens reais em `collection/bruno/environments/local.yml` ou `collection/postman/Cultiva.postman_collection.json`
+- [X] T050 Validar que a coleção Bruno importa sem erro e possui métodos, URLs, headers, autenticação, parâmetros e payloads compatíveis com os seis endpoints de `specs/001-product-offers/contracts/openapi.yaml`, sem armazenar tokens reais em `collection/bruno/environments/local.yml`
 - [X] T052 Revisar os arquivos listados em `specs/001-product-offers/plan.md` contra `AGENTS.md` e `.agents/skills/architecture/SKILL.md`, removendo somente abstrações sem uso e completando a evidência de Red/Green em `specs/001-product-offers/tdd-evidence.md`
 
 ---
@@ -272,7 +271,7 @@ Manter sequencial é a execução mínima para uma única rota de leitura.
 
 ### Scope Stop Condition
 
-A feature termina quando os seis endpoints e seus cenários do contrato estiverem verdes no container, Bruno e Postman cobrirem o mesmo contrato, os Reds prévios estiverem registrados e não houver category CRUD, delete de Offer, reserva/venda, retry/cache do catálogo, repository ou interface de implementação única.
+A feature termina quando os seis endpoints e seus cenários do contrato estiverem verdes no container, Bruno cobrir o contrato, os Reds prévios estiverem registrados e não houver category CRUD, delete de Offer, reserva/venda, retry/cache do catálogo, repository ou interface de implementação única.
 
 ---
 

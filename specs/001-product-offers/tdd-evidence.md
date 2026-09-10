@@ -16,7 +16,7 @@ Focused feature regression: `docker compose exec php vendor/bin/phpunit tests/Un
 
 Full backend suite: `docker compose exec php vendor/bin/phpunit` — GREEN, 95 tests and 236 assertions. Redis was started for the existing throttle tests; two empty PHPUnit placeholder files were removed because they contained no tests and caused runner warnings.
 
-Collection validation: Postman JSON parsed successfully with PHP and contains the six Offers requests. Bruno OpenCollection files follow the existing collection structure; both collections have matching methods, URLs, bearer profiles, headers, pagination parameters and JSON payloads. Token variables are empty and no credential-shaped value was found.
+Collection validation: Bruno OpenCollection files follow the existing collection structure and match the contract methods, URLs, bearer profiles, headers, pagination parameters and JSON payloads. Token variables are empty and no credential-shaped value was found.
 
 Architecture review: the feature uses Eloquent directly in Actions, exposes only `execute()` as each Action operation, keeps outbound HTTP inside `Integrations/ProductSource`, and introduces no repository, single-implementation interface or additional dependency.
 
