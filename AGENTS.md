@@ -73,6 +73,8 @@ custom behavior or message.
 Do not add exception renderers for standard Laravel authentication,
 authorization, or not-found responses unless the application explicitly
 requires a different contract.
+For simple Eloquent API representations, use Laravel API Resources and
+`Resource::collection()` instead of mapping models manually in controllers.
 
 ## 4. Workspace Development Skills
 
