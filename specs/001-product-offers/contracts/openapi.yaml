@@ -82,12 +82,12 @@ paths:
     parameters:
       - $ref: "#/components/parameters/OfferId"
     get:
-      operationId: showProducerOffer
-      summary: Exibe uma oferta pertencente ao produtor autenticado
+      operationId: showOffer
+      summary: Exibe uma oferta do produtor autenticado ou disponível ao retailer
       tags: [Producer Offers]
       responses:
         "200":
-          description: Oferta própria
+          description: Oferta própria do produtor ou oferta disponível para o retailer
           content:
             application/json:
               schema:
@@ -177,7 +177,7 @@ components:
       enum: [active, inactive]
     CreateOffer:
       type: object
-      additionalProperties: false
+      additionalProperties: true
       required: [source_product_id, category_id, unit_price, total_quantity]
       properties:
         source_product_id:
@@ -191,10 +191,10 @@ components:
           minimum: 0
         status:
           $ref: "#/components/schemas/OfferStatus"
-      description: "producer_id e reserved_quantity são proibidos; status omitido assume inactive."
+      description: "Campos não declarados são ignorados; status é aceito no payload, mas a criação sempre inicia a Offer como active."
     UpdateOffer:
       type: object
-      additionalProperties: false
+      additionalProperties: true
       minProperties: 1
       properties:
         source_product_id:
@@ -208,7 +208,7 @@ components:
           minimum: 0
         status:
           $ref: "#/components/schemas/OfferStatus"
-      description: "producer_id e reserved_quantity são proibidos. O produto é revalidado mesmo quando source_product_id não é enviado."
+      description: "Campos não declarados são ignorados. O PATCH exige ao menos um entre source_product_id, category_id, unit_price e total_quantity; status pode acompanhar esses campos e é aplicado. O produto é revalidado mesmo quando source_product_id não é enviado."
     Category:
       type: object
       additionalProperties: false
@@ -277,37 +277,24 @@ components:
           $ref: "#/components/schemas/Offer"
     OfferPage:
       type: object
-      description: Dados e metadados do paginator Laravel, sem links.
+      description: Coleção JSON Resource paginada pelo Laravel.
       additionalProperties: false
-      required: [data, current_page, per_page, total, has_previous_page, has_next_page]
+      required: [data, links, meta]
       properties:
         data:
           type: array
           items:
             $ref: "#/components/schemas/Offer"
-        current_page:
-          type: integer
-          minimum: 1
-        per_page:
-          type: integer
-          minimum: 1
-          maximum: 100
-        total:
-          type: integer
-          minimum: 0
-        has_previous_page:
-          type: boolean
-          description: True quando current_page é maior que 1, conforme onFirstPage().
-        has_next_page:
-          type: boolean
-          description: Resultado de hasMorePages() do paginator.
+        links:
+          type: object
+          additionalProperties: true
+        meta:
+          type: object
+          additionalProperties: true
       example:
         data: []
-        current_page: 1
-        per_page: 15
-        total: 0
-        has_previous_page: false
-        has_next_page: false
+        links: {}
+        meta: {}
     Error:
       type: object
       required: [message]
