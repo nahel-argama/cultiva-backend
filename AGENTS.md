@@ -85,6 +85,11 @@ FormRequest `validated()` already returns only fields declared in `rules()`;
 fields that must be ignored should not be declared just to add redundant
 `prohibited` rules. Add `prohibited` only when the request must explicitly
 reject a field instead of ignoring it.
+Optional fields without an implicit rule such as `required` do not need
+`sometimes`; Laravel skips them when they are absent.
+When consuming a trusted internal service, rely on its defined response
+contract and do not add defensive payload-shape validation in the consumer;
+validate only at genuinely untrusted boundaries.
 
 ## 4. Workspace Development Skills
 

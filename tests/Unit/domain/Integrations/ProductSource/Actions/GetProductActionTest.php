@@ -103,49 +103,4 @@ class GetProductActionTest extends TestCase
         }
     }
 
-    public function test_should_throw_503_when_response_id_does_not_match_request(): void
-    {
-        // Arrange
-        config(['services.product_source.base_url' => 'http://product-source.test/api']);
-        Http::fake([
-            'http://product-source.test/api/products/2' => Http::response([
-                'id' => '3',
-                'name' => 'Tomate',
-                'normal_name' => 'tomate',
-                'created_at' => '2026-09-05T12:00:00Z',
-            ], 200),
-        ]);
-        $sut = $this->app->make(GetProductAction::class);
-
-        // Action & Assert
-        try {
-            $sut->execute('2');
-            $this->fail('Expected CultivaException was not thrown.');
-        } catch (CultivaException $exception) {
-            $this->assertSame(503, $exception->getStatusCode());
-        }
-    }
-
-    public function test_should_throw_503_when_response_has_no_usable_name(): void
-    {
-        // Arrange
-        config(['services.product_source.base_url' => 'http://product-source.test/api']);
-        Http::fake([
-            'http://product-source.test/api/products/2' => Http::response([
-                'id' => '2',
-                'name' => ' ',
-                'normal_name' => '',
-                'created_at' => '2026-09-05T12:00:00Z',
-            ], 200),
-        ]);
-        $sut = $this->app->make(GetProductAction::class);
-
-        // Action & Assert
-        try {
-            $sut->execute('2');
-            $this->fail('Expected CultivaException was not thrown.');
-        } catch (CultivaException $exception) {
-            $this->assertSame(503, $exception->getStatusCode());
-        }
-    }
 }
