@@ -266,8 +266,7 @@ class UpdateTest extends TestCase
         ]);
 
         // Assert
-        $response->assertNotFound()
-            ->assertJsonPath('message', Lang::get('offers.not_found'));
+        $response->assertNotFound();
         Http::assertNothingSent();
     }
 

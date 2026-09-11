@@ -63,7 +63,18 @@ tests/
 
 ---
 
-## 3. Workspace Development Skills
+## 3. Laravel-Native APIs
+
+Before writing manual control flow, check Laravel's native APIs and use the
+method that already expresses the behavior. Prefer `firstOrFail()` or
+`findOrFail()` over `first()`/`find()` followed by a manual not-found
+exception. Do not duplicate framework behavior unless the application needs a
+custom behavior or message.
+Do not add exception renderers for standard Laravel authentication,
+authorization, or not-found responses unless the application explicitly
+requires a different contract.
+
+## 4. Workspace Development Skills
 
 All development guidelines, coding standards, and testing patterns are maintained as specialized skills:
 

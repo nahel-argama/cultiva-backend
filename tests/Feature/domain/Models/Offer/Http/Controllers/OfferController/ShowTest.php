@@ -6,7 +6,6 @@ use Database\Factories\OfferFactory;
 use Database\Factories\ProducerFactory;
 use Database\Factories\RetailerFactory;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Lang;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
@@ -42,8 +41,7 @@ class ShowTest extends TestCase
         $response = $this->getJson('/v1/offers/'.$offer->id);
 
         // Assert
-        $response->assertNotFound()
-            ->assertJsonPath('message', Lang::get('offers.not_found'));
+        $response->assertNotFound();
     }
 
     public function test_should_return_404_for_missing_offer(): void
@@ -56,8 +54,7 @@ class ShowTest extends TestCase
         $response = $this->getJson('/v1/offers/999999');
 
         // Assert
-        $response->assertNotFound()
-            ->assertJsonPath('message', Lang::get('offers.not_found'));
+        $response->assertNotFound();
     }
 
     public function test_should_return_401_without_token(): void
