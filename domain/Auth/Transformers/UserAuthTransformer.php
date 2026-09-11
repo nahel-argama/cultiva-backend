@@ -22,7 +22,7 @@ final class UserAuthTransformer
     public function transform(ProfileResultDTO $dto): array
     {
         $user = $dto->user;
-        $profileType = $user->getProfileType();
+        $profileType = $user->profile_type;
 
         $profile = match ($profileType) {
             ProfileType::PRODUCER => $this->producerTransformer->transform($user->producer),

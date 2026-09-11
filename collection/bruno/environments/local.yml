@@ -5,3 +5,33 @@ variables:
     enabled: true
     secret: false
     type: text
+  - name: producer_access_token
+    value: ""
+    enabled: true
+    secret: true
+    type: text
+  - name: retailer_access_token
+    value: ""
+    enabled: true
+    secret: true
+    type: text
+  - name: offer_id
+    value: "1"
+    enabled: true
+    secret: false
+    type: text
+  - name: source_product_id
+    value: "2"
+    enabled: true
+    secret: false
+    type: text
+  - name: page
+    value: "1"
+    enabled: true
+    secret: false
+    type: text
+  - name: per_page
+    value: "15"
+    enabled: true
+    secret: false
+    type: text

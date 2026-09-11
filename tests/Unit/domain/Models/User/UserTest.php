@@ -8,7 +8,7 @@ use Tests\TestCase;
 
 class UserTest extends TestCase
 {
-    public function test_should_return_profile_type(): void
+    public function test_should_cast_profile_type_from_user_column(): void
     {
         // Arrange
         $sut = new User([
@@ -16,10 +16,11 @@ class UserTest extends TestCase
         ]);
 
         // Action
-        $result = $sut->getProfileType();
+        $result = $sut->profile_type;
 
         // Assert
         $this->assertSame(ProfileType::PRODUCER, $result);
+        $this->assertFalse(method_exists($sut, 'getProfileType'));
     }
 
     public function test_should_identify_producer_profile(): void

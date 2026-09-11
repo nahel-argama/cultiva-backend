@@ -80,3 +80,27 @@ All development guidelines, coding standards, and testing patterns are maintaine
 - Persist test state with direct factories: `UserFactory::new()->create()`, including related records.
 - Mock or fake only outbound boundaries that cannot run locally, such as third-party APIs or webhooks.
 - Assert both the HTTP contract and relevant database side effects.
+
+### TDD Execution Gate (Non-Negotiable)
+
+For every new behavior, bug fix, or requirement change, the test must exist and produce a valid Red **before** any production code is written or changed:
+
+1. Create or update the smallest relevant test, including only required test scaffolding.
+2. Run that targeted test inside the `php` container.
+3. Confirm it fails because the requested behavior is missing or incorrect. Infrastructure, syntax, or environment failures do not count as Red.
+4. Only after that confirmed Red, change production code to reach Green.
+5. Run the targeted test again, then the relevant suite, and confirm Green.
+
+Red and Green must be separate, dependency-ordered tasks. Never combine them into one implementation task or run them in parallel. If the test passes before implementation, strengthen or correct the test until it fails for the expected reason. If a valid Red cannot be demonstrated, stop before changing production code and report the blocker.
+
+Every implementation handoff must report the Red command and expected failure reason, followed by the Green command and result.
+
+### API Pagination Convention (Mandatory)
+
+- Every query returning a paginated list MUST use Laravel's native `paginate()` on Eloquent or Query Builder before fetching records.
+- Read Actions MUST return `LengthAwarePaginator`. Keep it until HTTP serialization; never paginate manually with `skip()`/`take()`, array slicing, or an in-memory collection.
+- Responses MUST contain exactly `data`, `current_page`, `per_page`, `total`, `has_previous_page`, and `has_next_page` at the root. No links, `last_page`, `meta`, or `pagination` object.
+- Transform items with `through()` and use `items()` only for the `data` field. Read metadata from `currentPage()`, `perPage()`, `total()`, `! onFirstPage()`, and `hasMorePages()`; do not recalculate it.
+- Validate `page >= 1` and `1 <= per_page <= 100` in the endpoint FormRequest; defaults are 1 and 15. Invalid values return 422.
+- Reuse the count performed by `paginate()` and eager-load transformed relationships; never load all records or perform another count for serialization.
+- Apply this convention to all current and future paginated endpoints. No custom paginator class or middleware is required.

@@ -7,9 +7,8 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 
 final class CultivaException extends HttpException
 {
-
     public function __construct(
-        private int $statusCode,
+        int $statusCode,
         string $message = '',
         ?\Throwable $previous = null,
         private array $context = [],

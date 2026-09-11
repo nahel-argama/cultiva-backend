@@ -21,7 +21,7 @@ class RetailerFactory extends Factory
     public function definition(): array
     {
         return [
-            'company_id'    => CompanyFactory::new(),
+            'company_id'    => CompanyFactory::new()->for(UserFactory::new()->retailer()),
             'business_type' => $this->faker->randomElement(BusinessType::cases()),
         ];
     }

@@ -101,11 +101,6 @@ class User extends Authenticatable
         return $this->hasOneThrough(Delivery::class, Company::class, 'user_id', 'company_id');
     }
 
-    public function getProfileType(): ProfileType
-    {
-        return $this->profile_type;
-    }
-
     public function isRetailer(): bool
     {
         return $this->profile_type === ProfileType::RETAILER;

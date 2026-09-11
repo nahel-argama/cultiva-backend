@@ -13,7 +13,7 @@ trait HasEnumLabel
     {
         $enumKey = Str::snake(class_basename(self::class));
 
-        return Lang::get("enums.{$enumKey}.{$this->value}");
+        return Lang::get("enums.{$enumKey}.{$this->value}", locale: 'pt_BR');
     }
 
     /**
