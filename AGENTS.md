@@ -74,6 +74,7 @@ All development guidelines, coding standards, and testing patterns are maintaine
 
 ### Feature Test Non-Negotiables
 
+- Não criar testes para comportamentos básicos e padrão do Laravel que não foram customizados; presume-se que o framework funcione. Testar apenas a configuração ou comportamento próprio da aplicação.
 - A Feature test must execute the real route lifecycle: middleware, request, controller, Action, transformer, and database.
 - Never mock the Action called by the controller. That produces a controller unit test, not a Feature test.
 - Never instantiate Eloquent models with `new`, `make()`, or `setRelation()` to simulate persisted state in a Feature test.
