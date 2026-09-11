@@ -117,8 +117,8 @@ Every implementation handoff must report the Red command and expected failure re
 
 - Every query returning a paginated list MUST use Laravel's native `paginate()` on Eloquent or Query Builder before fetching records.
 - Read Actions MUST return `LengthAwarePaginator`. Keep it until HTTP serialization; never paginate manually with `skip()`/`take()`, array slicing, or an in-memory collection.
-- Responses MUST contain exactly `data`, `current_page`, `per_page`, `total`, `has_previous_page`, and `has_next_page` at the root. No links, `last_page`, `meta`, or `pagination` object.
-- Transform items with `through()` and use `items()` only for the `data` field. Read metadata from `currentPage()`, `perPage()`, `total()`, `! onFirstPage()`, and `hasMorePages()`; do not recalculate it.
+- Return paginators through the corresponding Laravel API Resource collection and let Laravel serialize `data`, `links`, and `meta`.
+- Do not manually call `through()`, `items()`, or rebuild pagination metadata in controllers.
 - Validate `page >= 1` and `1 <= per_page <= 100` in the endpoint FormRequest; defaults are 1 and 15. Invalid values return 422.
 - Reuse the count performed by `paginate()` and eager-load transformed relationships; never load all records or perform another count for serialization.
 - Apply this convention to all current and future paginated endpoints. No custom paginator class or middleware is required.

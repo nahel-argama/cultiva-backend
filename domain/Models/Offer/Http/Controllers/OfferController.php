@@ -14,10 +14,11 @@ use Cultiva\Models\Offer\DTO\UpdateOfferDTO;
 use Cultiva\Models\Offer\Http\Requests\ListOffersRequest;
 use Cultiva\Models\Offer\Http\Requests\StoreOfferRequest;
 use Cultiva\Models\Offer\Http\Requests\UpdateOfferRequest;
-use Cultiva\Models\Offer\Offer;
+use Cultiva\Models\Offer\Http\Resources\OfferResource;
 use Cultiva\Models\Offer\Transformers\OfferTransformer;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 final class OfferController extends Controller
 {
@@ -25,8 +26,7 @@ final class OfferController extends Controller
         ListOffersRequest $request,
         ListProducerOffersAction $producerAction,
         ListAvailableOffersAction $availableAction,
-        OfferTransformer $transformer,
-    ): JsonResponse {
+    ): AnonymousResourceCollection {
         $page = $request->integer('page', 1);
         $perPage = $request->integer('per_page', 15);
         $offers = match ($request->user()->profile_type) {
@@ -38,16 +38,7 @@ final class OfferController extends Controller
             ProfileType::RETAILER => $availableAction->execute($page, $perPage),
         };
 
-        return response()->json([
-            'data' => $offers->through(
-                fn (Offer $offer): array => $transformer->transform($offer),
-            )->items(),
-            'current_page' => $offers->currentPage(),
-            'per_page' => $offers->perPage(),
-            'total' => $offers->total(),
-            'has_previous_page' => ! $offers->onFirstPage(),
-            'has_next_page' => $offers->hasMorePages(),
-        ]);
+        return OfferResource::collection($offers);
     }
 
     public function store(

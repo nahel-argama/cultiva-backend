@@ -51,13 +51,11 @@ class IndexTest extends TestCase
             ->assertJsonPath('data.0.id', $newerExhausted->id)
             ->assertJsonPath('data.0.is_visible', false)
             ->assertJsonPath('data.1.id', $olderInactive->id)
-            ->assertJsonPath('current_page', 1)
-            ->assertJsonPath('per_page', 2)
-            ->assertJsonPath('total', 2)
-            ->assertJsonPath('has_previous_page', false)
-            ->assertJsonPath('has_next_page', false)
-            ->assertJsonMissingPath('pagination')
-            ->assertJsonMissingPath('meta');
+            ->assertJsonPath('meta.current_page', 1)
+            ->assertJsonPath('meta.per_page', 2)
+            ->assertJsonPath('meta.total', 2)
+            ->assertJsonPath('links.prev', null)
+            ->assertJsonPath('links.next', null);
         $this->assertCount(2, $response->json('data'));
     }
 
@@ -72,12 +70,12 @@ class IndexTest extends TestCase
 
         // Assert
         $response->assertOk()
-            ->assertJsonPath('current_page', 1)
-            ->assertJsonPath('per_page', 15)
-            ->assertExactJsonStructure([
+            ->assertJsonPath('meta.current_page', 1)
+            ->assertJsonPath('meta.per_page', 15)
+            ->assertJsonStructure([
                 'data',
-                'current_page', 'per_page', 'total',
-                'has_previous_page', 'has_next_page',
+                'links' => ['first', 'last', 'prev', 'next'],
+                'meta' => ['current_page', 'per_page', 'total', 'last_page'],
             ]);
     }
 
@@ -105,15 +103,16 @@ class IndexTest extends TestCase
         // Assert
         $response->assertOk()
             ->assertJsonCount($count, 'data')
-            ->assertJsonPath('current_page', $page)
-            ->assertJsonPath('per_page', $perPage)
-            ->assertJsonPath('total', $total)
-            ->assertJsonPath('has_previous_page', $previous)
-            ->assertJsonPath('has_next_page', $next)
-            ->assertExactJsonStructure([
-                'data', 'current_page', 'per_page', 'total',
-                'has_previous_page', 'has_next_page',
+            ->assertJsonPath('meta.current_page', $page)
+            ->assertJsonPath('meta.per_page', $perPage)
+            ->assertJsonPath('meta.total', $total)
+            ->assertJsonStructure([
+                'data',
+                'links' => ['first', 'last', 'prev', 'next'],
+                'meta' => ['current_page', 'per_page', 'total', 'last_page'],
             ]);
+        $this->assertSame($previous, $response->json('links.prev') !== null);
+        $this->assertSame($next, $response->json('links.next') !== null);
     }
 
     public static function paginationPagesProvider(): array
