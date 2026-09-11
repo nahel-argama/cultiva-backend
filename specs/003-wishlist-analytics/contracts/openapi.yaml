@@ -1,0 +1,121 @@
+openapi: 3.1.0
+info:
+  title: Cultiva Wishlist API
+  version: 1.0.0
+  description: Contrato da wishlist por varejista e da analytics anônima de demanda.
+servers:
+  - url: /
+security:
+  - bearerAuth: []
+paths:
+  /v1/wishlist/items:
+    post:
+      operationId: addWishlistItem
+      summary: Adiciona produto à wishlist do retailer autenticado
+      tags: [Wishlist]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [product_id]
+              additionalProperties: true
+              properties:
+                product_id: { type: string, minLength: 1, maxLength: 255 }
+      responses:
+        "201": { description: Item criado, content: { application/json: { schema: { $ref: "#/components/schemas/WishlistItemResponse" } } } }
+        "401": { $ref: "#/components/responses/Unauthenticated" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/ProductNotFound" }
+        "409": { $ref: "#/components/responses/Conflict" }
+        "422": { $ref: "#/components/responses/ValidationFailed" }
+    get:
+      operationId: listWishlistItems
+      summary: Lista itens da wishlist do retailer autenticado
+      tags: [Wishlist]
+      parameters:
+        - $ref: "#/components/parameters/Search"
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/PerPage"
+      responses:
+        "200": { description: Página isolada do retailer, content: { application/json: { schema: { $ref: "#/components/schemas/WishlistPage" } } } }
+        "401": { $ref: "#/components/responses/Unauthenticated" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "422": { $ref: "#/components/responses/ValidationFailed" }
+  /v1/wishlist/items/{wishlistItem}:
+    delete:
+      operationId: removeWishlistItem
+      summary: Remove item pertencente ao retailer autenticado
+      tags: [Wishlist]
+      parameters:
+        - name: wishlistItem
+          in: path
+          required: true
+          schema: { type: integer, minimum: 1 }
+      responses:
+        "204": { description: Item removido sem conteúdo }
+        "401": { $ref: "#/components/responses/Unauthenticated" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/ItemNotFound" }
+  /v1/wishlist/analytics:
+    get:
+      operationId: getWishlistAnalytics
+      summary: Consulta demanda agregada e anônima
+      tags: [Wishlist Analytics]
+      parameters:
+        - $ref: "#/components/parameters/State"
+        - $ref: "#/components/parameters/Limit"
+      responses:
+        "200": { description: Ranking agregado de produtos, content: { application/json: { schema: { $ref: "#/components/schemas/AnalyticsResponse" } } } }
+        "401": { $ref: "#/components/responses/Unauthenticated" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "422": { $ref: "#/components/responses/ValidationFailed" }
+components:
+  securitySchemes:
+    bearerAuth: { type: http, scheme: bearer, bearerFormat: Sanctum access token }
+  parameters:
+    Search: { name: search, in: query, schema: { type: string, maxLength: 255 } }
+    Page: { name: page, in: query, schema: { type: integer, minimum: 1, default: 1 } }
+    PerPage: { name: per_page, in: query, schema: { type: integer, minimum: 1, maximum: 100, default: 15 } }
+    State: { name: state, in: query, schema: { type: string, minLength: 2, maxLength: 2 } }
+    Limit: { name: limit, in: query, schema: { type: integer, minimum: 1, maximum: 50, default: 10 } }
+  schemas:
+    WishlistItem:
+      type: object
+      required: [id, source_product_id, product_name, state, created_at]
+      properties:
+        id: { type: integer }
+        source_product_id: { type: string }
+        product_name: { type: string }
+        state: { type: string, minLength: 2, maxLength: 2 }
+        created_at: { type: string, format: date-time }
+    WishlistItemResponse: { type: object, required: [data], properties: { data: { $ref: "#/components/schemas/WishlistItem" } } }
+    WishlistPage:
+      type: object
+      required: [data, links, meta]
+      properties: { data: { type: array, items: { $ref: "#/components/schemas/WishlistItem" } }, links: { type: object }, meta: { type: object } }
+    AnalyticsResult:
+      type: object
+      required: [position, source_product_id, product_name, total, percentage]
+      properties:
+        position: { type: integer, minimum: 1 }
+        source_product_id: { type: string }
+        product_name: { type: string }
+        total: { type: integer, minimum: 1 }
+        percentage: { type: integer, minimum: 0, maximum: 100 }
+    Analytics:
+      type: object
+      required: [state, total_items, results]
+      properties:
+        state: { type: [string, "null"] }
+        total_items: { type: integer, minimum: 0 }
+        results: { type: array, items: { $ref: "#/components/schemas/AnalyticsResult" } }
+    AnalyticsResponse: { type: object, required: [data], properties: { data: { $ref: "#/components/schemas/Analytics" } } }
+  responses:
+    Unauthenticated: { description: Token ausente ou inválido }
+    Forbidden: { description: Perfil ou ability sem permissão }
+    ProductNotFound: { description: Produto não encontrado }
+    ItemNotFound: { description: Item não encontrado no escopo do retailer }
+    Conflict: { description: Produto já está na wishlist }
+    ValidationFailed: { description: Dados inválidos }
