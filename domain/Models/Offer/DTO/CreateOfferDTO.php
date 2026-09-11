@@ -17,10 +17,10 @@ final readonly class CreateOfferDTO
     public static function from(array $data): self
     {
         return new self(
-            sourceProductId: (string) $data['source_product_id'],
-            categoryId: (int) $data['category_id'],
-            unitPrice: (string) $data['unit_price'],
-            totalQuantity: (int) $data['total_quantity'],
+            sourceProductId: $data['source_product_id'],
+            categoryId: $data['category_id'],
+            unitPrice: $data['unit_price'],
+            totalQuantity: $data['total_quantity'],
             status: OfferStatus::from($data['status'] ?? OfferStatus::INACTIVE->value),
         );
     }

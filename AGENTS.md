@@ -77,6 +77,8 @@ For simple Eloquent API representations, use Laravel API Resources and
 `Resource::collection()` instead of mapping models manually in controllers.
 For Eloquent writes, prefer the native combined methods such as `update()`
 instead of chaining `fill()` and `save()` separately.
+For DTOs, rely on the constructor property types and use `??` for optional
+input values; do not add redundant scalar casts or `array_key_exists()` checks.
 
 ## 4. Workspace Development Skills
 
