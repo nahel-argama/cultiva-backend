@@ -75,6 +75,8 @@ authorization, or not-found responses unless the application explicitly
 requires a different contract.
 For simple Eloquent API representations, use Laravel API Resources and
 `Resource::collection()` instead of mapping models manually in controllers.
+For Eloquent writes, prefer the native combined methods such as `update()`
+instead of chaining `fill()` and `save()` separately.
 
 ## 4. Workspace Development Skills
 
