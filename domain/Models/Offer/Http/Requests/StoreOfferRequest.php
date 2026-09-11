@@ -23,8 +23,6 @@ final class StoreOfferRequest extends FormRequest
             'unit_price' => ['required', 'string', 'numeric', 'gt:0', 'regex:/^[0-9]+(?:\.[0-9]{1,2})?$/'],
             'total_quantity' => ['required', 'integer', 'min:0'],
             'status' => ['sometimes', Rule::enum(OfferStatus::class)],
-            'producer_id' => ['prohibited'],
-            'reserved_quantity' => ['prohibited'],
         ];
     }
 }
