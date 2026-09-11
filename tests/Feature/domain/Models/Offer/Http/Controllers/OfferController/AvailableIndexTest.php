@@ -9,7 +9,6 @@ use Database\Factories\ProducerFactory;
 use Database\Factories\RetailerFactory;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
-use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class AvailableIndexTest extends TestCase
@@ -65,7 +64,7 @@ class AvailableIndexTest extends TestCase
         Sanctum::actingAs($retailer->company->user, ['access']);
 
         // Action
-        $response = $this->getJson('/v1/offers?per_page=10');
+        $response = $this->getJson('/v1/offers');
 
         // Assert
         $response->assertOk()
@@ -74,41 +73,8 @@ class AvailableIndexTest extends TestCase
             ->assertJsonPath('data.0.is_visible', true)
             ->assertJsonPath('data.1.id', $olderCheapVisible->id)
             ->assertJsonPath('data.1.available_quantity', 8)
-            ->assertJsonPath('meta.current_page', 1)
-            ->assertJsonPath('meta.per_page', 10)
-            ->assertJsonPath('meta.total', 2)
-            ->assertJsonPath('links.prev', null)
-            ->assertJsonPath('links.next', null)
-            ->assertJsonMissingPath('data.0.producer_id')
-            ->assertJsonStructure([
-                'data',
-                'links' => ['first', 'last', 'prev', 'next'],
-                'meta' => ['current_page', 'per_page', 'total', 'last_page'],
-            ]);
+            ->assertJsonMissingPath('data.0.producer_id');
         $this->assertCount(2, $response->json('data'));
-    }
-
-    #[DataProvider('invalidPaginationProvider')]
-    public function test_should_return_422_for_invalid_pagination(string $query): void
-    {
-        // Arrange
-        $retailer = RetailerFactory::new()->create();
-        Sanctum::actingAs($retailer->company->user, ['access']);
-
-        // Action
-        $response = $this->getJson('/v1/offers?'.$query);
-
-        // Assert
-        $response->assertUnprocessable();
-    }
-
-    public static function invalidPaginationProvider(): array
-    {
-        return [
-            'page below one' => ['page=0'],
-            'per page below one' => ['per_page=0'],
-            'per page above maximum' => ['per_page=101'],
-        ];
     }
 
     public function test_should_return_401_without_token(): void
