@@ -29,6 +29,11 @@ final class EnsureProfileTest extends TestCase
         Sanctum::actingAs($producer->company->user, ['access']);
 
         // Action & Assert
-        $this->getJson('/v1/purchases')->assertForbidden();
+        $this->getJson('/v1/purchases')
+            ->assertForbidden()
+            ->assertExactJson([
+                'message' => __('auth.forbidden'),
+                'context' => [],
+            ]);
     }
 }
