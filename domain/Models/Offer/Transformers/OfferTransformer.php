@@ -21,9 +21,9 @@ final class OfferTransformer
             'unit_price' => $offer->unit_price,
             'total_quantity' => $offer->total_quantity,
             'reserved_quantity' => $offer->reserved_quantity,
-            'available_quantity' => $offer->available_quantity,
+            'available_quantity' => $offer->availableQuantity(),
             'status' => $offer->status->value,
-            'is_visible' => $offer->is_visible,
+            'is_visible' => $offer->isVisible(),
             'created_at' => $offer->created_at->toISOString(),
             'updated_at' => $offer->updated_at->toISOString(),
         ];

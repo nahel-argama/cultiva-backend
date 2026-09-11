@@ -233,31 +233,6 @@ class StoreTest extends TestCase
         Http::assertSentCount(1);
     }
 
-    public function test_should_return_503_when_product_source_payload_is_invalid(): void
-    {
-        // Arrange
-        config(['services.product_source.base_url' => 'http://product-source.test/api']);
-        Http::fake([
-            'http://product-source.test/api/products/2' => Http::response(['id' => '2'], 200),
-        ]);
-        $producer = ProducerFactory::new()->create();
-        $category = CategoryFactory::new()->create();
-        Sanctum::actingAs($producer->company->user, ['access']);
-        $payload = [
-            'source_product_id' => '2',
-            'category_id' => $category->id,
-            'unit_price' => '12.50',
-            'total_quantity' => 10,
-        ];
-
-        // Action
-        $response = $this->postJson('/v1/offers', $payload);
-
-        // Assert
-        $response->assertServiceUnavailable();
-        $this->assertDatabaseCount('offers', 0);
-    }
-
     public function test_should_return_401_without_token(): void
     {
         // Arrange

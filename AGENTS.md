@@ -81,6 +81,8 @@ For DTOs, rely on the constructor property types and use `??` for optional
 input values; do not add redundant scalar casts or `array_key_exists()` checks.
 Controllers should only coordinate HTTP input and output; move branching and
 business-flow decisions into Actions.
+For simple computed model values, prefer explicit methods over Eloquent
+`Attribute` accessors when property-style access is not required.
 FormRequest `validated()` already returns only fields declared in `rules()`;
 fields that must be ignored should not be declared just to add redundant
 `prohibited` rules. Add `prohibited` only when the request must explicitly

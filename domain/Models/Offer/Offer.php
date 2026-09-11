@@ -6,7 +6,6 @@ use Cultiva\Models\Category\Category;
 use Cultiva\Models\Offer\Enums\OfferStatus;
 use Cultiva\Models\Producer\Producer;
 use Database\Factories\OfferFactory;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -55,17 +54,13 @@ class Offer extends Model
         return $this->belongsTo(Category::class);
     }
 
-    protected function availableQuantity(): Attribute
+    public function availableQuantity(): int
     {
-        return Attribute::get(
-            fn (): int => $this->total_quantity - $this->reserved_quantity,
-        );
+        return $this->total_quantity - $this->reserved_quantity;
     }
 
-    protected function isVisible(): Attribute
+    public function isVisible(): bool
     {
-        return Attribute::get(
-            fn (): bool => $this->status === OfferStatus::ACTIVE && $this->available_quantity > 0,
-        );
+        return $this->status === OfferStatus::ACTIVE && $this->availableQuantity() > 0;
     }
 }
