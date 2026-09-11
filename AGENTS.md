@@ -79,6 +79,8 @@ For Eloquent writes, prefer the native combined methods such as `update()`
 instead of chaining `fill()` and `save()` separately.
 For DTOs, rely on the constructor property types and use `??` for optional
 input values; do not add redundant scalar casts or `array_key_exists()` checks.
+Controllers should only coordinate HTTP input and output; move branching and
+business-flow decisions into Actions.
 
 ## 4. Workspace Development Skills
 

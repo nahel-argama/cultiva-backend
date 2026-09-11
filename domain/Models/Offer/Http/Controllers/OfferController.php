@@ -2,12 +2,10 @@
 
 namespace Cultiva\Models\Offer\Http\Controllers;
 
-use Cultiva\Auth\Enums\ProfileType;
 use Cultiva\Base\Contracts\Controller;
 use Cultiva\Models\Offer\Actions\CreateOfferAction;
 use Cultiva\Models\Offer\Actions\GetOfferAction;
-use Cultiva\Models\Offer\Actions\ListAvailableOffersAction;
-use Cultiva\Models\Offer\Actions\ListProducerOffersAction;
+use Cultiva\Models\Offer\Actions\ListOffersAction;
 use Cultiva\Models\Offer\Actions\UpdateOfferAction;
 use Cultiva\Models\Offer\DTO\CreateOfferDTO;
 use Cultiva\Models\Offer\DTO\UpdateOfferDTO;
@@ -24,19 +22,11 @@ final class OfferController extends Controller
 {
     public function index(
         ListOffersRequest $request,
-        ListProducerOffersAction $producerAction,
-        ListAvailableOffersAction $availableAction,
+        ListOffersAction $action,
     ): AnonymousResourceCollection {
         $page = $request->integer('page', 1);
         $perPage = $request->integer('per_page', 15);
-        $offers = match ($request->user()->profile_type) {
-            ProfileType::PRODUCER => $producerAction->execute(
-                $request->user()->producer()->firstOrFail(),
-                $page,
-                $perPage,
-            ),
-            ProfileType::RETAILER => $availableAction->execute($page, $perPage),
-        };
+        $offers = $action->execute($request->user(), $page, $perPage);
 
         return OfferResource::collection($offers);
     }
