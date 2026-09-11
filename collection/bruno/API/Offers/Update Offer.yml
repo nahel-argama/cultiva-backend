@@ -22,12 +22,11 @@ http:
         "source_product_id": "{{source_product_id}}",
         "category_id": 1,
         "unit_price": "15.00",
-        "total_quantity": 25,
-        "status": "active"
+        "total_quantity": 25
       }
   auth:
     type: bearer
-    token: "{{producer_access_token}}"
+    token: "{{access_token}}"
 
 runtime:
   variables:

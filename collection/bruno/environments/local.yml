@@ -5,12 +5,7 @@ variables:
     enabled: true
     secret: false
     type: text
-  - name: producer_access_token
-    value: ""
-    enabled: true
-    secret: true
-    type: text
-  - name: retailer_access_token
+  - name: access_token
     value: ""
     enabled: true
     secret: true

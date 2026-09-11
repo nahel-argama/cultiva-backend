@@ -1,0 +1,91 @@
+{
+  "info": {
+    "name": "Cultiva API",
+    "description": "Collection da API v1 do Cultiva.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:80" },
+    { "key": "offer_id", "value": "1" },
+    { "key": "source_product_id", "value": "2" },
+    { "key": "page", "value": "1" },
+    { "key": "per_page", "value": "15" },
+    { "key": "cep", "value": "89010025" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Signup - Producer",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"user\": {\n    \"name\": \"Maria Silva\",\n    \"email\": \"maria@example.com\",\n    \"password\": \"Password123!\",\n    \"password_confirmation\": \"Password123!\"\n  },\n  \"profile_type\": \"producer\",\n  \"company\": {\n    \"trade_name\": \"Sítio Primavera\",\n    \"legal_name\": \"Sítio Primavera LTDA\",\n    \"document_number\": \"12345678000195\",\n    \"phone\": \"5511987654321\",\n    \"address\": {\n      \"zip\": \"89010025\",\n      \"number\": \"123\",\n      \"complement\": \"Portão Azul\",\n      \"reference_point\": \"Perto da ponte\"\n    }\n  },\n  \"producer\": {\n    \"activity_segment\": \"vegetables\"\n  }\n}", "options": { "raw": { "language": "json" } } },
+            "url": { "raw": "{{base_url}}/v1/auth/signup", "host": ["{{base_url}}"], "path": ["v1", "auth", "signup"] }
+          },
+          "event": [{ "listen": "test", "script": { "type": "text", "exec": ["if (pm.response.code === 201) {", "  const body = pm.response.json();", "  pm.environment.set('access_token', body.data.tokens.access_token);", "}"] } }]
+        },
+        {
+          "name": "Signup - Retailer",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"user\": {\n    \"name\": \"Carlos Mendes\",\n    \"email\": \"carlos@example.com\",\n    \"password\": \"Password123!\",\n    \"password_confirmation\": \"Password123!\"\n  },\n  \"profile_type\": \"retailer\",\n  \"company\": {\n    \"trade_name\": \"Mercado Central\",\n    \"legal_name\": \"Mercado Central LTDA\",\n    \"document_number\": \"12345678000196\",\n    \"phone\": \"5511987654321\",\n    \"address\": {\n      \"zip\": \"89010025\",\n      \"number\": \"456\",\n      \"complement\": \"Loja 01\",\n      \"reference_point\": \"Em frente à praça\"\n    }\n  },\n  \"retailer\": {\n    \"business_type\": \"supermarket\"\n  }\n}", "options": { "raw": { "language": "json" } } },
+            "url": { "raw": "{{base_url}}/v1/auth/signup", "host": ["{{base_url}}"], "path": ["v1", "auth", "signup"] }
+          },
+          "event": [{ "listen": "test", "script": { "type": "text", "exec": ["if (pm.response.code === 201) {", "  const body = pm.response.json();", "  pm.environment.set('access_token', body.data.tokens.access_token);", "}"] } }]
+        },
+        {
+          "name": "Signup - Delivery",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"user\": {\n    \"name\": \"João Souza\",\n    \"email\": \"joao@example.com\",\n    \"password\": \"Password123!\",\n    \"password_confirmation\": \"Password123!\"\n  },\n  \"profile_type\": \"delivery\",\n  \"company\": {\n    \"trade_name\": \"Entrega Rápida\",\n    \"legal_name\": \"Entrega Rápida LTDA\",\n    \"document_number\": \"12345678000197\",\n    \"phone\": \"5511987654321\",\n    \"address\": {\n      \"zip\": \"89010025\",\n      \"number\": \"789\",\n      \"complement\": \"Sala 02\",\n      \"reference_point\": \"Ao lado do mercado\"\n    }\n  },\n  \"delivery\": {\n    \"cnh_number\": \"12345678901\",\n    \"cnh_category\": \"B\",\n    \"vehicle\": {\n      \"plate\": \"BRA2E19\",\n      \"cargo_type\": \"refrigerated\"\n    }\n  }\n}", "options": { "raw": { "language": "json" } } },
+            "url": { "raw": "{{base_url}}/v1/auth/signup", "host": ["{{base_url}}"], "path": ["v1", "auth", "signup"] }
+          }
+        },
+        {
+          "name": "Signup Metadata",
+          "request": { "method": "GET", "header": [{ "key": "Accept", "value": "application/json" }], "url": { "raw": "{{base_url}}/v1/auth/signup/metadata", "host": ["{{base_url}}"], "path": ["v1", "auth", "signup", "metadata"] } }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"maria@example.com\",\n  \"password\": \"Password123!\"\n}", "options": { "raw": { "language": "json" } } },
+            "url": { "raw": "{{base_url}}/v1/auth/login", "host": ["{{base_url}}"], "path": ["v1", "auth", "login"] }
+          },
+          "event": [{ "listen": "test", "script": { "type": "text", "exec": ["if (pm.response.code === 200) {", "  const body = pm.response.json();", "  pm.environment.set('access_token', body.data.tokens.access_token);", "  console.log('Token salvo em access_token');", "}"] } }]
+        }
+      ]
+    },
+    {
+      "name": "Consult",
+      "item": [
+        { "name": "Search CEP", "request": { "method": "GET", "header": [{ "key": "Accept", "value": "application/json" }], "url": { "raw": "{{base_url}}/v1/consult/cep/{{cep}}", "host": ["{{base_url}}"], "path": ["v1", "consult", "cep", "{{cep}}"] } } }
+      ]
+    },
+    {
+      "name": "Offers",
+      "item": [
+        { "name": "List Available Offers", "request": { "method": "GET", "header": [{ "key": "Accept", "value": "application/json" }], "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }] }, "url": { "raw": "{{base_url}}/v1/offers?page={{page}}&per_page={{per_page}}", "host": ["{{base_url}}"], "path": ["v1", "offers"], "query": [{ "key": "page", "value": "{{page}}" }, { "key": "per_page", "value": "{{per_page}}" }] } } },
+        { "name": "List My Offers", "request": { "method": "GET", "header": [{ "key": "Accept", "value": "application/json" }], "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }] }, "url": { "raw": "{{base_url}}/v1/offers?page={{page}}&per_page={{per_page}}", "host": ["{{base_url}}"], "path": ["v1", "offers"], "query": [{ "key": "page", "value": "{{page}}" }, { "key": "per_page", "value": "{{per_page}}" }] } } },
+        { "name": "Create Offer", "request": { "method": "POST", "header": [{ "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" }], "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }] }, "body": { "mode": "raw", "raw": "{\n  \"source_product_id\": \"{{source_product_id}}\",\n  \"category_id\": 1,\n  \"unit_price\": \"12.50\",\n  \"total_quantity\": 20\n}", "options": { "raw": { "language": "json" } } }, "url": { "raw": "{{base_url}}/v1/offers", "host": ["{{base_url}}"], "path": ["v1", "offers"] } } },
+        { "name": "Show Available Offer (Retailer)", "request": { "method": "GET", "header": [{ "key": "Accept", "value": "application/json" }], "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }] }, "url": { "raw": "{{base_url}}/v1/offers/{{offer_id}}", "host": ["{{base_url}}"], "path": ["v1", "offers", "{{offer_id}}"] } } },
+        { "name": "Show Offer", "request": { "method": "GET", "header": [{ "key": "Accept", "value": "application/json" }], "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }] }, "url": { "raw": "{{base_url}}/v1/offers/{{offer_id}}", "host": ["{{base_url}}"], "path": ["v1", "offers", "{{offer_id}}"] } } },
+        { "name": "Update Offer", "request": { "method": "PATCH", "header": [{ "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" }], "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }] }, "body": { "mode": "raw", "raw": "{\n  \"source_product_id\": \"{{source_product_id}}\",\n  \"category_id\": 1,\n  \"unit_price\": \"15.00\",\n  \"total_quantity\": 25\n}", "options": { "raw": { "language": "json" } } }, "url": { "raw": "{{base_url}}/v1/offers/{{offer_id}}", "host": ["{{base_url}}"], "path": ["v1", "offers", "{{offer_id}}"] } } },
+        { "name": "List Categories", "request": { "method": "GET", "header": [{ "key": "Accept", "value": "application/json" }], "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }] }, "url": { "raw": "{{base_url}}/v1/products/categories", "host": ["{{base_url}}"], "path": ["v1", "products", "categories"] } } }
+      ]
+    },
+    {
+      "name": "Purchases",
+      "item": [
+        { "name": "Buy Offer", "request": { "method": "POST", "header": [{ "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" }], "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }] }, "body": { "mode": "raw", "raw": "{\n  \"quantity\": 2\n}", "options": { "raw": { "language": "json" } } }, "url": { "raw": "{{base_url}}/v1/offers/{{offer_id}}/purchase", "host": ["{{base_url}}"], "path": ["v1", "offers", "{{offer_id}}", "purchase"] } } },
+        { "name": "List My Purchases", "request": { "method": "GET", "header": [{ "key": "Accept", "value": "application/json" }], "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }] }, "url": { "raw": "{{base_url}}/v1/purchases?page={{page}}&per_page={{per_page}}", "host": ["{{base_url}}"], "path": ["v1", "purchases"], "query": [{ "key": "page", "value": "{{page}}" }, { "key": "per_page", "value": "{{per_page}}" }] } } },
+        { "name": "List My Sales", "request": { "method": "GET", "header": [{ "key": "Accept", "value": "application/json" }], "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }] }, "url": { "raw": "{{base_url}}/v1/sales?page={{page}}&per_page={{per_page}}", "host": ["{{base_url}}"], "path": ["v1", "sales"], "query": [{ "key": "page", "value": "{{page}}" }, { "key": "per_page", "value": "{{per_page}}" }] } } }
+      ]
+    }
+  ]
+}
