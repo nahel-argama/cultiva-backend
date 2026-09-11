@@ -2,10 +2,9 @@
 
 namespace Cultiva\Models\Offer\Actions;
 
-use Cultiva\Base\Exceptions\CultivaException;
+use Cultiva\Models\Offer\Enums\OfferStatus;
 use Cultiva\Models\Offer\Offer;
 use Cultiva\Models\Producer\Producer;
-use Illuminate\Support\Facades\Lang;
 
 final class GetOfferAction
 {
@@ -13,11 +12,19 @@ final class GetOfferAction
     {
         $offer = $producer->offers()
             ->with('category')
-            ->find($offerId);
+            ->findOrFail($offerId);
 
-        if (! $offer instanceof Offer) {
-            throw new CultivaException(404, Lang::get('offers.not_found'));
-        }
+        return $offer;
+    }
+
+    public function executeForRetailer(int $offerId): Offer
+    {
+        $offer = Offer::query()
+            ->with('category')
+            ->whereKey($offerId)
+            ->where('status', OfferStatus::ACTIVE->value)
+            ->whereColumn('total_quantity', '>', 'reserved_quantity')
+            ->firstOrFail();
 
         return $offer;
     }

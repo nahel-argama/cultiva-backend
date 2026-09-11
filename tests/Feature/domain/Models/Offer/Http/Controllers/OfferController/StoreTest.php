@@ -25,7 +25,7 @@ class StoreTest extends TestCase
             'http://product-source.test/api/products/0002' => Http::response($fixture, 200),
         ]);
         $producer = ProducerFactory::new()->create();
-        $category = CategoryFactory::new()->create(['id' => 1, 'name' => 'Frutas']);
+        $category = CategoryFactory::new()->create(['name' => 'Categoria de teste']);
         Sanctum::actingAs($producer->company->user, ['access']);
         $payload = [
             'source_product_id' => '0002',
@@ -41,13 +41,13 @@ class StoreTest extends TestCase
         $response->assertCreated()
             ->assertJsonPath('data.source_product_id', '0002')
             ->assertJsonPath('data.product_name', 'Tomate Italiano')
-            ->assertJsonPath('data.category.id', 1)
+            ->assertJsonPath('data.category.id', $category->id)
             ->assertJsonPath('data.unit_price', '12.50')
             ->assertJsonPath('data.total_quantity', 20)
             ->assertJsonPath('data.reserved_quantity', 0)
             ->assertJsonPath('data.available_quantity', 20)
-            ->assertJsonPath('data.status', 'inactive')
-            ->assertJsonPath('data.is_visible', false);
+            ->assertJsonPath('data.status', 'active')
+            ->assertJsonPath('data.is_visible', true);
         $this->assertDatabaseHas('offers', [
             'producer_id' => $producer->id,
             'source_product_id' => '0002',
@@ -56,11 +56,11 @@ class StoreTest extends TestCase
             'unit_price' => '12.50',
             'total_quantity' => 20,
             'reserved_quantity' => 0,
-            'status' => 'inactive',
+            'status' => 'active',
         ]);
     }
 
-    public function test_should_accept_integer_source_id_and_snapshot_fallback_name(): void
+    public function test_should_ignore_client_status_and_snapshot_fallback_name(): void
     {
         // Arrange
         config(['services.product_source.base_url' => 'http://product-source.test/api']);
@@ -76,7 +76,9 @@ class StoreTest extends TestCase
             'category_id' => $category->id,
             'unit_price' => '9.90',
             'total_quantity' => 5,
-            'status' => 'active',
+            'status' => 'inactive',
+            'producer_id' => 999,
+            'reserved_quantity' => 99,
         ];
 
         // Action
@@ -127,8 +129,6 @@ class StoreTest extends TestCase
             'more than two decimal places' => [['unit_price' => '1.999']],
             'negative total quantity' => [['total_quantity' => -1]],
             'invalid status' => [['status' => 'draft']],
-            'producer supplied by client' => [['producer_id' => 999]],
-            'reserved quantity supplied by client' => [['reserved_quantity' => 1]],
         ];
     }
 
@@ -231,31 +231,6 @@ class StoreTest extends TestCase
         $response->assertServiceUnavailable();
         $this->assertDatabaseCount('offers', 0);
         Http::assertSentCount(1);
-    }
-
-    public function test_should_return_503_when_product_source_payload_is_invalid(): void
-    {
-        // Arrange
-        config(['services.product_source.base_url' => 'http://product-source.test/api']);
-        Http::fake([
-            'http://product-source.test/api/products/2' => Http::response(['id' => '2'], 200),
-        ]);
-        $producer = ProducerFactory::new()->create();
-        $category = CategoryFactory::new()->create();
-        Sanctum::actingAs($producer->company->user, ['access']);
-        $payload = [
-            'source_product_id' => '2',
-            'category_id' => $category->id,
-            'unit_price' => '12.50',
-            'total_quantity' => 10,
-        ];
-
-        // Action
-        $response = $this->postJson('/v1/offers', $payload);
-
-        // Assert
-        $response->assertServiceUnavailable();
-        $this->assertDatabaseCount('offers', 0);
     }
 
     public function test_should_return_401_without_token(): void

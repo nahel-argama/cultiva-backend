@@ -17,13 +17,11 @@ final readonly class UpdateOfferDTO
     public static function from(array $data): self
     {
         return new self(
-            sourceProductId: array_key_exists('source_product_id', $data)
-                ? (string) $data['source_product_id']
-                : null,
-            categoryId: array_key_exists('category_id', $data) ? (int) $data['category_id'] : null,
-            unitPrice: array_key_exists('unit_price', $data) ? (string) $data['unit_price'] : null,
-            totalQuantity: array_key_exists('total_quantity', $data) ? (int) $data['total_quantity'] : null,
-            status: array_key_exists('status', $data) ? OfferStatus::from($data['status']) : null,
+            sourceProductId: $data['source_product_id'] ?? null,
+            categoryId: $data['category_id'] ?? null,
+            unitPrice: $data['unit_price'] ?? null,
+            totalQuantity: $data['total_quantity'] ?? null,
+            status: ($data['status'] ?? null) === null ? null : OfferStatus::from($data['status']),
         );
     }
 }

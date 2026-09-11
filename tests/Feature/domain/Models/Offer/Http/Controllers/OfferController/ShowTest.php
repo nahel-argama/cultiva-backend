@@ -2,11 +2,11 @@
 
 namespace Tests\Feature\domain\Models\Offer\Http\Controllers\OfferController;
 
+use Cultiva\Models\Offer\Enums\OfferStatus;
 use Database\Factories\OfferFactory;
 use Database\Factories\ProducerFactory;
 use Database\Factories\RetailerFactory;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Lang;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
@@ -42,8 +42,7 @@ class ShowTest extends TestCase
         $response = $this->getJson('/v1/offers/'.$offer->id);
 
         // Assert
-        $response->assertNotFound()
-            ->assertJsonPath('message', Lang::get('offers.not_found'));
+        $response->assertNotFound();
     }
 
     public function test_should_return_404_for_missing_offer(): void
@@ -56,8 +55,7 @@ class ShowTest extends TestCase
         $response = $this->getJson('/v1/offers/999999');
 
         // Assert
-        $response->assertNotFound()
-            ->assertJsonPath('message', Lang::get('offers.not_found'));
+        $response->assertNotFound();
     }
 
     public function test_should_return_401_without_token(): void
@@ -85,16 +83,24 @@ class ShowTest extends TestCase
         $response->assertForbidden();
     }
 
-    public function test_should_return_403_for_retailer_profile(): void
+    public function test_should_show_available_offer_for_retailer_profile(): void
     {
         // Arrange
         $retailer = RetailerFactory::new()->create();
+        $offer = OfferFactory::new()->create([
+            'status' => OfferStatus::ACTIVE,
+            'total_quantity' => 10,
+            'reserved_quantity' => 0,
+        ]);
         Sanctum::actingAs($retailer->company->user, ['access']);
 
         // Action
-        $response = $this->getJson('/v1/offers/1');
+        $response = $this->getJson('/v1/offers/'.$offer->id);
 
         // Assert
-        $response->assertForbidden();
+        $response->assertOk()
+            ->assertJsonPath('data.id', $offer->id)
+            ->assertJsonPath('data.status', 'active')
+            ->assertJsonPath('data.available_quantity', 10);
     }
 }

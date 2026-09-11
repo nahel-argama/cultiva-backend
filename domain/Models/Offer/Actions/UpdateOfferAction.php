@@ -33,14 +33,14 @@ final class UpdateOfferAction
 
         $product = $this->getProduct->execute($data->sourceProductId ?? $offer->source_product_id);
 
-        $offer->fill([
+        $offer->update([
             'category_id' => $categoryId,
             'source_product_id' => $product->id,
             'product_name' => $product->name,
             'unit_price' => $data->unitPrice ?? $offer->unit_price,
             'total_quantity' => $totalQuantity,
             'status' => $data->status ?? $offer->status,
-        ])->save();
+        ]);
 
         return $offer->load('category');
     }

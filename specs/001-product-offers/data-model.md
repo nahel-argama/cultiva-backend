@@ -21,7 +21,7 @@ Tabela de referência seedada, sem administração por API nesta feature.
 | 4 | Tubérculos e raízes |
 | 5 | Grãos e cereais |
 
-O seeder usa upsert pelos IDs fixos. Reexecução atualiza os nomes esperados sem duplicar linhas.
+As cinco categorias são inseridas diretamente na migration que cria categories. Em uma instalação limpa, recebem IDs 1 a 5; não existe Seeder separado.
 
 ### Relationships
 
@@ -41,8 +41,8 @@ Oferta comercial pertencente a um Producer e baseada em um produto externo valid
 | `product_name` | text | yes | — | Nome de apresentação ou fallback normalizado |
 | `unit_price` | numeric(12,2) | yes | — | Maior que zero |
 | `total_quantity` | integer | yes | — | Maior ou igual a zero |
-| `reserved_quantity` | integer | yes | `0` | Entre zero e `total_quantity`; não editável nesta feature |
-| `status` | varchar(8) | yes | `inactive` | `active` ou `inactive` |
+| `reserved_quantity` | integer | yes | `0` | Entre zero e `total_quantity`; não recebido pelo cliente |
+| `status` | varchar(8) | yes | `inactive` no banco | `active` ou `inactive`; a Action de criação inicia `active` |
 | `created_at` | timestamp | yes | current time | Gerenciado pela aplicação |
 | `updated_at` | timestamp | yes | current time | Gerenciado pela aplicação |
 
@@ -87,7 +87,7 @@ Os derivados são calculados na leitura. `is_visible` também define o filtro da
 | `categoryId` | int | Payload |
 | `unitPrice` | string | Decimal do payload |
 | `totalQuantity` | int | Payload |
-| `status` | OfferStatus | Payload ou `inactive` |
+| `status` | OfferStatus | Payload no PATCH; ignorado no POST, que inicia `active` |
 
 `producer_id`, `product_name` e `reserved_quantity` não pertencem ao DTO. Producer vem do token, product_name vem da integração e reserved inicia no domínio.
 
@@ -113,11 +113,10 @@ Nenhum payload cru do fornecedor atravessa a integração.
 - `unit_price`: decimal positivo com no máximo duas casas.
 - `total_quantity`: inteiro não negativo.
 - `status`: `active|inactive`; opcional no POST e PATCH.
-- `producer_id`: prohibited.
-- `reserved_quantity`: prohibited.
-- PATCH exige ao menos um campo editável.
+- `producer_id` e `reserved_quantity`: se enviados, são ignorados.
+- PATCH exige ao menos um entre `source_product_id`, `category_id`, `unit_price` e `total_quantity`; `status` pode acompanhar esses campos.
 - `page`: inteiro positivo, default 1; `per_page`: inteiro entre 1 e 100, default 15.
-- Listagens usam o paginator nativo para obter `current_page`, `per_page`, `total` e os booleanos de navegação; nenhuma contagem adicional é feita na resposta.
+- Listagens usam `paginate()` e `Resource::collection()`, retornando `data`, `links` e `meta` nativos do Laravel.
 
 ### Domain/Action
 

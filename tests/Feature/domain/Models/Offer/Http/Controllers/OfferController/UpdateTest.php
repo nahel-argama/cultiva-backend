@@ -45,6 +45,8 @@ class UpdateTest extends TestCase
             'unit_price' => '25.90',
             'total_quantity' => 20,
             'status' => 'active',
+            'producer_id' => 999,
+            'reserved_quantity' => 99,
         ];
 
         // Action
@@ -136,8 +138,6 @@ class UpdateTest extends TestCase
     {
         return [
             'empty payload' => [[]],
-            'producer supplied by client' => [['producer_id' => 999]],
-            'reserved quantity supplied by client' => [['reserved_quantity' => 1]],
             'invalid source id' => [['source_product_id' => '']],
             'invalid category id' => [['category_id' => 'one']],
             'invalid price' => [['unit_price' => '0.00']],
@@ -266,8 +266,7 @@ class UpdateTest extends TestCase
         ]);
 
         // Assert
-        $response->assertNotFound()
-            ->assertJsonPath('message', Lang::get('offers.not_found'));
+        $response->assertNotFound();
         Http::assertNothingSent();
     }
 

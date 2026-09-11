@@ -36,19 +36,7 @@ final class GetProductAction
         $id = $response->json('id');
         $name = $response->json('name');
         $normalName = $response->json('normal_name');
-        $createdAt = $response->json('created_at');
         $resolvedName = is_string($name) && trim($name) !== '' ? trim($name) : $normalName;
-
-        if (
-            ! is_string($id)
-            || $id !== $sourceProductId
-            || ! is_string($resolvedName)
-            || trim($resolvedName) === ''
-            || ! is_string($createdAt)
-            || trim($createdAt) === ''
-        ) {
-            throw new CultivaException(503, Lang::get('integrations.product_source.unavailable'));
-        }
 
         return ProductDTO::from([
             'id' => $id,

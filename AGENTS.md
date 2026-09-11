@@ -63,7 +63,37 @@ tests/
 
 ---
 
-## 3. Workspace Development Skills
+## 3. Laravel-Native APIs
+
+Before writing manual control flow, check Laravel's native APIs and use the
+method that already expresses the behavior. Prefer `firstOrFail()` or
+`findOrFail()` over `first()`/`find()` followed by a manual not-found
+exception. Do not duplicate framework behavior unless the application needs a
+custom behavior or message.
+Do not add exception renderers for standard Laravel authentication,
+authorization, or not-found responses unless the application explicitly
+requires a different contract.
+For simple Eloquent API representations, use Laravel API Resources and
+`Resource::collection()` instead of mapping models manually in controllers.
+For Eloquent writes, prefer the native combined methods such as `update()`
+instead of chaining `fill()` and `save()` separately.
+For DTOs, rely on the constructor property types and use `??` for optional
+input values; do not add redundant scalar casts or `array_key_exists()` checks.
+Controllers should only coordinate HTTP input and output; move branching and
+business-flow decisions into Actions.
+For simple computed model values, prefer explicit methods over Eloquent
+`Attribute` accessors when property-style access is not required.
+FormRequest `validated()` already returns only fields declared in `rules()`;
+fields that must be ignored should not be declared just to add redundant
+`prohibited` rules. Add `prohibited` only when the request must explicitly
+reject a field instead of ignoring it.
+Optional fields without an implicit rule such as `required` do not need
+`sometimes`; Laravel skips them when they are absent.
+When consuming a trusted internal service, rely on its defined response
+contract and do not add defensive payload-shape validation in the consumer;
+validate only at genuinely untrusted boundaries.
+
+## 4. Workspace Development Skills
 
 All development guidelines, coding standards, and testing patterns are maintained as specialized skills:
 
@@ -74,6 +104,7 @@ All development guidelines, coding standards, and testing patterns are maintaine
 
 ### Feature Test Non-Negotiables
 
+- Não criar testes para comportamentos básicos e padrão do Laravel que não foram customizados; presume-se que o framework funcione. Testar apenas a configuração ou comportamento próprio da aplicação.
 - A Feature test must execute the real route lifecycle: middleware, request, controller, Action, transformer, and database.
 - Never mock the Action called by the controller. That produces a controller unit test, not a Feature test.
 - Never instantiate Eloquent models with `new`, `make()`, or `setRelation()` to simulate persisted state in a Feature test.
@@ -99,8 +130,9 @@ Every implementation handoff must report the Red command and expected failure re
 
 - Every query returning a paginated list MUST use Laravel's native `paginate()` on Eloquent or Query Builder before fetching records.
 - Read Actions MUST return `LengthAwarePaginator`. Keep it until HTTP serialization; never paginate manually with `skip()`/`take()`, array slicing, or an in-memory collection.
-- Responses MUST contain exactly `data`, `current_page`, `per_page`, `total`, `has_previous_page`, and `has_next_page` at the root. No links, `last_page`, `meta`, or `pagination` object.
-- Transform items with `through()` and use `items()` only for the `data` field. Read metadata from `currentPage()`, `perPage()`, `total()`, `! onFirstPage()`, and `hasMorePages()`; do not recalculate it.
+- Return paginators through the corresponding Laravel API Resource collection and let Laravel serialize `data`, `links`, and `meta`.
+- Do not manually call `through()`, `items()`, or rebuild pagination metadata in controllers.
+- Do not create tests for Laravel's native paginator metadata, navigation, validation, or default behavior.
 - Validate `page >= 1` and `1 <= per_page <= 100` in the endpoint FormRequest; defaults are 1 and 15. Invalid values return 422.
 - Reuse the count performed by `paginate()` and eager-load transformed relationships; never load all records or perform another count for serialization.
 - Apply this convention to all current and future paginated endpoints. No custom paginator class or middleware is required.

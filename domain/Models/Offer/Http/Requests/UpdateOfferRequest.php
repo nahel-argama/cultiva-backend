@@ -3,6 +3,7 @@
 namespace Cultiva\Models\Offer\Http\Requests;
 
 use Cultiva\Models\Offer\Enums\OfferStatus;
+
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -19,7 +20,7 @@ final class UpdateOfferRequest extends FormRequest
     {
         return [
             'source_product_id' => [
-                'required_without_all:category_id,unit_price,total_quantity,status',
+                'required_without_all:category_id,unit_price,total_quantity',
                 'string',
                 'max:255',
             ],
@@ -27,8 +28,6 @@ final class UpdateOfferRequest extends FormRequest
             'unit_price' => ['sometimes', 'string', 'numeric', 'gt:0', 'regex:/^[0-9]+(?:\.[0-9]{1,2})?$/'],
             'total_quantity' => ['sometimes', 'integer', 'min:0'],
             'status' => ['sometimes', Rule::enum(OfferStatus::class)],
-            'producer_id' => ['prohibited'],
-            'reserved_quantity' => ['prohibited'],
         ];
     }
 }

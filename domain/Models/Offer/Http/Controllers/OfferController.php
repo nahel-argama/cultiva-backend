@@ -2,52 +2,34 @@
 
 namespace Cultiva\Models\Offer\Http\Controllers;
 
-use Cultiva\Auth\Enums\ProfileType;
 use Cultiva\Base\Contracts\Controller;
+use Cultiva\Auth\Enums\ProfileType;
 use Cultiva\Models\Offer\Actions\CreateOfferAction;
 use Cultiva\Models\Offer\Actions\GetOfferAction;
-use Cultiva\Models\Offer\Actions\ListAvailableOffersAction;
-use Cultiva\Models\Offer\Actions\ListProducerOffersAction;
+use Cultiva\Models\Offer\Actions\ListOffersAction;
 use Cultiva\Models\Offer\Actions\UpdateOfferAction;
 use Cultiva\Models\Offer\DTO\CreateOfferDTO;
 use Cultiva\Models\Offer\DTO\UpdateOfferDTO;
 use Cultiva\Models\Offer\Http\Requests\ListOffersRequest;
 use Cultiva\Models\Offer\Http\Requests\StoreOfferRequest;
 use Cultiva\Models\Offer\Http\Requests\UpdateOfferRequest;
-use Cultiva\Models\Offer\Offer;
+use Cultiva\Models\Offer\Http\Resources\OfferResource;
 use Cultiva\Models\Offer\Transformers\OfferTransformer;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 final class OfferController extends Controller
 {
     public function index(
         ListOffersRequest $request,
-        ListProducerOffersAction $producerAction,
-        ListAvailableOffersAction $availableAction,
-        OfferTransformer $transformer,
-    ): JsonResponse {
+        ListOffersAction $action,
+    ): AnonymousResourceCollection {
         $page = $request->integer('page', 1);
         $perPage = $request->integer('per_page', 15);
-        $offers = match ($request->user()->profile_type) {
-            ProfileType::PRODUCER => $producerAction->execute(
-                $request->user()->producer()->firstOrFail(),
-                $page,
-                $perPage,
-            ),
-            ProfileType::RETAILER => $availableAction->execute($page, $perPage),
-        };
+        $offers = $action->execute($request->user(), $page, $perPage);
 
-        return response()->json([
-            'data' => $offers->through(
-                fn (Offer $offer): array => $transformer->transform($offer),
-            )->items(),
-            'current_page' => $offers->currentPage(),
-            'per_page' => $offers->perPage(),
-            'total' => $offers->total(),
-            'has_previous_page' => ! $offers->onFirstPage(),
-            'has_next_page' => $offers->hasMorePages(),
-        ]);
+        return OfferResource::collection($offers);
     }
 
     public function store(
@@ -69,8 +51,14 @@ final class OfferController extends Controller
         GetOfferAction $action,
         OfferTransformer $transformer,
     ): JsonResponse {
-        $producer = $request->user()->producer()->firstOrFail();
-        $result = $action->execute($producer, $offer);
+        $result = match ($request->user()->profile_type) {
+            ProfileType::PRODUCER => $action->execute(
+                $request->user()->producer()->firstOrFail(),
+                $offer,
+            ),
+            ProfileType::RETAILER => $action->executeForRetailer($offer),
+            default => abort(403),
+        };
 
         return response()->json([
             'data' => $transformer->transform($result),

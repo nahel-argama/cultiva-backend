@@ -5,6 +5,7 @@ use Cultiva\Auth\Controllers\RegisterController;
 use Cultiva\Integrations\Geo\Controllers\GeoController;
 use Cultiva\Models\Category\Http\Controllers\CategoryController;
 use Cultiva\Models\Offer\Http\Controllers\OfferController;
+use Cultiva\Models\Purchase\Http\Controllers\PurchaseController;
 use Illuminate\Support\Facades\Route;
 
 Route::group([
@@ -32,15 +33,27 @@ Route::group([
     Route::middleware(['auth:sanctum', 'ability:access'])
         ->group(function (): void {
             Route::get('offers', [OfferController::class, 'index'])->name('offers.index');
+            Route::get('offers/{offer}', [OfferController::class, 'show'])
+                ->whereNumber('offer')
+                ->name('offers.show');
+
+            Route::middleware('profile:retailer')
+                ->group(function (): void {
+                    Route::post('offers/{offer}/purchase', [PurchaseController::class, 'store'])
+                        ->whereNumber('offer')
+                        ->name('purchases.store');
+                    Route::get('purchases', [PurchaseController::class, 'index'])->name('purchases.index');
+                });
+
+            Route::middleware('profile:producer')
+                ->get('sales', [PurchaseController::class, 'sales'])
+                ->name('sales.index');
 
             Route::middleware('profile:producer')
                 ->name('producer.')
                 ->group(function (): void {
                     Route::get('products/categories', [CategoryController::class, 'index'])->name('categories.index');
                     Route::post('offers', [OfferController::class, 'store'])->name('offers.store');
-                    Route::get('offers/{offer}', [OfferController::class, 'show'])
-                        ->whereNumber('offer')
-                        ->name('offers.show');
                     Route::patch('offers/{offer}', [OfferController::class, 'update'])
                         ->whereNumber('offer')
                         ->name('offers.update');

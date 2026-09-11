@@ -6,6 +6,7 @@ use Cultiva\Base\Exceptions\CultivaException;
 use Cultiva\Integrations\ProductSource\Actions\GetProductAction;
 use Cultiva\Models\Category\Category;
 use Cultiva\Models\Offer\DTO\CreateOfferDTO;
+use Cultiva\Models\Offer\Enums\OfferStatus;
 use Cultiva\Models\Offer\Offer;
 use Cultiva\Models\Producer\Producer;
 use Illuminate\Support\Facades\Lang;
@@ -31,7 +32,7 @@ final class CreateOfferAction
             'unit_price' => $data->unitPrice,
             'total_quantity' => $data->totalQuantity,
             'reserved_quantity' => 0,
-            'status' => $data->status,
+            'status' => OfferStatus::ACTIVE,
         ]);
     }
 }

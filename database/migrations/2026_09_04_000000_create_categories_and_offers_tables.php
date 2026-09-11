@@ -15,6 +15,16 @@ return new class extends Migration
             $table->timestamps();
         });
 
+        $timestamp = now();
+
+        DB::table('categories')->insert([
+            ['name' => 'Frutas', 'created_at' => $timestamp, 'updated_at' => $timestamp],
+            ['name' => 'Legumes', 'created_at' => $timestamp, 'updated_at' => $timestamp],
+            ['name' => 'Verduras', 'created_at' => $timestamp, 'updated_at' => $timestamp],
+            ['name' => 'Tubérculos e raízes', 'created_at' => $timestamp, 'updated_at' => $timestamp],
+            ['name' => 'Grãos e cereais', 'created_at' => $timestamp, 'updated_at' => $timestamp],
+        ]);
+
         Schema::create('offers', function (Blueprint $table): void {
             $table->id();
             $table->foreignId('producer_id')->constrained('producers')->cascadeOnDelete();
