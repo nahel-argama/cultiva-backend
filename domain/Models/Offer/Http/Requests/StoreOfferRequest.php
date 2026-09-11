@@ -3,6 +3,7 @@
 namespace Cultiva\Models\Offer\Http\Requests;
 
 use Cultiva\Models\Offer\Enums\OfferStatus;
+
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 

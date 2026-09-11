@@ -5,10 +5,12 @@ namespace Cultiva\Models\Offer;
 use Cultiva\Models\Category\Category;
 use Cultiva\Models\Offer\Enums\OfferStatus;
 use Cultiva\Models\Producer\Producer;
+use Cultiva\Models\Purchase\Purchase;
 use Database\Factories\OfferFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Override;
 
 class Offer extends Model
@@ -52,6 +54,14 @@ class Offer extends Model
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
+    }
+
+    /**
+     * @return HasMany<Purchase, $this>
+     */
+    public function purchases(): HasMany
+    {
+        return $this->hasMany(Purchase::class);
     }
 
     public function availableQuantity(): int

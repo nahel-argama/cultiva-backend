@@ -3,6 +3,7 @@
 namespace Cultiva\Models\Offer\Http\Controllers;
 
 use Cultiva\Base\Contracts\Controller;
+use Cultiva\Auth\Enums\ProfileType;
 use Cultiva\Models\Offer\Actions\CreateOfferAction;
 use Cultiva\Models\Offer\Actions\GetOfferAction;
 use Cultiva\Models\Offer\Actions\ListOffersAction;
@@ -50,8 +51,14 @@ final class OfferController extends Controller
         GetOfferAction $action,
         OfferTransformer $transformer,
     ): JsonResponse {
-        $producer = $request->user()->producer()->firstOrFail();
-        $result = $action->execute($producer, $offer);
+        $result = match ($request->user()->profile_type) {
+            ProfileType::PRODUCER => $action->execute(
+                $request->user()->producer()->firstOrFail(),
+                $offer,
+            ),
+            ProfileType::RETAILER => $action->executeForRetailer($offer),
+            default => abort(403),
+        };
 
         return response()->json([
             'data' => $transformer->transform($result),

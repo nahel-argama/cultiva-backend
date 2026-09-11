@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\domain\Models\Offer\Http\Controllers\OfferController;
 
+use Cultiva\Models\Offer\Enums\OfferStatus;
 use Database\Factories\OfferFactory;
 use Database\Factories\ProducerFactory;
 use Database\Factories\RetailerFactory;
@@ -82,16 +83,24 @@ class ShowTest extends TestCase
         $response->assertForbidden();
     }
 
-    public function test_should_return_403_for_retailer_profile(): void
+    public function test_should_show_available_offer_for_retailer_profile(): void
     {
         // Arrange
         $retailer = RetailerFactory::new()->create();
+        $offer = OfferFactory::new()->create([
+            'status' => OfferStatus::ACTIVE,
+            'total_quantity' => 10,
+            'reserved_quantity' => 0,
+        ]);
         Sanctum::actingAs($retailer->company->user, ['access']);
 
         // Action
-        $response = $this->getJson('/v1/offers/1');
+        $response = $this->getJson('/v1/offers/'.$offer->id);
 
         // Assert
-        $response->assertForbidden();
+        $response->assertOk()
+            ->assertJsonPath('data.id', $offer->id)
+            ->assertJsonPath('data.status', 'active')
+            ->assertJsonPath('data.available_quantity', 10);
     }
 }
