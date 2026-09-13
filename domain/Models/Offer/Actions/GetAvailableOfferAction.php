@@ -4,18 +4,16 @@ namespace Cultiva\Models\Offer\Actions;
 
 use Cultiva\Models\Offer\Enums\OfferStatus;
 use Cultiva\Models\Offer\Offer;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
-final class ListAvailableOffersAction
+class GetAvailableOfferAction
 {
-    public function execute(int $page, int $perPage): LengthAwarePaginator
+    public function execute(int $offerId): Offer
     {
         return Offer::query()
             ->with('category')
+            ->whereKey($offerId)
             ->where('status', OfferStatus::ACTIVE->value)
             ->whereColumn('total_quantity', '>', 'reserved_quantity')
-            ->latest('created_at')
-            ->latest('id')
-            ->paginate(perPage: $perPage, page: $page);
+            ->firstOrFail();
     }
 }

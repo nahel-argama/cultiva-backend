@@ -10,16 +10,24 @@ use Cultiva\Models\Offer\Offer;
 use Cultiva\Models\Producer\Producer;
 use Illuminate\Support\Facades\Lang;
 
+/**
+ * TODO as regras de update de oferta vão sofrer algumas alterações. A gente não pode deixar ela ser alterada caso existam compras
+ * feitas. Além disso, não é legal deixar aberto para mudar o produto.
+ *
+ * A gente também vai precisar daquelas novas datas no input de criação
+ */
 final class UpdateOfferAction
 {
     public function __construct(
-        private readonly GetOfferAction $getOffer,
         private readonly GetProductAction $getProduct,
     ) {}
 
     public function execute(Producer $producer, int $offerId, UpdateOfferDTO $data): Offer
     {
-        $offer = $this->getOffer->execute($producer, $offerId);
+        $offer = $producer->offers()
+            ->with('category')
+            ->findOrFail($offerId);
+
         $categoryId = $data->categoryId ?? $offer->category_id;
         $totalQuantity = $data->totalQuantity ?? $offer->total_quantity;
 

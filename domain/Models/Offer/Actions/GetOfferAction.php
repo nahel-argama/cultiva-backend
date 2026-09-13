@@ -2,30 +2,25 @@
 
 namespace Cultiva\Models\Offer\Actions;
 
-use Cultiva\Models\Offer\Enums\OfferStatus;
+use Cultiva\Auth\Enums\ProfileType;
 use Cultiva\Models\Offer\Offer;
-use Cultiva\Models\Producer\Producer;
+use Cultiva\Models\User\User;
 
 final class GetOfferAction
 {
-    public function execute(Producer $producer, int $offerId): Offer
+    public function __construct(
+        private readonly GetProducerOfferAction $producerOffer,
+        private readonly GetAvailableOfferAction $availableOffer,
+    ) {}
+
+    public function execute(User $user, int $offerId): Offer
     {
-        $offer = $producer->offers()
-            ->with('category')
-            ->findOrFail($offerId);
-
-        return $offer;
-    }
-
-    public function executeForRetailer(int $offerId): Offer
-    {
-        $offer = Offer::query()
-            ->with('category')
-            ->whereKey($offerId)
-            ->where('status', OfferStatus::ACTIVE->value)
-            ->whereColumn('total_quantity', '>', 'reserved_quantity')
-            ->firstOrFail();
-
-        return $offer;
+        return match ($user->profile_type) {
+            ProfileType::PRODUCER => $this->producerOffer->execute(
+                $user->producer()->firstOrFail(),
+                $offerId,
+            ),
+            ProfileType::RETAILER => $this->availableOffer->execute($offerId),
+        };
     }
 }
