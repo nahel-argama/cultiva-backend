@@ -1,0 +1,143 @@
+openapi: 3.1.0
+info:
+  title: Cultiva Offer Purchases API
+  version: 1.0.0
+  description: Contrato dos endpoints de compra, minhas compras e minhas vendas.
+servers:
+  - url: /
+security:
+  - bearerAuth: []
+paths:
+  /v1/offers/{offer}:
+    get:
+      operationId: showOffer
+      summary: Detalha uma Offer própria do producer ou disponível para retailer
+      tags: [Offers]
+      parameters:
+        - $ref: '#/components/parameters/OfferId'
+      responses:
+        '200':
+          description: Detalhes da Offer
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/OfferNotFound' }
+  /v1/offers/{offer}/purchase:
+    post:
+      operationId: createOfferPurchase
+      summary: Compra quantidade disponível de uma oferta
+      tags: [Purchases]
+      parameters:
+        - $ref: '#/components/parameters/OfferId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreatePurchase' }
+      responses:
+        '201':
+          description: Compra confirmada
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PurchaseResponse' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/OfferNotFound' }
+        '409': { $ref: '#/components/responses/InsufficientStock' }
+        '422': { $ref: '#/components/responses/ValidationFailed' }
+  /v1/purchases:
+    get:
+      operationId: listMyPurchases
+      summary: Lista compras do retailer autenticado
+      tags: [Purchases]
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PerPage'
+      responses:
+        '200':
+          description: Página de compras próprias
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PurchasePage' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '422': { $ref: '#/components/responses/ValidationFailed' }
+  /v1/sales:
+    get:
+      operationId: listMySales
+      summary: Lista compras originadas nas Offers do producer autenticado
+      tags: [Sales]
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PerPage'
+      responses:
+        '200':
+          description: Página de vendas próprias
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PurchasePage' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '422': { $ref: '#/components/responses/ValidationFailed' }
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: Sanctum access token
+      description: O token precisa possuir a ability access. Sem token válido, a API retorna 401 Unauthenticated; com perfil sem permissão, retorna 403 You do not have permission to access this resource.
+  parameters:
+    OfferId:
+      name: offer
+      in: path
+      required: true
+      schema: { type: integer, minimum: 1 }
+    Page:
+      name: page
+      in: query
+      schema: { type: integer, minimum: 1, default: 1 }
+    PerPage:
+      name: per_page
+      in: query
+      schema: { type: integer, minimum: 1, maximum: 100, default: 15 }
+  schemas:
+    CreatePurchase:
+      type: object
+      additionalProperties: false
+      required: [quantity]
+      properties:
+        quantity: { type: integer, minimum: 1 }
+      description: Valores comerciais e identidades são derivados pelo backend.
+    Purchase:
+      type: object
+      required: [id, offer_id, retailer_id, producer_id, source_product_id, product_name, quantity, unit_price, total_price, created_at]
+      properties:
+        id: { type: integer }
+        offer_id: { type: integer }
+        retailer_id: { type: integer }
+        producer_id: { type: integer }
+        source_product_id: { type: string }
+        product_name: { type: string }
+        quantity: { type: integer, minimum: 1 }
+        unit_price: { type: string, pattern: '^[0-9]+\.[0-9]{2}$' }
+        total_price: { type: string, pattern: '^[0-9]+\.[0-9]{2}$' }
+        created_at: { type: string, format: date-time }
+    PurchaseResponse:
+      type: object
+      required: [data]
+      properties:
+        data: { $ref: '#/components/schemas/Purchase' }
+    PurchasePage:
+      type: object
+      required: [data, links, meta]
+      properties:
+        data:
+          type: array
+          items: { $ref: '#/components/schemas/Purchase' }
+        links: { type: object, additionalProperties: true }
+        meta: { type: object, additionalProperties: true }
+  responses:
+    Unauthenticated: { description: Token ausente ou inválido }
+    Forbidden: { description: Ability ou perfil sem permissão }
+    OfferNotFound: { description: Oferta inexistente }
+    InsufficientStock: { description: Saldo insuficiente no momento da confirmação }
+    ValidationFailed: { description: Payload ou parâmetros inválidos }

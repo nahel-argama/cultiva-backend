@@ -43,7 +43,7 @@ Implementar ofertas pertencentes ao produtor autenticado, vinculadas a categoria
 | Organização por domínio | PASS | PASS | `Models/Offer`, `Models/Category` e `Integrations/ProductSource`. |
 | Actions como unidade de negócio | PASS | PASS | Uma Action por operação, apenas `execute()` público e retornos tipados. |
 | DTOs e fronteiras tipadas | PASS | PASS | DTOs readonly para criação, edição e produto externo; arrays ficam apenas na camada HTTP. |
-| Validação em duas camadas | PASS | PASS | FormRequests validam formato/campos proibidos; Actions validam categoria, propriedade e estoque. |
+| Validação em duas camadas | PASS | PASS | FormRequests validam formato; Actions validam categoria, propriedade e estoque. Campos não declarados são ignorados. |
 | Persistência e consistência | PASS | PASS | Eloquent direto, constraints no banco e HTTP antes da única escrita; nenhuma transação longa. |
 | Exceções e integração externa | PASS | PASS | A integração converte 404 em 422 e indisponibilidade em 503; payload externo não sai do módulo. |
 | Abstração somente com evidência | PASS | PASS | Sem repository, facade, provider resolver, interface unitária ou nova biblioteca HTTP. |
@@ -83,7 +83,6 @@ database/
 ├── migrations/
 │   └── *_create_categories_and_offers_tables.php
 └── seeders/
-    ├── CategorySeeder.php
     └── DatabaseSeeder.php
 
 domain/
@@ -96,7 +95,7 @@ domain/
     ├── Category/
     │   ├── Actions/ListCategoriesAction.php
     │   ├── Http/Controllers/CategoryController.php
-    │   ├── Transformers/CategoryTransformer.php
+    │   ├── Http/Resources/CategoryResource.php
     │   └── Category.php
     ├── Offer/
     │   ├── Actions/
@@ -115,7 +114,7 @@ domain/
     │   │       ├── ListOffersRequest.php
     │   │       ├── StoreOfferRequest.php
     │   │       └── UpdateOfferRequest.php
-    │   ├── Transformers/OfferTransformer.php
+    │   ├── Http/Resources/OfferResource.php
     │   └── Offer.php
     └── Producer/Producer.php         # relação offers()
 
@@ -156,4 +155,4 @@ O desenho pós-Phase 1 continua aprovado em todos os gates constitucionais. A pr
 
 ## Paginação nativa da API
 
-As duas Actions de listagem mantêm `paginate()`. `OfferController@index` aplica `OfferTransformer` via `through()` e serializa somente `data`, `current_page`, `per_page`, `total`, `has_previous_page` e `has_next_page`. `ListOffersRequest` mantém validação e limites. Não existem classes próprias de paginação; os testes Feature de Producer e Retailer validam o contrato exato, sem links.
+As duas Actions de listagem mantêm `paginate()`. `OfferController@index` retorna `OfferResource::collection($paginator)`, com `data`, `links` e `meta` nativos do Laravel. `ListOffersRequest` mantém validação e limites. Não existem classes próprias de paginação.

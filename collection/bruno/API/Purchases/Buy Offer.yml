@@ -1,0 +1,38 @@
+info:
+  name: Buy Offer
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{base_url}}/v1/offers/:offer_id/purchase"
+  headers:
+    - name: Accept
+      value: application/json
+    - name: Content-Type
+      value: application/json
+  params:
+    - name: offer_id
+      value: "{{offer_id}}"
+      type: path
+  body:
+    type: json
+    data: |-
+      {
+        "quantity": 2
+      }
+  auth:
+    type: bearer
+    token: "{{access_token}}"
+
+runtime:
+  variables:
+    - name: offer_id
+      value: "28"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: true

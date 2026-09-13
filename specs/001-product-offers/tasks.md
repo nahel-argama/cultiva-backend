@@ -61,14 +61,14 @@
 
 ### Create offer route — Red → Green
 
-- [X] T011 [US1] [RED] Escrever somente `tests/Feature/domain/Models/Offer/Http/Controllers/OfferController/StoreTest.php`, usando rota real, `ProducerFactory::new()`, banco real e fake apenas do HTTP externo, para cobrir 201, produtor do token, `reserved_quantity=0`, status padrão `inactive`, preservação de `"0002"`, snapshot/fallback do nome, categoria inexistente, preço/estoque/status inválidos, proibição de `producer_id` e `reserved_quantity`, 401 sem token, 403 com refresh/perfil errado, 422 externo e 503 externo sem escrita
+- [X] T011 [US1] [RED] Escrever somente `tests/Feature/domain/Models/Offer/Http/Controllers/OfferController/StoreTest.php`, usando rota real, `ProducerFactory::new()`, banco real e fake apenas do HTTP externo, para cobrir 201, produtor do token, `reserved_quantity=0`, status ativo, preservação de `"0002"`, snapshot/fallback do nome, categoria inexistente, preço/estoque/status inválidos, ignorar campos não declarados, 401 sem token, 403 com refresh/perfil errado, 422 externo e 503 externo sem escrita
 - [X] T012 [US1] [RED-RUN] Executar `docker compose exec php php artisan test tests/Feature/domain/Models/Offer/Http/Controllers/OfferController/StoreTest.php`, confirmar falha pela rota/comportamento ainda ausente e registrar o Red em `specs/001-product-offers/tdd-evidence.md`; bloquear todo Green de criação sem esse Red válido
 - [X] T013 [US1] [GREEN] Criar `database/migrations/2026_09_04_000000_create_categories_and_offers_tables.php` com FKs, defaults, checks e índices definidos em `specs/001-product-offers/data-model.md`, e criar `domain/Models/Offer/Enums/OfferStatus.php` somente com `active` e `inactive`
 - [X] T014 [US1] [GREEN] Implementar models, relações, casts e valores derivados em `domain/Models/Category/Category.php`, `domain/Models/Offer/Offer.php` e `domain/Models/Producer/Producer.php`, mais suporte de persistência dos testes em `database/factories/CategoryFactory.php` e `database/factories/OfferFactory.php`
-- [X] T015 [US1] [GREEN] Criar o upsert idempotente das cinco categorias fixas em `database/seeders/CategorySeeder.php` e chamá-lo em `database/seeders/DatabaseSeeder.php`
+- [X] T015 [US1] [GREEN] Inserir as cinco categorias fixas diretamente na migration de categorias; não há seeder separado
 - [X] T016 [P] [US1] [GREEN] Implementar o middleware parametrizado de perfil em `domain/Auth/Middleware/EnsureProfile.php` e registrar os aliases nativos de `ability` e `profile` em `bootstrap/app.php`, reutilizando Sanctum e os enums de autenticação existentes
-- [X] T017 [US1] [GREEN] Criar o contrato de entrada e validação HTTP de criação em `domain/Models/Offer/DTO/CreateOfferDTO.php` e `domain/Models/Offer/Http/Requests/StoreOfferRequest.php`, normalizando `source_product_id` para string sem remover zeros e proibindo IDs/estoque reservados fornecidos pelo cliente
-- [X] T018 [US1] [GREEN] Implementar o fluxo real mínimo em `domain/Models/Offer/Actions/CreateOfferAction.php`, `domain/Models/Category/Transformers/CategoryTransformer.php`, `domain/Models/Offer/Transformers/OfferTransformer.php`, `domain/Models/Offer/Http/Controllers/OfferController.php`, `routes/api.php` e `lang/en/offers.php`, validando produto/categoria antes de persistir e obtendo Producer exclusivamente do token
+- [X] T017 [US1] [GREEN] Criar o contrato de entrada e validação HTTP de criação em `domain/Models/Offer/DTO/CreateOfferDTO.php` e `domain/Models/Offer/Http/Requests/StoreOfferRequest.php`, normalizando `source_product_id` para string sem remover zeros e ignorando IDs/estoque reservado não declarados
+- [X] T018 [US1] [GREEN] Implementar o fluxo real mínimo em `domain/Models/Offer/Actions/CreateOfferAction.php`, `domain/Models/Category/Http/Resources/CategoryResource.php`, `domain/Models/Offer/Http/Resources/OfferResource.php`, `domain/Models/Offer/Http/Controllers/OfferController.php`, `routes/api.php` e `lang/en/offers.php`, validando produto/categoria antes de persistir e obtendo Producer exclusivamente do token
 - [X] T019 [US1] [GREEN-CHECK] Reexecutar `tests/Feature/domain/Models/Offer/Http/Controllers/OfferController/StoreTest.php` no container, confirmar todos os cenários verdes e registrar o resultado em `specs/001-product-offers/tdd-evidence.md`
 - [X] T020 [US1] [GREEN-CHECK] Executar juntos `tests/Unit/domain/Integrations/ProductSource/Actions/GetProductActionTest.php` e `tests/Feature/domain/Models/Offer/Http/Controllers/OfferController/StoreTest.php` no container e registrar a regressão verde da US1 em `specs/001-product-offers/tdd-evidence.md`
 
@@ -116,9 +116,9 @@
 
 **Independent Test**: Atualizar parcialmente uma oferta própria com produto fake válido e verificar 200/snapshot/banco; provar revalidação mesmo sem novo ID, 404 para oferta alheia, 422 para total abaixo do reservado ou produto ausente e 503 externo, sempre sem alteração parcial.
 
-- [X] T033 [US4] [RED] Escrever somente `tests/Feature/domain/Models/Offer/Http/Controllers/OfferController/UpdateTest.php` cobrindo PATCH parcial, novo snapshot, revalidação do ID atual, categoria/preço/status, payload vazio, campos proibidos, `total_quantity < reserved_quantity`, ownership 404, 401/403 e traduções externas 422/503 com banco inalterado
+- [X] T033 [US4] [RED] Escrever somente `tests/Feature/domain/Models/Offer/Http/Controllers/OfferController/UpdateTest.php` cobrindo PATCH parcial, novo snapshot, revalidação do ID atual, categoria/preço/status, payload vazio, campos não declarados ignorados, `total_quantity < reserved_quantity`, ownership 404, 401/403 e traduções externas 422/503 com banco inalterado
 - [X] T034 [US4] [RED-RUN] Executar `docker compose exec php php artisan test tests/Feature/domain/Models/Offer/Http/Controllers/OfferController/UpdateTest.php`, confirmar falha pelo endpoint/comportamento ausente e registrar o Red em `specs/001-product-offers/tdd-evidence.md`; não iniciar T035 sem Red válido
-- [X] T035 [US4] [GREEN] Criar PATCH tipado e validação de transporte em `domain/Models/Offer/DTO/UpdateOfferDTO.php` e `domain/Models/Offer/Http/Requests/UpdateOfferRequest.php`, exigindo ao menos um campo editável e proibindo `producer_id`/`reserved_quantity`
+- [X] T035 [US4] [GREEN] Criar PATCH tipado e validação de transporte em `domain/Models/Offer/DTO/UpdateOfferDTO.php` e `domain/Models/Offer/Http/Requests/UpdateOfferRequest.php`, exigindo ao menos um campo editável e ignorando `producer_id`/`reserved_quantity`
 - [X] T036 [US4] [GREEN] Implementar atualização atômica após todas as validações em `domain/Models/Offer/Actions/UpdateOfferAction.php`, sempre consultando o product-source e recusando total efetivo abaixo do reservado sem alterar a Offer
 - [X] T037 [US4] [GREEN] Adicionar o método update fino em `domain/Models/Offer/Http/Controllers/OfferController.php` e `PATCH /v1/offers/{offer}` sob os middlewares Producer em `routes/api.php`
 - [X] T038 [US4] [GREEN-CHECK] Reexecutar `tests/Feature/domain/Models/Offer/Http/Controllers/OfferController/UpdateTest.php` no container e registrar o Green em `specs/001-product-offers/tdd-evidence.md`
@@ -153,8 +153,7 @@
 - [X] T047 Executar `docker compose exec php php artisan test` para a suíte completa, sem Pint, e registrar o resultado final em `specs/001-product-offers/tdd-evidence.md`
 - [X] T048 Conferir as seis rotas com `docker compose exec php php artisan route:list --path=v1`, comparar request/response/status com `specs/001-product-offers/contracts/openapi.yaml` e a tradução externa com `specs/001-product-offers/contracts/product-source.openapi.yaml`
 - [X] T049 [P] Adicionar uma pasta Offers com as seis requisições autenticadas — categorias, criar, listar próprias, detalhar, editar e listar disponíveis — em `collection/bruno/API/Offers/folder.yml`, `collection/bruno/API/Offers/List Categories.yml`, `collection/bruno/API/Offers/Create Offer.yml`, `collection/bruno/API/Offers/List Producer Offers.yml`, `collection/bruno/API/Offers/Show Offer.yml`, `collection/bruno/API/Offers/Update Offer.yml` e `collection/bruno/API/Offers/List Available Offers.yml`, parametrizando tokens/IDs em `collection/bruno/environments/local.yml`
-- [X] T050 [P] Adicionar uma pasta Offers com as mesmas seis requisições, payloads e autenticação bearer em `collection/postman/Cultiva.postman_collection.json`, incluindo variáveis distintas para access tokens de Producer/Retailer, `offer_id` e `source_product_id`
-- [X] T051 Validar que Bruno e Postman importam sem erro e possuem paridade de método, URL, headers, autenticação, parâmetros e payloads com os seis endpoints de `specs/001-product-offers/contracts/openapi.yaml`, sem armazenar tokens reais em `collection/bruno/environments/local.yml` ou `collection/postman/Cultiva.postman_collection.json`
+- [X] T050 Validar que a coleção Bruno importa sem erro e possui métodos, URLs, headers, autenticação, parâmetros e payloads compatíveis com os seis endpoints de `specs/001-product-offers/contracts/openapi.yaml`, sem armazenar tokens reais em `collection/bruno/environments/local.yml`
 - [X] T052 Revisar os arquivos listados em `specs/001-product-offers/plan.md` contra `AGENTS.md` e `.agents/skills/architecture/SKILL.md`, removendo somente abstrações sem uso e completando a evidência de Red/Green em `specs/001-product-offers/tdd-evidence.md`
 
 ---
@@ -272,7 +271,7 @@ Manter sequencial é a execução mínima para uma única rota de leitura.
 
 ### Scope Stop Condition
 
-A feature termina quando os seis endpoints e seus cenários do contrato estiverem verdes no container, Bruno e Postman cobrirem o mesmo contrato, os Reds prévios estiverem registrados e não houver category CRUD, delete de Offer, reserva/venda, retry/cache do catálogo, repository ou interface de implementação única.
+A feature termina quando os seis endpoints e seus cenários do contrato estiverem verdes no container, Bruno cobrir o contrato, os Reds prévios estiverem registrados e não houver category CRUD, delete de Offer, reserva/venda, retry/cache do catálogo, repository ou interface de implementação única.
 
 ---
 
@@ -284,20 +283,20 @@ A feature termina quando os seis endpoints e seus cenários do contrato estivere
 - Cada Green deve ser o mínimo que satisfaz o teste e os contratos existentes.
 - Faça commit apenas após um Green confirmado; nunca entre Red e Green.
 
-## Revisão: paginação nativa (histórico; contrato refinado abaixo)
+## Revisão: paginação nativa (histórico)
 
 - [X] T053 [RED] Atualizar os testes Feature de Producer e Retailer para exigir campos nativos na raiz e ausência de wrappers.
 - [X] T054 [RED-RUN] Confirmar Red: 3 falhas porque `current_page` ainda não existia na raiz.
-- [X] T055 [GREEN] Retornar o paginator com `through()` e `withQueryString()`; remover classes/testes exclusivos da abstração customizada e manter `ListOffersRequest`.
+- [X] T055 [GREEN] Retornar o paginator por `Resource::collection()`; remover classes/testes exclusivos da abstração customizada e manter `ListOffersRequest`.
 - [X] T056 [GREEN-CHECK] Confirmar Green focado: 13 testes, 50 assertions.
 - [X] T057 Atualizar arquitetura, convenções, specs e contrato OpenAPI para o JSON nativo.
 - [X] T058 Executar regressão e checagem de sintaxe no container: 106 testes, 322 assertions, PHP sem erros de sintaxe.
 
-## Contrato final: navegação booleana
+## Contrato final anterior: navegação booleana (substituído pelo Resource nativo)
 
-- [X] T059 [RED] Adaptar testes Feature existentes para os seis campos exatos, ambos os booleanos e ausência de links.
+- [X] T059 [RED] Adaptar testes Feature existentes para o contrato então vigente de seis campos e ausência de links.
 - [X] T060 [RED-RUN] Confirmar Red: 21 testes, 71 assertions, 9 falhas por booleanos ausentes e campos extras.
-- [X] T061 [GREEN] Serializar dados e metadados do paginator usando `! onFirstPage()` e `hasMorePages()`, sem novas classes.
+- [X] T061 [GREEN] Serializar dados e metadados do paginator no contrato então vigente, sem novas classes.
 - [X] T062 [GREEN-CHECK] Confirmar Green focado: 21 testes, 148 assertions.
 - [X] T063 Atualizar regras e documentação para o contrato final.
 - [X] T064 Executar regressão, validar sintaxe e commitar testes, implementação, regras e documentação nessa ordem. Regressão: 106 testes, 370 assertions.

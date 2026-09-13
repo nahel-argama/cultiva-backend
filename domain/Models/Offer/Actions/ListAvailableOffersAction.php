@@ -16,6 +16,6 @@ final class ListAvailableOffersAction
             ->whereColumn('total_quantity', '>', 'reserved_quantity')
             ->latest('created_at')
             ->latest('id')
-            ->paginate($perPage, ['*'], 'page', $page);
+            ->paginate(perPage: $perPage, page: $page);
     }
 }

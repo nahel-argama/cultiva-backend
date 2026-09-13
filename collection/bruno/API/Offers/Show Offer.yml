@@ -15,7 +15,7 @@ http:
       type: path
   auth:
     type: bearer
-    token: "{{producer_access_token}}"
+    token: "{{access_token}}"
 
 runtime:
   variables:

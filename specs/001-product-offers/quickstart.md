@@ -69,10 +69,9 @@ O `phpunit.xml` define `APP_ENV=testing`; sem um arquivo específico de testes, 
 
 ```bash
 docker compose exec php php artisan migrate --force
-docker compose exec php php artisan db:seed --class=CategorySeeder --force
 ```
 
-Resultado esperado: cinco categorias, com IDs e nomes definidos em [data-model.md](data-model.md).
+Resultado esperado: a migration cria cinco categorias, com IDs e nomes definidos em [data-model.md](data-model.md).
 
 ## 5. Execute a validação automatizada
 
@@ -95,7 +94,7 @@ Use [contracts/openapi.yaml](contracts/openapi.yaml) como contrato dos endpoints
 ### Criação
 
 - Access token de Producer + produto/categoria válidos retorna 201.
-- Oferta pertence ao Producer do token, inicia `reserved_quantity=0` e usa `status=inactive` se omitido.
+- Oferta pertence ao Producer do token, inicia `reserved_quantity=0` e é criada com `status=active`; o status enviado no POST não altera esse valor.
 - ID textual como `"0002"` permanece inalterado.
 - `producer_id` ou `reserved_quantity` no payload retorna 422.
 - Produto externo 404 retorna 422; timeout, 5xx ou payload inválido retorna 503.
@@ -126,23 +125,17 @@ O planejamento está provado quando todos os testes relevantes e a suíte comple
 
 ## Paginação com Laravel
 
-`GET /v1/offers?page=1&per_page=15` retorna exatamente:
+`GET /v1/offers?page=1&per_page=15` retorna a coleção nativa do Laravel Resource, com `data`, `links` e `meta`:
 
 ```json
 {
   "data": [],
-  "current_page": 1,
-  "per_page": 15,
-  "total": 0,
-  "has_previous_page": false,
-  "has_next_page": false
+  "links": {},
+  "meta": {}
 }
 ```
 
 - Defaults: `page=1`, `per_page=15`. Ambos inteiros positivos, máximo 100 itens por página; inválidos retornam 422.
-- `total` é o total de registros, não o tamanho da página atual.
-- `has_previous_page` vem de `! onFirstPage()`; `has_next_page` vem de `hasMorePages()`.
-- Página acima da última mantém `current_page` solicitado e retorna `data: []`, sem próxima página. O indicador de anterior permanece true quando page > 1.
-- Compatibilidade: não existem links, `last_page`, `meta` ou objeto `pagination`.
-- Novos endpoints devem usar `paginate()` na query, transformar itens com `through()` e ler os cinco metadados do próprio paginator. Não criar classes ou middleware de paginação.
-- A contagem é a do próprio paginator; serialização não faz consultas. Relações usadas pelo transformer devem usar eager loading.
+- `links` e `meta` são serializados pelo Laravel a partir do `LengthAwarePaginator`.
+- Novos endpoints devem usar `paginate()` na query e `Resource::collection()`; não criar classes ou middleware de paginação.
+- A contagem é a do próprio paginator; relações usadas pelo Resource devem usar eager loading.

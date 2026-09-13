@@ -84,7 +84,7 @@
 
 ## 8. Persistência e visibilidade
 
-**Decision**: Criar `categories` e `offers` em uma migration. Offer usa preço `numeric(12,2)`, quantidades inteiras, status textual `active|inactive`, default `inactive`, timestamps e constraints para preço/estoque/status. Visibilidade não será persistida: `status = active AND total_quantity > reserved_quantity` será aplicada na consulta e no transformer.
+**Decision**: Criar `categories` e `offers` em uma migration. Offer usa preço `numeric(12,2)`, quantidades inteiras, status textual `active|inactive`, default de banco `inactive`, timestamps e constraints para preço/estoque/status. A Action de criação define novas ofertas como `active`. Visibilidade não será persistida: `status = active AND total_quantity > reserved_quantity` será aplicada na consulta e no Resource.
 
 **Rationale**: Numeric preserva dinheiro; checks protegem invariantes fora do HTTP; visibilidade derivada evita sincronização de uma coluna redundante. Cada operação grava apenas Offer, então não requer transação e não manterá uma transação aberta durante HTTP.
 
@@ -97,7 +97,7 @@
 
 ## 9. Categorias seedadas
 
-**Decision**: Usar IDs bigint fixos de 1 a 5 e nomes únicos: Frutas, Legumes, Verduras, Tubérculos e raízes, Grãos e cereais. `CategorySeeder` fará upsert idempotente e será chamado por `DatabaseSeeder`. Não haverá CRUD de categoria.
+**Decision**: Usar IDs bigint fixos de 1 a 5 e nomes únicos: Frutas, Legumes, Verduras, Tubérculos e raízes, Grãos e cereais. A migration insere essas categorias diretamente. Não haverá CRUD ou seeder de categoria.
 
 **Rationale**: IDs explícitos permanecem estáveis entre ambientes e seguem o padrão numérico das entidades existentes. A carga é pequena e definida pela especificação.
 
@@ -109,11 +109,11 @@
 
 ## 10. Contrato HTTP e paginação
 
-**Decision**: `GET /v1/offers` retorna ofertas conforme o perfil autenticado. Actions usam `paginate()`; o controller aplica o transformer via `through()` e retorna somente `data`, `current_page`, `per_page`, `total`, `has_previous_page` e `has_next_page`. O FormRequest valida page/per_page (defaults 1/15, máximo 100).
+**Decision**: `GET /v1/offers` retorna ofertas conforme o perfil autenticado. Actions usam `paginate()`; o controller retorna `OfferResource::collection($paginator)`, com `data`, `links` e `meta` nativos do Laravel. O FormRequest valida page/per_page (defaults 1/15, máximo 100).
 
-**Rationale**: O paginator já fornece valores e navegação via `! onFirstPage()` e `hasMorePages()`. Basta selecionar esses campos na resposta, sem classe extra nem gerar URLs. COUNT é executado uma vez, itens usam consulta limitada e categorias são carregadas antecipadamente, evitando N+1.
+**Rationale**: O Resource collection delega serialização, URLs e metadados ao paginator nativo. COUNT é executado uma vez, itens usam consulta limitada e categorias são carregadas antecipadamente, evitando N+1.
 
-**Compatibility**: O contrato final substitui `meta` e o JSON nativo completo por seis campos na raiz, sem links ou `last_page`. Clientes usam os dois booleanos para habilitar navegação. A ordenação da mais recente para a mais antiga permanece.
+**Compatibility**: O contrato usa o formato padrão de Resource paginado do Laravel (`data`, `links` e `meta`). A ordenação da mais recente para a mais antiga permanece.
 
 ## 11. Estratégia TDD e ambiente
 

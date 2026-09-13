@@ -126,7 +126,7 @@ Como varejista autenticado, quero ver apenas ofertas efetivamente disponíveis p
 - **FR-016**: O sistema MUST iniciar `reserved_quantity` em zero em toda nova oferta.
 - **FR-017**: O sistema MUST impedir que criação ou edição administrativa forneça ou altere diretamente `reserved_quantity`.
 - **FR-018**: O sistema MUST rejeitar com status 422 uma redução de `total_quantity` para valor inferior a `reserved_quantity`.
-- **FR-019**: O sistema MUST permitir os estados ativo e inativo e MUST considerar inativo quando o estado for omitido na criação.
+- **FR-019**: O sistema MUST permitir os estados ativo e inativo; toda nova oferta deve ser criada como ativa, independentemente do status enviado no POST.
 - **FR-020**: O sistema MUST considerar uma oferta visível para compra somente quando seu estado for ativo e `total_quantity` for maior que `reserved_quantity`.
 - **FR-021**: O sistema MUST recalcular a visibilidade da oferta a partir do estado e das quantidades atuais, sem exigir uma ação manual adicional.
 - **FR-022**: O sistema MUST permitir que o produtor liste todas as suas ofertas, independentemente de estado ou saldo disponível, incluindo a indicação calculada de visibilidade.
@@ -134,9 +134,9 @@ Como varejista autenticado, quero ver apenas ofertas efetivamente disponíveis p
 - **FR-024**: O sistema MUST retornar os dados essenciais da oferta nas consultas: produto e nome snapshotado, categoria, preço unitário, estoque total, quantidade reservada, estado e visibilidade.
 - **FR-025**: O sistema MUST manter registros suficientes de criação e última atualização para apoiar rastreabilidade e suporte.
 
-- **FR-026**: Toda listagem paginada MUST usar `paginate()` na query e retornar exatamente `data`, `current_page`, `per_page`, `total`, `has_previous_page` e `has_next_page` na raiz, sem links ou wrappers.
+- **FR-026**: Toda listagem paginada MUST usar `paginate()` na query e `Resource::collection()`, retornando `data`, `links` e `meta` no formato nativo do Laravel.
 - **FR-027**: Parâmetros MUST ser inteiros positivos, com defaults `page=1` e `per_page=15`, máximo de 100 itens e HTTP 422 para entradas inválidas.
-- **FR-028**: A serialização MUST reaproveitar a contagem do paginator e preservar eager loading de relações. Página acima da última retorna lista vazia; resultado vazio na página 1 retorna ambos os booleanos false. A navegação usa `! onFirstPage()` e `hasMorePages()` do paginator.
+- **FR-028**: A serialização MUST reaproveitar a contagem do paginator e preservar eager loading de relações; navegação e metadados são fornecidos pelo Resource paginado do Laravel.
 
 ### Key Entities
 
