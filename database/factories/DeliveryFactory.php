@@ -21,7 +21,7 @@ class DeliveryFactory extends Factory
     public function definition(): array
     {
         return [
-            'company_id'   => CompanyFactory::new(),
+            'company_id'   => CompanyFactory::new()->for(UserFactory::new()->delivery()),
             'cnh_number'   => $this->faker->unique()->numerify('###########'),
             'cnh_category' => $this->faker->randomElement(CnhCategory::cases()),
         ];
