@@ -1,9 +1,10 @@
 <?php
 
-namespace Tests\Feature\domain\Models\Offer\Http\Controllers\OfferController;
+namespace Tests\Feature\domain\Models\Offer\Controllers\OfferController;
 
 use Cultiva\Models\Offer\Enums\OfferStatus;
 use Database\Factories\CategoryFactory;
+use Database\Factories\DeliveryFactory;
 use Database\Factories\OfferFactory;
 use Database\Factories\ProducerFactory;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -70,6 +71,19 @@ class IndexTest extends TestCase
         // Arrange
         $producer = ProducerFactory::new()->create();
         Sanctum::actingAs($producer->company->user, ['refresh']);
+
+        // Action
+        $response = $this->getJson('/v1/offers');
+
+        // Assert
+        $response->assertForbidden();
+    }
+
+    public function test_should_return_403_for_delivery_profile(): void
+    {
+        // Arrange
+        $delivery = DeliveryFactory::new()->create();
+        Sanctum::actingAs($delivery->company->user, ['access']);
 
         // Action
         $response = $this->getJson('/v1/offers');

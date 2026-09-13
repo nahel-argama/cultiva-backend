@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\domain\Models\Offer\Http\Controllers\OfferController;
+namespace Tests\Feature\domain\Models\Offer\Controllers\OfferController;
 
 use Database\Factories\CategoryFactory;
 use Database\Factories\ProducerFactory;
@@ -60,11 +60,11 @@ class StoreTest extends TestCase
         ]);
     }
 
-    public function test_should_ignore_client_status_and_snapshot_fallback_name(): void
+    public function test_should_ignore_client_status_and_unfillable_attributes(): void
     {
         // Arrange
         config(['services.product_source.base_url' => 'http://product-source.test/api']);
-        $fixture = require base_path('tests/Fixtures/Integrations/ProductSource/product_without_presentation_name.php');
+        $fixture = require base_path('tests/Fixtures/Integrations/ProductSource/product_success.php');
         Http::fake([
             'http://product-source.test/api/products/2' => Http::response($fixture, 200),
         ]);
@@ -86,14 +86,14 @@ class StoreTest extends TestCase
 
         // Assert
         $response->assertCreated()
-            ->assertJsonPath('data.source_product_id', '2')
-            ->assertJsonPath('data.product_name', 'Tomate')
+            ->assertJsonPath('data.source_product_id', '0002')
+            ->assertJsonPath('data.product_name', 'Tomate Italiano')
             ->assertJsonPath('data.status', 'active')
             ->assertJsonPath('data.is_visible', true);
         $this->assertDatabaseHas('offers', [
             'producer_id' => $producer->id,
-            'source_product_id' => '2',
-            'product_name' => 'Tomate',
+            'source_product_id' => '0002',
+            'product_name' => 'Tomate Italiano',
         ]);
     }
 
@@ -136,7 +136,7 @@ class StoreTest extends TestCase
     {
         // Arrange
         config(['services.product_source.base_url' => 'http://product-source.test/api']);
-        $fixture = require base_path('tests/Fixtures/Integrations/ProductSource/product_without_presentation_name.php');
+        $fixture = require base_path('tests/Fixtures/Integrations/ProductSource/product_success.php');
         Http::fake([
             'http://product-source.test/api/products/2' => Http::response($fixture, 200),
         ]);

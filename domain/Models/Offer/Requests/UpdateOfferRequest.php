@@ -1,6 +1,6 @@
 <?php
 
-namespace Cultiva\Models\Offer\Http\Requests;
+namespace Cultiva\Models\Offer\Requests;
 
 use Cultiva\Models\Offer\Enums\OfferStatus;
 

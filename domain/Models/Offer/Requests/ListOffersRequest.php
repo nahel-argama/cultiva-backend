@@ -1,6 +1,6 @@
 <?php
 
-namespace Cultiva\Models\Offer\Http\Requests;
+namespace Cultiva\Models\Offer\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 

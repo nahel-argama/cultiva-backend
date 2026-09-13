@@ -14,6 +14,6 @@ final class ListProducerSalesAction
             ->where('producer_id', $producer->id)
             ->latest('created_at')
             ->latest('id')
-            ->paginate($perPage, ['*'], 'page', $page);
+            ->paginate(perPage: $perPage, page: $page);
     }
 }

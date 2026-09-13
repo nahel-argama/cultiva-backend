@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\domain\Models\Purchase\Http\Controllers\PurchaseController;
+namespace Tests\Feature\domain\Models\Purchase\Controllers\PurchaseController;
 
 use Cultiva\Models\Offer\Enums\OfferStatus;
 use Database\Factories\OfferFactory;

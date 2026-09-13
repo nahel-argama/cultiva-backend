@@ -1,15 +1,15 @@
 <?php
 
-namespace Cultiva\Models\Purchase\Http\Controllers;
+namespace Cultiva\Models\Purchase\Controllers;
 
 use Cultiva\Base\Contracts\Controller;
 use Cultiva\Models\Purchase\Actions\CreatePurchaseAction;
 use Cultiva\Models\Purchase\Actions\ListProducerSalesAction;
 use Cultiva\Models\Purchase\Actions\ListRetailerPurchasesAction;
 use Cultiva\Models\Purchase\DTO\CreatePurchaseDTO;
-use Cultiva\Models\Purchase\Http\Requests\ListPurchasesRequest;
-use Cultiva\Models\Purchase\Http\Requests\StorePurchaseRequest;
-use Cultiva\Models\Purchase\Http\Resources\PurchaseResource;
+use Cultiva\Models\Purchase\Requests\ListPurchasesRequest;
+use Cultiva\Models\Purchase\Requests\StorePurchaseRequest;
+use Cultiva\Models\Purchase\Resources\PurchaseResource;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 

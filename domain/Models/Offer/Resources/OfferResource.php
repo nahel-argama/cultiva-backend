@@ -1,6 +1,6 @@
 <?php
 
-namespace Cultiva\Models\Offer\Http\Resources;
+namespace Cultiva\Models\Offer\Resources;
 
 use Cultiva\Models\Category\Http\Resources\CategoryResource;
 use Illuminate\Http\Request;

@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\domain\Models\Purchase\Http\Controllers\PurchaseController;
+namespace Tests\Feature\domain\Models\Purchase\Controllers\PurchaseController;
 
 use Database\Factories\PurchaseFactory;
 use Illuminate\Foundation\Testing\RefreshDatabase;

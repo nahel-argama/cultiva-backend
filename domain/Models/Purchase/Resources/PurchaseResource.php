@@ -1,6 +1,6 @@
 <?php
 
-namespace Cultiva\Models\Purchase\Http\Resources;
+namespace Cultiva\Models\Purchase\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;

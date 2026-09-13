@@ -14,6 +14,6 @@ final class ListRetailerPurchasesAction
             ->where('retailer_id', $retailer->id)
             ->latest('created_at')
             ->latest('id')
-            ->paginate($perPage, ['*'], 'page', $page);
+            ->paginate(perPage: $perPage, page: $page);
     }
 }

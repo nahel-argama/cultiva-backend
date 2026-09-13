@@ -1,8 +1,9 @@
 <?php
 
-namespace Tests\Feature\domain\Models\Offer\Http\Controllers\OfferController;
+namespace Tests\Feature\domain\Models\Offer\Controllers\OfferController;
 
 use Cultiva\Models\Offer\Enums\OfferStatus;
+use Database\Factories\DeliveryFactory;
 use Database\Factories\OfferFactory;
 use Database\Factories\ProducerFactory;
 use Database\Factories\RetailerFactory;
@@ -102,5 +103,23 @@ class ShowTest extends TestCase
             ->assertJsonPath('data.id', $offer->id)
             ->assertJsonPath('data.status', 'active')
             ->assertJsonPath('data.available_quantity', 10);
+    }
+
+    public function test_should_return_403_for_delivery_profile(): void
+    {
+        // Arrange
+        $offer = OfferFactory::new()->create([
+            'status' => OfferStatus::ACTIVE,
+            'total_quantity' => 10,
+            'reserved_quantity' => 0,
+        ]);
+        $delivery = DeliveryFactory::new()->create();
+        Sanctum::actingAs($delivery->company->user, ['access']);
+
+        // Action
+        $response = $this->getJson('/v1/offers/'.$offer->id);
+
+        // Assert
+        $response->assertForbidden();
     }
 }
