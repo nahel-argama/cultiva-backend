@@ -24,7 +24,7 @@ final class WishlistController extends Controller
 {
     public function store(AddWishlistItemRequest $request, AddWishlistItemAction $action): JsonResponse
     {
-        $retailer = $request->user()->retailer()->first();
+$retailer = $request->user()->retailer()->firstOrFail();
 
         $dto = AddWishlistItemDTO::from($request->validated());
 
