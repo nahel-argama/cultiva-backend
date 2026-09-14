@@ -4,11 +4,13 @@ namespace Cultiva\Models\Retailer;
 
 use Carbon\CarbonImmutable;
 use Cultiva\Models\Company\Company;
+use Cultiva\Models\Wishlist\WishlistItem;
 use Cultiva\Models\Retailer\Enums\BusinessType;
 use Database\Factories\RetailerFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Override;
 
@@ -45,5 +47,11 @@ class Retailer extends Model
     public function company(): BelongsTo
     {
         return $this->belongsTo(Company::class);
+    }
+
+    /** @return HasMany<WishlistItem, $this> */
+    public function wishlistItems(): HasMany
+    {
+        return $this->hasMany(related: WishlistItem::class);
     }
 }

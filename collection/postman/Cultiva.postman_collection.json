@@ -10,6 +10,11 @@
     { "key": "source_product_id", "value": "2" },
     { "key": "page", "value": "1" },
     { "key": "per_page", "value": "15" },
+    { "key": "wishlist_item_id", "value": "1" },
+    { "key": "product_id", "value": "product-123" },
+    { "key": "state", "value": "SP" },
+    { "key": "limit", "value": "10" },
+    { "key": "search", "value": "" },
     { "key": "cep", "value": "89010025" }
   ],
   "item": [
@@ -77,6 +82,15 @@
         { "name": "Show Offer", "request": { "method": "GET", "header": [{ "key": "Accept", "value": "application/json" }], "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }] }, "url": { "raw": "{{base_url}}/v1/offers/{{offer_id}}", "host": ["{{base_url}}"], "path": ["v1", "offers", "{{offer_id}}"] } } },
         { "name": "Update Offer", "request": { "method": "PATCH", "header": [{ "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" }], "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }] }, "body": { "mode": "raw", "raw": "{\n  \"source_product_id\": \"{{source_product_id}}\",\n  \"category_id\": 1,\n  \"unit_price\": \"15.00\",\n  \"total_quantity\": 25\n}", "options": { "raw": { "language": "json" } } }, "url": { "raw": "{{base_url}}/v1/offers/{{offer_id}}", "host": ["{{base_url}}"], "path": ["v1", "offers", "{{offer_id}}"] } } },
         { "name": "List Categories", "request": { "method": "GET", "header": [{ "key": "Accept", "value": "application/json" }], "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }] }, "url": { "raw": "{{base_url}}/v1/products/categories", "host": ["{{base_url}}"], "path": ["v1", "products", "categories"] } } }
+      ]
+    },
+    {
+      "name": "Wishlist",
+      "item": [
+        { "name": "Add Wishlist Item", "request": { "method": "POST", "header": [{ "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" }], "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }] }, "body": { "mode": "raw", "raw": "{\n  \"product_id\": \"{{product_id}}\"\n}", "options": { "raw": { "language": "json" } } }, "url": { "raw": "{{base_url}}/v1/wishlist/items", "host": ["{{base_url}}"], "path": ["v1", "wishlist", "items"] } } },
+        { "name": "List Wishlist Items", "request": { "method": "GET", "header": [{ "key": "Accept", "value": "application/json" }], "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }] }, "url": { "raw": "{{base_url}}/v1/wishlist/items?page={{page}}&per_page={{per_page}}&search={{search}}", "host": ["{{base_url}}"], "path": ["v1", "wishlist", "items"], "query": [{ "key": "page", "value": "{{page}}" }, { "key": "per_page", "value": "{{per_page}}" }, { "key": "search", "value": "{{search}}" }] } } },
+        { "name": "Remove Wishlist Item", "request": { "method": "DELETE", "header": [{ "key": "Accept", "value": "application/json" }], "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }] }, "url": { "raw": "{{base_url}}/v1/wishlist/items/{{wishlist_item_id}}", "host": ["{{base_url}}"], "path": ["v1", "wishlist", "items", "{{wishlist_item_id}}"] } } },
+        { "name": "Wishlist Analytics", "request": { "method": "GET", "header": [{ "key": "Accept", "value": "application/json" }], "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }] }, "url": { "raw": "{{base_url}}/v1/wishlist/analytics?state={{state}}&limit={{limit}}", "host": ["{{base_url}}"], "path": ["v1", "wishlist", "analytics"], "query": [{ "key": "state", "value": "{{state}}" }, { "key": "limit", "value": "{{limit}}" }] } } }
       ]
     },
     {

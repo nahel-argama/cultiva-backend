@@ -1,0 +1,34 @@
+info:
+  name: Add Wishlist Item
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{base_url}}/v1/wishlist/items"
+  headers:
+    - name: Accept
+      value: application/json
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "product_id": "{{product_id}}"
+      }
+  auth:
+    type: bearer
+    token: "{{access_token}}"
+
+runtime:
+  variables:
+    - name: product_id
+      value: "product-123"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: true

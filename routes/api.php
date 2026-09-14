@@ -6,6 +6,7 @@ use Cultiva\Integrations\Geo\Controllers\GeoController;
 use Cultiva\Models\Category\Http\Controllers\CategoryController;
 use Cultiva\Models\Offer\Http\Controllers\OfferController;
 use Cultiva\Models\Purchase\Http\Controllers\PurchaseController;
+use Cultiva\Models\Wishlist\Http\Controllers\WishlistController;
 use Illuminate\Support\Facades\Route;
 
 Route::group([
@@ -33,12 +34,18 @@ Route::group([
     Route::middleware(['auth:sanctum', 'ability:access'])
         ->group(function (): void {
             Route::get('offers', [OfferController::class, 'index'])->name('offers.index');
+            Route::get('wishlist/analytics', [WishlistController::class, 'analytics'])->name('wishlist.analytics');
             Route::get('offers/{offer}', [OfferController::class, 'show'])
                 ->whereNumber('offer')
                 ->name('offers.show');
 
             Route::middleware('profile:retailer')
                 ->group(function (): void {
+                    Route::post('wishlist/items', [WishlistController::class, 'store'])->name('wishlist.items.store');
+                    Route::get('wishlist/items', [WishlistController::class, 'index'])->name('wishlist.items.index');
+                    Route::delete('wishlist/items/{wishlistItem}', [WishlistController::class, 'destroy'])
+                        ->whereNumber('wishlistItem')
+                        ->name('wishlist.items.destroy');
                     Route::post('offers/{offer}/purchase', [PurchaseController::class, 'store'])
                         ->whereNumber('offer')
                         ->name('purchases.store');
