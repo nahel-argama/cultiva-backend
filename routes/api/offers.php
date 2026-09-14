@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Route;
 Route::group([
     'prefix' => 'offers',
     'as' => 'offers.',
+    'middleware' => 'profile:producer,retailer',
 ], function (): void {
     Route::get('', [OfferController::class, 'index'])->name('index');
     Route::get('{offer}', [OfferController::class, 'show'])
