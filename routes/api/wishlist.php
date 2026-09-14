@@ -3,16 +3,21 @@
 use Cultiva\Models\Wishlist\Http\Controllers\WishlistController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('wishlist/analytics', [WishlistController::class, 'analytics'])
-    ->name('wishlist.analytics');
+Route::group([
+    'prefix' => 'wishlist',
+    'as' => 'wishlist.',
+], function (): void {
+    Route::get('analytics', [WishlistController::class, 'analytics'])->name('analytics');
 
-Route::middleware('profile:retailer')
-    ->group(function (): void {
-        Route::post('wishlist/items', [WishlistController::class, 'store'])
-            ->name('wishlist.items.store');
-        Route::get('wishlist/items', [WishlistController::class, 'index'])
-            ->name('wishlist.items.index');
-        Route::delete('wishlist/items/{wishlistItem}', [WishlistController::class, 'destroy'])
+    Route::group([
+        'prefix' => 'items',
+        'as' => 'items.',
+        'middleware' => 'profile:retailer',
+    ], function (): void {
+        Route::post('', [WishlistController::class, 'store'])->name('store');
+        Route::get('', [WishlistController::class, 'index'])->name('index');
+        Route::delete('{wishlistItem}', [WishlistController::class, 'destroy'])
             ->whereNumber('wishlistItem')
-            ->name('wishlist.items.destroy');
+            ->name('destroy');
     });
+});

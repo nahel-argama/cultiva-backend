@@ -4,10 +4,15 @@ use Cultiva\Models\Category\Http\Controllers\CategoryController;
 use Cultiva\Models\Offer\Controllers\OfferController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('offers', [OfferController::class, 'index'])->name('offers.index');
-Route::get('offers/{offer}', [OfferController::class, 'show'])
-    ->whereNumber('offer')
-    ->name('offers.show');
+Route::group([
+    'prefix' => 'offers',
+    'as' => 'offers.',
+], function (): void {
+    Route::get('', [OfferController::class, 'index'])->name('index');
+    Route::get('{offer}', [OfferController::class, 'show'])
+        ->whereNumber('offer')
+        ->name('show');
+});
 
 Route::middleware('profile:producer')
     ->name('producer.')

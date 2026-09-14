@@ -91,6 +91,11 @@ $action->execute($retailer, $wishlistItem);
 
 over `$action->execute($request->user()->retailer()->firstOrFail(),
 $wishlistItem);`.
+When creating routes, prefer grouping related routes with shared `prefix`, `as`,
+`namespace`, and middleware instead of declaring individual routes directly.
+For example, prefer a `Route::group([...], function (): void { ... });` for a
+resource such as `wishlist/items`, keeping route names and middleware at the
+group level whenever they are shared.
 For simple computed model values, prefer explicit methods over Eloquent
 `Attribute` accessors when property-style access is not required.
 FormRequest `validated()` already returns only fields declared in `rules()`;
