@@ -66,6 +66,7 @@ Como produtor ou varejista autenticado, quero consultar a demanda agregada por p
 - `page` deve ser no mínimo 1; `per_page` deve ficar entre 1 e 100; valores inválidos retornam 422.
 - `limit` padrão é 10 e o máximo é 50; valores menores que 1 ou maiores que 50 retornam 422.
 - Percentual é um número inteiro arredondado para o inteiro mais próximo; quando `total_items` é zero, resultados são vazios e o total permanece zero.
+- `percentage` usa como denominador todos os WishlistItems do site, independentemente de `limit`; `others` aparece somente quando existem mais grupos de produtos que o `limit`, sempre como último resultado e somando os grupos omitidos.
 - Usuário não autenticado recebe a resposta padrão de autenticação; nenhum cenário de leitura ou escrita expõe dados de terceiros.
 - A analytics não consulta o endereço atual de usuários ou varejistas.
 
@@ -86,9 +87,9 @@ Como produtor ou varejista autenticado, quero consultar a demanda agregada por p
 - **FR-011**: O endpoint `DELETE /api/v1/wishlist/items/{wishlistItem}` MUST remover somente item pertencente ao varejista autenticado e retornar sem conteúdo ou o padrão HTTP equivalente do projeto.
 - **FR-012**: Produtores e outros perfis MUST ser impedidos de adicionar, listar ou remover wishlist; produtores e varejistas com ability `access` podem consultar analytics.
 - **FR-013**: O endpoint `GET /api/v1/wishlist/analytics` MUST aceitar filtro opcional por `state` e `limit` default 10, máximo 50.
-- **FR-014**: A analytics MUST agrupar por `source_product_id` e `product_name`, calcular `total_items` após o filtro, ordenar por total decrescente e por `source_product_id` em empate, e retornar apenas os primeiros `limit` resultados.
+- **FR-014**: A analytics MUST agrupar por `source_product_id` e `product_name`, calcular `total_items` após o filtro, ordenar por total decrescente e por `source_product_id` em empate, retornar os primeiros `limit` produtos e adicionar `others` somente quando houver grupos omitidos.
 - **FR-015**: Cada resultado da analytics MUST conter `position`, `source_product_id`, `product_name`, `total` e `percentage`, sem identidade de usuários ou varejistas.
-- **FR-016**: `percentage` MUST ser inteiro arredondado para o inteiro mais próximo, calculado sobre `total_items` filtrado; quando o total for zero, a resposta MUST conter resultados vazios e total zero.
+- **FR-016**: `percentage` MUST ser inteiro arredondado para o inteiro mais próximo, calculado sobre o total global de WishlistItems do site, sem depender de `limit`; `others` MUST somar os grupos omitidos e usar o mesmo denominador global. Quando não houver itens filtrados, a resposta MUST conter resultados vazios e total zero.
 - **FR-017**: A analytics MUST realizar a agregação na fonte persistida e não carregar todos os itens para a memória.
 - **FR-018**: As Actions MUST possuir somente `execute()` público, receber DTOs readonly para entradas estruturadas e não receber Request; controllers devem apenas coordenar entrada validada, Action e Resource.
 - **FR-019**: Falhas esperadas MUST usar `CultivaException` com status HTTP explícito, sem expor detalhes internos.
@@ -125,6 +126,7 @@ Como produtor ou varejista autenticado, quero consultar a demanda agregada por p
 - A rota pública usa o prefixo `/api/v1`, conforme a convenção vigente do backend.
 - O limite padrão da analytics será 10 e o máximo 50; essa escolha mantém respostas enxutas para redes móveis e cobre os principais produtos demandados.
 - Percentuais inteiros usam arredondamento convencional para o inteiro mais próximo; o arredondamento pode fazer a soma visual não ser exatamente 100.
+- `total_items` continua sendo o total após o filtro `state`; o denominador de `percentage` é o total global de todos os WishlistItems. `others` é um resumo separado com `total` e `percentage`, e só aparece quando a quantidade de grupos excede `limit`.
 - A resposta de analytics com estado não informado usa `state: null`; com filtro usa o estado solicitado.
 - O ProductSource continua sendo a fonte oficial do identificador e nome; falhas transitórias da integração seguem o contrato de erro já existente.
 - A autorização, a autenticação e os formatos padrão de erro existentes serão reutilizados.

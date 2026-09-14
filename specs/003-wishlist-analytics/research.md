@@ -25,10 +25,10 @@
 - **Rationale**: `GROUP BY source_product_id, product_name`, filtro por `state`, `COUNT(*)`, ordenação determinística e `LIMIT` evitam carregar todos os itens para memória.
 - **Alternatives considered**: buscar a coleção e agrupar em PHP. Rejeitado por custo de memória e por contrariar FR-017.
 
-## Decision: Percentual inteiro arredondado
+## Decision: Percentual global e `others`
 
-- **Rationale**: Mantém a resposta enxuta para clientes móveis; `round(total * 100 / total_items)` é simples, explícito e testável. Com total zero, não há resultados e o total é zero.
-- **Alternatives considered**: decimal com casas fixas. Rejeitado nesta versão por não agregar informação necessária ao caso de uso.
+- **Rationale**: O percentual representa participação no site inteiro, não apenas nos produtos retornados. A consulta busca `limit + 1`; se houver grupo extra, os grupos omitidos são representados por `others` no fim, sem carregar todos os grupos.
+- **Alternatives considered**: percentual sobre o ranking limitado ou carregar todos os grupos para agrupar em PHP. Rejeitados por distorcer a participação global ou aumentar memória.
 
 ## Decision: `limit` default 10, máximo 50
 

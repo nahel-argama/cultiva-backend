@@ -103,7 +103,13 @@ components:
         source_product_id: { type: string }
         product_name: { type: string }
         total: { type: integer, minimum: 1 }
-        percentage: { type: integer, minimum: 0, maximum: 100 }
+        percentage: { type: integer, minimum: 0, maximum: 100, description: Percentual sobre todos os WishlistItems do site; arredondado ao inteiro mais próximo }
+    AnalyticsOthers:
+      type: object
+      required: [total, percentage]
+      properties:
+        total: { type: integer, minimum: 1 }
+        percentage: { type: integer, minimum: 0, maximum: 100, description: Percentual sobre todos os WishlistItems do site; arredondado ao inteiro mais próximo }
     Analytics:
       type: object
       required: [state, total_items, results]
@@ -111,6 +117,7 @@ components:
         state: { type: [string, "null"] }
         total_items: { type: integer, minimum: 0 }
         results: { type: array, items: { $ref: "#/components/schemas/AnalyticsResult" } }
+        others: { allOf: [{ $ref: "#/components/schemas/AnalyticsOthers" }], nullable: true }
     AnalyticsResponse: { type: object, required: [data], properties: { data: { $ref: "#/components/schemas/Analytics" } } }
   responses:
     Unauthenticated: { description: Token ausente ou inválido }

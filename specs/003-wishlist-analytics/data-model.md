@@ -36,12 +36,13 @@ DTO readonly não persistido, composto por:
 |---|---|---|
 | `state` | texto ou nulo | Filtro recebido; nulo quando ausente |
 | `total_items` | inteiro | Quantidade total de WishlistItems após filtro |
-| `results` | lista de resultados | No máximo `limit`, default 10, máximo 50 |
+| `results` | lista de produtos | Até `limit` produtos; `others` é retornado separadamente quando houver grupos omitidos |
+| `others` | resumo opcional | Contém apenas `total` e `percentage` dos grupos omitidos |
 | `position` | inteiro | Posição 1-based após ordenação |
 | `source_product_id` | texto | Chave externa agrupada |
 | `product_name` | texto | Nome snapshotado agrupado |
 | `total` | inteiro | Quantidade do grupo |
-| `percentage` | inteiro | `round(total * 100 / total_items)`; zero não produz resultados |
+| `percentage` | inteiro | `round(total * 100 / total_global_wishlist_items)`; zero não produz resultados |
 
 ### Query rules
 
@@ -49,4 +50,6 @@ DTO readonly não persistido, composto por:
 - Agrupar por `source_product_id` e `product_name`.
 - Ordenar por `total DESC`, depois `source_product_id ASC`.
 - Aplicar `limit` somente depois de ordenar.
+- Buscar no máximo `limit + 1` grupos; adicionar `others` apenas quando o grupo extra existir, somando todos os grupos omitidos.
+- Percentual usa a contagem global sem filtro; `total_items` permanece a contagem do filtro aplicado.
 - Não carregar a coleção completa nem consultar endereço atual.
