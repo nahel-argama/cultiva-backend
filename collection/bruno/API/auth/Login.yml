@@ -15,7 +15,7 @@ http:
     type: json
     data: |
       {
-        "email": "maria@example.com",
+        "email": "carlos@example.com",
         "password": "Password123!"
       }
 

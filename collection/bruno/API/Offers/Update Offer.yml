@@ -13,13 +13,12 @@ http:
       value: application/json
   params:
     - name: offer_id
-      value: "{{offer_id}}"
+      value: "1"
       type: path
   body:
     type: json
     data: |-
       {
-        "source_product_id": "{{source_product_id}}",
         "category_id": 1,
         "unit_price": "15.00",
         "total_quantity": 25
@@ -28,14 +27,8 @@ http:
     type: bearer
     token: "{{access_token}}"
 
-runtime:
-  variables:
-    - name: offer_id
-      value: "28"
-
 settings:
   encodeUrl: true
   timeout: 0
   followRedirects: true
   maxRedirects: 5
-  forwardAuthorizationHeader: true

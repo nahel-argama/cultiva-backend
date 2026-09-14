@@ -2,31 +2,5 @@ name: local
 variables:
   - name: base_url
     value: http://localhost:80
-    enabled: true
-    secret: false
-    type: text
-  - name: access_token
-    value: ""
-    enabled: true
-    secret: true
-    type: text
-  - name: offer_id
-    value: "1"
-    enabled: true
-    secret: false
-    type: text
-  - name: source_product_id
-    value: "2"
-    enabled: true
-    secret: false
-    type: text
-  - name: page
-    value: "1"
-    enabled: true
-    secret: false
-    type: text
-  - name: per_page
-    value: "15"
-    enabled: true
-    secret: false
-    type: text
+  - secret: true
+    name: access_token

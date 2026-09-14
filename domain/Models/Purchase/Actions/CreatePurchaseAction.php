@@ -16,18 +16,15 @@ final class CreatePurchaseAction
     public function execute(Retailer $retailer, int $offerId, CreatePurchaseDTO $data): Purchase
     {
         return DB::transaction(function () use ($retailer, $offerId, $data): Purchase {
-            $offer = Offer::query()->lockForUpdate()->find($offerId);
+            $offer = Offer::query()->lockForUpdate()->findOrFail($offerId);
 
-            if (! $offer instanceof Offer) {
-                throw new CultivaException(404, Lang::get('purchases.offer_not_found'));
-            }
+            $availableQuantity = $offer->availableQuantity();
 
-            $availableQuantity = $offer->total_quantity - $offer->reserved_quantity;
             if ($offer->status !== OfferStatus::ACTIVE || $data->quantity > $availableQuantity) {
                 throw new CultivaException(409, Lang::get('purchases.insufficient_stock'));
             }
 
-            $totalPrice = $this->calculateTotalPrice((string) $offer->unit_price, $data->quantity);
+            $totalPrice = $this->calculateTotalPrice($offer->unit_price, $data->quantity);
             $reservedQuantity = $offer->reserved_quantity + $data->quantity;
 
             $purchase = Purchase::create([
@@ -41,22 +38,23 @@ final class CreatePurchaseAction
                 'total_price' => $totalPrice,
             ]);
 
+            $newStatus = $reservedQuantity === $offer->total_quantity
+                ? OfferStatus::INACTIVE
+                : $offer->status;
+
             $offer->update([
                 'reserved_quantity' => $reservedQuantity,
-                'status' => $reservedQuantity === $offer->total_quantity
-                    ? OfferStatus::INACTIVE
-                    : $offer->status,
+                'status' => $newStatus,
             ]);
 
             return $purchase;
         });
     }
 
-    private function calculateTotalPrice(string $unitPrice, int $quantity): string
+    private function calculateTotalPrice(float $unitPrice, int $quantity): float
     {
-        [$whole, $decimal] = array_pad(explode('.', $unitPrice, 2), 2, '0');
-        $cents = ((int) $whole * 100) + (int) str_pad($decimal, 2, '0');
+        $cents = (int) round($unitPrice * 100);
 
-        return number_format(($cents * $quantity) / 100, 2, '.', '');
+        return ($cents * $quantity) / 100;
     }
 }

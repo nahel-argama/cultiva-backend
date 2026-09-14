@@ -5,31 +5,23 @@ info:
 
 http:
   method: GET
-  url: "{{base_url}}/v1/offers?page={{page}}&per_page={{per_page}}"
+  url: "{{base_url}}/v1/offers?page=1&per_page=15"
   headers:
     - name: Accept
       value: application/json
   params:
     - name: page
-      value: "{{page}}"
+      value: "1"
       type: query
     - name: per_page
-      value: "{{per_page}}"
+      value: "15"
       type: query
   auth:
     type: bearer
     token: "{{access_token}}"
-
-runtime:
-  variables:
-    - name: page
-      value: "1"
-    - name: per_page
-      value: "10"
 
 settings:
   encodeUrl: true
   timeout: 0
   followRedirects: true
   maxRedirects: 5
-  forwardAuthorizationHeader: true
