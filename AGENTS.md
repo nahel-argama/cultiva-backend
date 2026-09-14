@@ -81,6 +81,16 @@ For DTOs, rely on the constructor property types and use `??` for optional
 input values; do not add redundant scalar casts or `array_key_exists()` checks.
 Controllers should only coordinate HTTP input and output; move branching and
 business-flow decisions into Actions.
+For readability, assign intermediate values before calling Actions instead of
+nesting long expressions in the call. Prefer:
+
+```php
+$retailer = $request->user()->retailer()->firstOrFail();
+$action->execute($retailer, $wishlistItem);
+```
+
+over `$action->execute($request->user()->retailer()->firstOrFail(),
+$wishlistItem);`.
 For simple computed model values, prefer explicit methods over Eloquent
 `Attribute` accessors when property-style access is not required.
 FormRequest `validated()` already returns only fields declared in `rules()`;
