@@ -89,7 +89,7 @@
 - [X] T034 [US3] Criar DTOs readonly `GetWishlistAnalyticsDTO` e resultado tipado em `domain/Models/Wishlist/DTO/GetWishlistAnalyticsDTO.php` e `domain/Models/Wishlist/DTO/WishlistAnalyticsResultDTO.php`
 - [X] T035 [US3] Criar `GetWishlistAnalyticsRequest` validando `state` e `limit` entre 1 e 50 em `domain/Models/Wishlist/Http/Requests/GetWishlistAnalyticsRequest.php`
 - [X] T036 [US3] Implementar `GetWishlistAnalyticsAction::execute()` em `domain/Models/Wishlist/Actions/GetWishlistAnalyticsAction.php` com count filtrado, group/order/limit no banco, sem carregar coleção completa, calculando posição e percentual explícitos
-- [X] T037 [US3] Implementar `WishlistAnalyticsResource` em `domain/Models/Wishlist/Http/Resources/WishlistAnalyticsResource.php` sem campos de identidade ou endereço
+- [X] T037 [US3] Implementar `WishlistAnalyticsTransformer` em `domain/Models/Wishlist/Transformers/WishlistAnalyticsTransformer.php` sem campos de identidade ou endereço
 - [X] T038 [US3] Adicionar `analytics()` ao controller em `domain/Models/Wishlist/Http/Controllers/WishlistController.php`
 - [X] T039 [US3] Registrar `GET /v1/wishlist/analytics` com `auth:sanctum` e `ability:access`, sem middleware de perfil, em `routes/api.php`
 - [X] T040 [US3] Executar Green da analytics no container `php` com `docker compose exec php php artisan test --filter=WishlistController\\AnalyticsTest` e `docker compose exec php php artisan test tests/Unit/domain/Models/Wishlist/Actions/GetWishlistAnalyticsActionTest.php`, registrando resultado em `specs/003-wishlist-analytics/tdd-evidence.md`

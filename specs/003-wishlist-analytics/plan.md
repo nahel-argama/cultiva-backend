@@ -66,6 +66,8 @@ domain/Models/Wishlist/
 │   ├── AddWishlistItemDTO.php
 │   ├── ListWishlistItemsDTO.php
 │   └── GetWishlistAnalyticsDTO.php
+├── Transformers/
+│   └── WishlistAnalyticsTransformer.php
 └── Http/
     ├── Controllers/WishlistController.php
     ├── Requests/
@@ -73,8 +75,7 @@ domain/Models/Wishlist/
     │   ├── ListWishlistItemsRequest.php
     │   └── GetWishlistAnalyticsRequest.php
     └── Resources/
-        ├── WishlistItemResource.php
-        └── WishlistAnalyticsResource.php
+        └── WishlistItemResource.php
 
 database/migrations/*_create_wishlist_items_table.php
 database/factories/WishlistItemFactory.php

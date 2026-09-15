@@ -75,8 +75,17 @@ authorization, or not-found responses unless the application explicitly
 requires a different contract.
 For simple Eloquent API representations, use Laravel API Resources and
 `Resource::collection()` instead of mapping models manually in controllers.
+For aggregate DTO responses that map nested results or compose custom output,
+use a dedicated `Transformers/<Name>Transformer` with a typed `transform()`
+method instead of a Resource. Inject it into the controller and preserve the
+HTTP response envelope there. Business calculations remain in Actions.
 For Eloquent writes, prefer the native combined methods such as `update()`
 instead of chaining `fill()` and `save()` separately.
+For concurrent check-then-create operations, prefer `Cache::lock()` over
+`createOrFirst()`. Scope the lock to the entity and unique business key, check
+for duplicates and insert while holding it, return the domain conflict response
+when acquisition fails, and always release acquired locks in `finally`. Keep
+database unique constraints as the final integrity safeguard.
 For DTOs, rely on the constructor property types and use `??` for optional
 input values; do not add redundant scalar casts or `array_key_exists()` checks.
 Controllers should only coordinate HTTP input and output; move branching and

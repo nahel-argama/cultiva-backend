@@ -13,7 +13,7 @@ use Cultiva\Models\Wishlist\DTO\ListWishlistItemsDTO;
 use Cultiva\Models\Wishlist\Http\Requests\AddWishlistItemRequest;
 use Cultiva\Models\Wishlist\Http\Requests\ListWishlistItemsRequest;
 use Cultiva\Models\Wishlist\Http\Requests\GetWishlistAnalyticsRequest;
-use Cultiva\Models\Wishlist\Http\Resources\WishlistAnalyticsResource;
+use Cultiva\Models\Wishlist\Transformers\WishlistAnalyticsTransformer;
 use Cultiva\Models\Wishlist\Http\Resources\WishlistItemResource;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -65,12 +65,13 @@ $retailer = $request->user()->retailer()->firstOrFail();
     public function analytics(
         GetWishlistAnalyticsRequest $request,
         GetWishlistAnalyticsAction $action,
-    ): WishlistAnalyticsResource {
+        WishlistAnalyticsTransformer $transformer,
+    ): JsonResponse {
         $result = $action->execute(
             $request->user(),
             GetWishlistAnalyticsDTO::from($request->validated()),
         );
 
-        return new WishlistAnalyticsResource($result);
+        return response()->json(['data' => $transformer->transform($result)]);
     }
 }

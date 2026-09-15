@@ -36,7 +36,7 @@ Como varejista autenticado, quero consultar, pesquisar e remover itens da minha 
 
 **Acceptance Scenarios**:
 
-1. **Given** itens de dois varejistas, **When** um varejista consulta `GET /api/v1/wishlist/items`, **Then** recebe somente seus próprios itens.
+1. **Given** itens de dois varejistas, **When** um varejista consulta `GET /v1/wishlist/items`, **Then** recebe somente seus próprios itens.
 2. **Given** itens com nomes diferentes, **When** informa `search`, **Then** recebe somente itens cujo nome do produto corresponde à pesquisa.
 3. **Given** mais itens que o tamanho da página, **When** informa `page` e `per_page` válidos, **Then** recebe a página solicitada e os metadados de paginação do contrato da API.
 4. **Given** um item pertencente a outro varejista, **When** tenta removê-lo, **Then** recebe não encontrado ou a resposta equivalente do escopo autorizado e o item permanece intacto.
@@ -52,7 +52,7 @@ Como produtor ou varejista autenticado, quero consultar a demanda agregada por p
 
 **Acceptance Scenarios**:
 
-1. **Given** itens agregáveis de vários varejistas, **When** um produtor ou varejista consulta `GET /api/v1/wishlist/analytics`, **Then** recebe os produtos agrupados, sem usuários, varejistas ou outras identidades.
+1. **Given** itens agregáveis de vários varejistas, **When** um produtor ou varejista consulta `GET /v1/wishlist/analytics`, **Then** recebe os produtos agrupados, sem usuários, varejistas ou outras identidades.
 2. **Given** itens em estados diferentes, **When** informa `state`, **Then** o total e os resultados consideram somente o estado salvo nos itens.
 3. **Given** resultados com totais diferentes, **When** consulta analytics, **Then** os resultados são ordenados pelo total decrescente e, em empate, por `source_product_id` em ordem determinística.
 4. **Given** um `limit` válido, **When** consulta analytics, **Then** recebe no máximo essa quantidade de produtos, sem alterar o total filtrado usado nos percentuais.
@@ -81,12 +81,12 @@ Como produtor ou varejista autenticado, quero consultar a demanda agregada por p
 - **FR-005**: O item MUST persistir, no mínimo, `id`, `retailer_id`, `source_product_id`, `product_name`, `state`, `created_at` e `updated_at`.
 - **FR-006**: O sistema MUST impedir duplicidade por `retailer_id` + `source_product_id` e retornar 409 quando o item já existir.
 - **FR-007**: Nome e estado MUST ser snapshots imutáveis do momento da inclusão; alterações posteriores no produto ou endereço não podem modificar itens anteriores.
-- **FR-008**: O endpoint `POST /api/v1/wishlist/items` MUST retornar 201 com o item criado em `data`, incluindo `id`, `source_product_id`, `product_name`, `state` e `created_at`.
-- **FR-009**: O endpoint `GET /api/v1/wishlist/items` MUST retornar somente itens do varejista autenticado, aceitar pesquisa por `product_name` e suportar paginação com defaults page 1/per_page 15 e máximo 100.
+- **FR-008**: O endpoint `POST /v1/wishlist/items` MUST retornar 201 com o item criado em `data`, incluindo `id`, `source_product_id`, `product_name`, `state` e `created_at`.
+- **FR-009**: O endpoint `GET /v1/wishlist/items` MUST retornar somente itens do varejista autenticado, aceitar pesquisa por `product_name` e suportar paginação com defaults page 1/per_page 15 e máximo 100.
 - **FR-010**: Toda listagem da wishlist MUST retornar paginação nativa com `data`, `links` e `meta`, sem permitir `retailer_id` informado pelo cliente.
-- **FR-011**: O endpoint `DELETE /api/v1/wishlist/items/{wishlistItem}` MUST remover somente item pertencente ao varejista autenticado e retornar sem conteúdo ou o padrão HTTP equivalente do projeto.
+- **FR-011**: O endpoint `DELETE /v1/wishlist/items/{wishlistItem}` MUST remover somente item pertencente ao varejista autenticado e retornar sem conteúdo ou o padrão HTTP equivalente do projeto.
 - **FR-012**: Produtores e outros perfis MUST ser impedidos de adicionar, listar ou remover wishlist; produtores e varejistas com ability `access` podem consultar analytics.
-- **FR-013**: O endpoint `GET /api/v1/wishlist/analytics` MUST aceitar filtro opcional por `state` e `limit` default 10, máximo 50.
+- **FR-013**: O endpoint `GET /v1/wishlist/analytics` MUST aceitar filtro opcional por `state` e `limit` default 10, máximo 50.
 - **FR-014**: A analytics MUST agrupar por `source_product_id` e `product_name`, calcular `total_items` após o filtro, ordenar por total decrescente e por `source_product_id` em empate, retornar os primeiros `limit` produtos e adicionar `others` somente quando houver grupos omitidos.
 - **FR-015**: Cada resultado da analytics MUST conter `position`, `source_product_id`, `product_name`, `total` e `percentage`, sem identidade de usuários ou varejistas.
 - **FR-016**: `percentage` MUST ser inteiro arredondado para o inteiro mais próximo, calculado sobre o total global de WishlistItems do site, sem depender de `limit`; `others` MUST somar os grupos omitidos e usar o mesmo denominador global. Quando não houver itens filtrados, a resposta MUST conter resultados vazios e total zero.
@@ -123,7 +123,7 @@ Como produtor ou varejista autenticado, quero consultar a demanda agregada por p
 
 ## Assumptions
 
-- A rota pública usa o prefixo `/api/v1`, conforme a convenção vigente do backend.
+- A rota pública usa o prefixo `/v1`, conforme a convenção vigente do backend.
 - O limite padrão da analytics será 10 e o máximo 50; essa escolha mantém respostas enxutas para redes móveis e cobre os principais produtos demandados.
 - Percentuais inteiros usam arredondamento convencional para o inteiro mais próximo; o arredondamento pode fazer a soma visual não ser exatamente 100.
 - `total_items` continua sendo o total após o filtro `state`; o denominador de `percentage` é o total global de todos os WishlistItems. `others` é um resumo separado com `total` e `percentage`, e só aparece quando a quantidade de grupos excede `limit`.
