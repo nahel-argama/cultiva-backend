@@ -1,0 +1,25 @@
+info:
+  name: Remove Wishlist Item
+  type: http
+  seq: 3
+
+http:
+  method: DELETE
+  url: "{{base_url}}/v1/wishlist/items/:wishlist_item_id"
+  headers:
+    - name: Accept
+      value: application/json
+  params:
+    - name: wishlist_item_id
+      value: "{{wishlist_item_id}}"
+      type: path
+  auth:
+    type: bearer
+    token: "{{access_token}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: true

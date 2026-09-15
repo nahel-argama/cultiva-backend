@@ -26,5 +26,8 @@ class TranslationsTest extends TestCase
         $this->assertSame('Failed to retrieve geographic information.', Lang::get('integrations.geo.failed_to_search'));
         $this->assertSame('Product not found in the external catalog.', Lang::get('integrations.product_source.not_found'));
         $this->assertSame('Product catalog unavailable.', Lang::get('integrations.product_source.unavailable'));
+        $this->assertSame('A company address is required to add a wishlist item.', Lang::get('wishlist.address_required'));
+        $this->assertSame('This product is already in the wishlist.', Lang::get('wishlist.already_exists'));
+        $this->assertSame('Product not found.', Lang::get('wishlist.product_not_found'));
     }
 }
