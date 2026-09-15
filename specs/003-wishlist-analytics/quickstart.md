@@ -35,11 +35,11 @@ docker compose exec php php artisan test
 
 ## End-to-end acceptance
 
-- `POST /api/v1/wishlist/items` aceita `product_id`, retorna 201 e snapshotta nome ProductSource + estado do endereço.
+- `POST /v1/wishlist/items` aceita `product_id`, retorna 201 e snapshotta nome ProductSource + estado do endereço.
 - Produto inexistente retorna 404; ausência de endereço retorna 422; duplicidade retorna 409; produtor não adiciona.
-- `GET /api/v1/wishlist/items` isola retailer, pesquisa `product_name` e retorna paginação nativa.
-- `DELETE /api/v1/wishlist/items/{wishlistItem}` não remove item de outro retailer e retorna 204 para item próprio.
-- `GET /api/v1/wishlist/analytics` funciona para producer e retailer, filtra estado salvo, ordena por total/id e respeita `limit` 10/50.
+- `GET /v1/wishlist/items` isola retailer, pesquisa `product_name` e retorna paginação nativa.
+- `DELETE /v1/wishlist/items/{wishlistItem}` não remove item de outro retailer e retorna 204 para item próprio.
+- `GET /v1/wishlist/analytics` funciona para producer e retailer, filtra estado salvo, ordena por total/id e respeita `limit` 10/50.
 - Com mais grupos que o `limit`, retorna `others` como resumo separado, contendo apenas `total` e `percentage`; sem grupos excedentes, não retorna `others`.
 - `percentage` usa todos os WishlistItems do site como denominador, mesmo quando `limit` ou `state` restringem os resultados.
 - Analytics retorna somente `state`, `total_items` e resultados; não retorna user, retailer ou endereço.
