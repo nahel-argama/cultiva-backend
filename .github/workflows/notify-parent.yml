@@ -1,0 +1,24 @@
+name: Notify parent repository
+
+on:
+  push:
+    branches: [main]
+
+permissions: {}
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Request parent update
+        env:
+          TOKEN: ${{ secrets.CULTIVA_PARENT_DISPATCH_TOKEN }}
+          SHA: ${{ github.sha }}
+        run: |
+          curl --fail-with-body --retry 3 -L \
+            -X POST \
+            -H 'Accept: application/vnd.github+json' \
+            -H "Authorization: Bearer $TOKEN" \
+            -H 'X-GitHub-Api-Version: 2022-11-28' \
+            https://api.github.com/repos/nahel-argama/cultiva/dispatches \
+            -d "{\"event_type\":\"submodule-updated\",\"client_payload\":{\"path\":\"backend\",\"sha\":\"$SHA\"}}"
