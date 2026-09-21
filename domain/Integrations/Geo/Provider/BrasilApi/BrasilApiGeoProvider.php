@@ -1,6 +1,6 @@
 <?php
 
-namespace Cultiva\Integrations\Geo\Adapters;
+namespace Cultiva\Integrations\Geo\Provider\BrasilApi;
 
 use Cultiva\Base\Exceptions\CultivaException;
 use Cultiva\Base\ValueObjects\Cep;
@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Lang;
 use Override;
 use Throwable;
 
-final class BrasilApiGeoAdapter implements GeoProviderContract
+final class BrasilApiGeoProvider implements GeoProviderContract
 {
     public function __construct(
         private readonly Client $client,
