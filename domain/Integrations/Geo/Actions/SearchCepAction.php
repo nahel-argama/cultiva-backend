@@ -14,8 +14,8 @@ class SearchCepAction
 
     public function execute(Cep $cep): GeoAddressDTO
     {
-        $provider = $this->resolveGeoProvider->execute();
+        $factoryMethod = $this->resolveGeoProvider->execute();
 
-        return $provider->searchByCep($cep);
+        return $factoryMethod->searchByCep($cep);
     }
 }

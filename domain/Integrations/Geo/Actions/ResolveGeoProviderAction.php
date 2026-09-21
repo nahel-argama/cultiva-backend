@@ -3,9 +3,9 @@
 namespace Cultiva\Integrations\Geo\Actions;
 
 use Cultiva\Base\Exceptions\CultivaException;
-use Cultiva\Integrations\Geo\Contracts\GeoProviderContract;
 use Cultiva\Integrations\Geo\GeoConfig;
-use Cultiva\Integrations\Geo\Provider\BrasilApi\BrasilApiGeoProvider;
+use Cultiva\Integrations\Geo\GeoProviderFactoryMethod;
+use Cultiva\Integrations\Geo\Provider\BrasilApi\BrasilApiGeoProviderFactoryMethod;
 use Illuminate\Contracts\Container\Container;
 
 class ResolveGeoProviderAction
@@ -18,12 +18,12 @@ class ResolveGeoProviderAction
     /**
      * @throws CultivaException
      */
-    public function execute(): GeoProviderContract
+    public function execute(): GeoProviderFactoryMethod
     {
         $providerName = $this->config->getProvider();
 
         $providerClass = match ($providerName) {
-            'brasilapi' => BrasilApiGeoProvider::class,
+            'brasilapi' => BrasilApiGeoProviderFactoryMethod::class,
             default => throw new CultivaException(422, "Unsupported geo provider: {$providerName}"),
         };
 
