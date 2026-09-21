@@ -1,16 +1,16 @@
 <?php
 
-namespace Tests\Unit\domain\Integrations\Geo\Provider\BrasilApi;
+namespace Tests\Unit\domain\Integrations\Geo\Adapters;
 
 use Cultiva\Base\Exceptions\CultivaException;
 use Cultiva\Base\ValueObjects\Cep;
+use Cultiva\Integrations\Geo\Adapters\BrasilApiGeoAdapter;
 use Cultiva\Integrations\Geo\DTO\GeoAddressDTO;
-use Cultiva\Integrations\Geo\Provider\BrasilApi\BrasilApiGeoProvider;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 
-class BrasilApiGeoProviderTest extends TestCase
+class BrasilApiGeoAdapterTest extends TestCase
 {
     public function test_should_return_geo_address_dto_when_brasil_api_returns_successful_response(): void
     {
@@ -22,7 +22,7 @@ class BrasilApiGeoProviderTest extends TestCase
         ]);
 
         $cep = new Cep('89010-025');
-        $sut = $this->app->make(BrasilApiGeoProvider::class);
+        $sut = $this->app->make(BrasilApiGeoAdapter::class);
 
         // Action
         $result = $sut->searchByCep($cep);
@@ -48,7 +48,7 @@ class BrasilApiGeoProviderTest extends TestCase
         ]);
 
         $cep = new Cep('89010025');
-        $sut = $this->app->make(BrasilApiGeoProvider::class);
+        $sut = $this->app->make(BrasilApiGeoAdapter::class);
 
         // Action & Assert
         $this->expectException(CultivaException::class);
@@ -63,7 +63,7 @@ class BrasilApiGeoProviderTest extends TestCase
         ]);
 
         $cep = new Cep('89010025');
-        $sut = $this->app->make(BrasilApiGeoProvider::class);
+        $sut = $this->app->make(BrasilApiGeoAdapter::class);
 
         // Action & Assert
         $this->expectException(CultivaException::class);
