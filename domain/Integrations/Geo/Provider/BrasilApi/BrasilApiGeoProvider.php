@@ -12,16 +12,11 @@ use Illuminate\Support\Facades\Lang;
 use Override;
 use Throwable;
 
-/**
- * @nicolas
- *
- *  Aqui só faço uma implementação simples do serviço, já que ele tem só um método abstrato na interface
- */
 final class BrasilApiGeoProvider implements GeoProviderContract
 {
     public function __construct(
         private readonly Client $client,
-        private readonly CepAddressTransformer $transformer
+        private readonly CepAddressTransformer $transformer,
     ) {}
 
     #[Override]
