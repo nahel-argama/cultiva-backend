@@ -84,7 +84,7 @@ return new class extends Migration
             $table->foreignId('delivery_id')->constrained('deliveries')->cascadeOnDelete();
 
             $table->string('plate', 8)->unique();
-            $table->string('cargo_type', 30);
+            $table->foreignId('cargo_type_id')->constrained('cargo_types')->restrictOnDelete();
 
             $table->timestamps();
             $table->softDeletes();

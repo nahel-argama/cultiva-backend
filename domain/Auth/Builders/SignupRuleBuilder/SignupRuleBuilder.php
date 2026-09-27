@@ -7,7 +7,7 @@ namespace Cultiva\Auth\Builders\SignupRuleBuilder;
 use Cultiva\Auth\Builders\SignupRuleBuilder\Contracts\SignupRuleBuilderInterface;
 use Cultiva\Auth\Enums\ProfileType;
 use Cultiva\Models\Delivery\Enums\CnhCategory;
-use Cultiva\Models\Vehicle\Enums\CargoType;
+use Cultiva\Models\CargoType\Enums\CargoType;
 use Cultiva\Models\Producer\Enums\ActivitySegment;
 use Cultiva\Models\Retailer\Enums\BusinessType;
 use Illuminate\Validation\Rule;

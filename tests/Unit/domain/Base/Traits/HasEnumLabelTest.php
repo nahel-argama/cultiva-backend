@@ -8,7 +8,7 @@ use Cultiva\Auth\Enums\ProfileType;
 use Cultiva\Models\Delivery\Enums\CnhCategory;
 use Cultiva\Models\Producer\Enums\ActivitySegment;
 use Cultiva\Models\Retailer\Enums\BusinessType;
-use Cultiva\Models\Vehicle\Enums\CargoType;
+use Cultiva\Models\CargoType\Enums\CargoType;
 use Tests\TestCase;
 
 class HasEnumLabelTest extends TestCase

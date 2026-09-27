@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\domain\Auth\Controllers;
 
+use Cultiva\Models\CargoType\CargoType;
 use Cultiva\Models\Company\Company;
 use Cultiva\Models\User\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -231,10 +232,12 @@ class RegisterControllerTest extends TestCase
             'cnh_category' => 'B',
         ]);
 
+        $refrigeratedType = CargoType::where('code', 'refrigerated')->first();
+
         $this->assertDatabaseHas('vehicles', [
-            'delivery_id' => $user->delivery->id,
-            'plate'       => 'BRA2E19',
-            'cargo_type'  => 'refrigerated',
+            'delivery_id'   => $user->delivery->id,
+            'plate'         => 'BRA2E19',
+            'cargo_type_id' => $refrigeratedType->id,
         ]);
 
         $this->assertDatabaseHas('addresses', [
