@@ -24,6 +24,8 @@ final class StoreOfferRequest extends FormRequest
             'unit_price' => ['required', 'string', 'numeric', 'gt:0', 'regex:/^[0-9]+(?:\.[0-9]{1,2})?$/'],
             'total_quantity' => ['required', 'integer', 'min:0'],
             'status' => [Rule::enum(OfferStatus::class)],
+            'harvest_date' => ['required', 'date', 'date_format:Y-m-d', 'after_or_equal:today'],
+            'lifespan_days' => ['required', 'integer', 'min:1'],
         ];
     }
 }

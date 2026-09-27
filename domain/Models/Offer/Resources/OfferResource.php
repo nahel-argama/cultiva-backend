@@ -21,6 +21,8 @@ final class OfferResource extends JsonResource
             'available_quantity' => $this->availableQuantity(),
             'status' => $this->status->value,
             'is_visible' => $this->isVisible(),
+            'harvest_date' => $this->harvest_date?->toDateString(),
+            'lifespan_days' => $this->lifespan_days,
             'created_at' => $this->created_at->toISOString(),
             'updated_at' => $this->updated_at->toISOString(),
         ];

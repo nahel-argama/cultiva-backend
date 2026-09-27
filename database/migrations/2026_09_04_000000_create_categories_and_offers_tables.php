@@ -35,6 +35,8 @@ return new class extends Migration
             $table->integer('total_quantity');
             $table->integer('reserved_quantity')->default(0);
             $table->string('status', 8)->default('inactive');
+            $table->date('harvest_date');
+            $table->integer('lifespan_days');
             $table->timestamps();
 
             $table->index(['producer_id', 'created_at']);
@@ -46,6 +48,7 @@ return new class extends Migration
         DB::statement('ALTER TABLE offers ADD CONSTRAINT offers_reserved_quantity_non_negative CHECK (reserved_quantity >= 0)');
         DB::statement('ALTER TABLE offers ADD CONSTRAINT offers_reserved_not_above_total CHECK (reserved_quantity <= total_quantity)');
         DB::statement("ALTER TABLE offers ADD CONSTRAINT offers_status_valid CHECK (status IN ('active', 'inactive'))");
+        DB::statement('ALTER TABLE offers ADD CONSTRAINT offers_lifespan_days_positive CHECK (lifespan_days > 0)');
     }
 
     public function down(): void

@@ -44,6 +44,8 @@ class UpdateTest extends TestCase
             'total_quantity' => 20,
             'producer_id' => 999,
             'reserved_quantity' => 99,
+            'harvest_date' => '2099-01-01',
+            'lifespan_days' => 999,
         ];
 
         // Action
@@ -57,7 +59,9 @@ class UpdateTest extends TestCase
             ->assertJsonPath('data.unit_price', '25.90')
             ->assertJsonPath('data.total_quantity', 20)
             ->assertJsonPath('data.reserved_quantity', 2)
-            ->assertJsonPath('data.status', 'active');
+            ->assertJsonPath('data.status', 'active')
+            ->assertJsonPath('data.harvest_date', $offer->harvest_date->toDateString())
+            ->assertJsonPath('data.lifespan_days', $offer->lifespan_days);
         Http::assertNothingSent();
         $this->assertDatabaseHas('offers', [
             'id' => $offer->id,
@@ -69,6 +73,8 @@ class UpdateTest extends TestCase
             'total_quantity' => 20,
             'reserved_quantity' => 2,
             'status' => 'active',
+            'harvest_date' => $offer->harvest_date->toDateString(),
+            'lifespan_days' => $offer->lifespan_days,
         ]);
     }
 

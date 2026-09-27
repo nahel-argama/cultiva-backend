@@ -18,7 +18,9 @@ http:
         "source_product_id": "3",
         "category_id": 1,
         "unit_price": "12.50",
-        "total_quantity": 20
+        "total_quantity": 20,
+        "harvest_date": "2026-10-01",
+        "lifespan_days": 7
       }
   auth:
     type: bearer

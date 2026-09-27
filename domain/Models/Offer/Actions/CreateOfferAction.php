@@ -33,6 +33,8 @@ final class CreateOfferAction
             'total_quantity' => $data->totalQuantity,
             'reserved_quantity' => 0,
             'status' => OfferStatus::ACTIVE,
+            'harvest_date' => $data->harvestDate,
+            'lifespan_days' => $data->lifespanDays,
         ]);
     }
 }
