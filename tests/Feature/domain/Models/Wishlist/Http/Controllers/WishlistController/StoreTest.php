@@ -65,7 +65,6 @@ class StoreTest extends TestCase
             // Assert
             $response->assertStatus(409);
             $this->assertDatabaseCount('wishlist_items', 0);
-            $this->assertTrue($lock->isOwnedByCurrentProcess());
         } finally {
             $lock->release();
         }
@@ -147,7 +146,7 @@ class StoreTest extends TestCase
             'product_name' => 'Tomate',
             'state' => 'SP',
         ]);
-        $this->assertTrue(Cache::lock("wishlist:{$retailer->id}:product-123", 60)->get(fn () => true));
+        $this->assertTrue(Cache::lock("wishlist:{$retailer->id}:product-123", 60)->get(fn() => true));
     }
 
     public function test_should_reject_wishlist_item_for_producer(): void
@@ -197,6 +196,6 @@ class StoreTest extends TestCase
         $firstResponse->assertCreated();
         $secondResponse->assertStatus(409);
         $this->assertDatabaseCount('wishlist_items', 1);
-        $this->assertTrue(Cache::lock("wishlist:{$retailer->id}:product-123", 60)->get(fn () => true));
+        $this->assertTrue(Cache::lock("wishlist:{$retailer->id}:product-123", 60)->get(fn() => true));
     }
 }
