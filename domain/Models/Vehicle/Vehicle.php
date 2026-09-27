@@ -3,8 +3,8 @@
 namespace Cultiva\Models\Vehicle;
 
 use Carbon\CarbonImmutable;
+use Cultiva\Models\CargoType\CargoType;
 use Cultiva\Models\Delivery\Delivery;
-use Cultiva\Models\Vehicle\Enums\CargoType;
 use Database\Factories\VehicleFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -15,12 +15,13 @@ use Override;
 /**
  * @property-read int $id
  * @property-read int $delivery_id
+ * @property-read int $cargo_type_id
  * @property-read string $plate
- * @property-read CargoType $cargo_type
  * @property-read CarbonImmutable $created_at
  * @property-read ?CarbonImmutable $updated_at
  * @property-read ?CarbonImmutable $deleted_at
  * @property-read ?Delivery $delivery
+ * @property-read ?CargoType $cargoType
  */
 class Vehicle extends Model
 {
@@ -29,15 +30,15 @@ class Vehicle extends Model
 
     protected $fillable = [
         'delivery_id',
+        'cargo_type_id',
         'plate',
-        'cargo_type',
     ];
 
     #[Override]
     protected function casts(): array
     {
         return [
-            'cargo_type' => CargoType::class,
+            'cargo_type_id' => 'integer',
         ];
     }
 
@@ -47,5 +48,13 @@ class Vehicle extends Model
     public function delivery(): BelongsTo
     {
         return $this->belongsTo(Delivery::class);
+    }
+
+    /**
+     * @return BelongsTo<CargoType, $this>
+     */
+    public function cargoType(): BelongsTo
+    {
+        return $this->belongsTo(CargoType::class);
     }
 }

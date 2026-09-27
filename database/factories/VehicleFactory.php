@@ -2,7 +2,7 @@
 
 namespace Database\Factories;
 
-use Cultiva\Models\Vehicle\Enums\CargoType;
+use Cultiva\Models\CargoType\CargoType;
 use Cultiva\Models\Vehicle\Vehicle;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -21,9 +21,9 @@ class VehicleFactory extends Factory
     public function definition(): array
     {
         return [
-            'delivery_id' => DeliveryFactory::new(),
-            'plate'       => strtoupper($this->faker->unique()->bothify('???#?##')),
-            'cargo_type'  => $this->faker->randomElement(CargoType::cases()),
+            'delivery_id'   => DeliveryFactory::new(),
+            'cargo_type_id' => $this->faker->randomElement(CargoType::pluck('id')->toArray()),
+            'plate'         => strtoupper($this->faker->unique()->bothify('???#?##')),
         ];
     }
 }

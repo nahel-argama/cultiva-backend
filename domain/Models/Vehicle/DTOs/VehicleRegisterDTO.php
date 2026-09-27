@@ -2,7 +2,7 @@
 
 namespace Cultiva\Models\Vehicle\DTOs;
 
-use Cultiva\Models\Vehicle\Enums\CargoType;
+use Cultiva\Models\CargoType\Enums\CargoType;
 
 final class VehicleRegisterDTO
 {

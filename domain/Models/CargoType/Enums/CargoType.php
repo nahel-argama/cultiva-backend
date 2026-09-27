@@ -1,6 +1,6 @@
 <?php
 
-namespace Cultiva\Models\Vehicle\Enums;
+namespace Cultiva\Models\CargoType\Enums;
 
 use Cultiva\Base\Traits\HasEnumLabel;
 
