@@ -35,4 +35,29 @@ return [
         'climate_controlled' => 'Climatizada',
         'refrigerated' => 'Refrigerada',
     ],
+    'delivery_trip_status' => [
+        'available' => 'Disponível',
+        'assigned' => 'Atribuída',
+        'in_progress' => 'Em andamento',
+        'completed' => 'Concluída',
+        'cancelled' => 'Cancelada',
+    ],
+    'delivery_trip_stop_type' => [
+        'pickup' => 'Coleta',
+        'dropoff' => 'Entrega',
+    ],
+    'delivery_trip_stop_status' => [
+        'pending' => 'Pendente',
+        'arrived' => 'Chegou',
+        'completed' => 'Concluída',
+        'skipped' => 'Ignorada',
+    ],
+    'delivery_order_status' => [
+        'pending' => 'Pendente',
+        'assigned' => 'Atribuído',
+        'in_transit' => 'Em trânsito',
+        'delivered' => 'Entregue',
+        'failed' => 'Falhou',
+        'cancelled' => 'Cancelado',
+    ],
 ];
