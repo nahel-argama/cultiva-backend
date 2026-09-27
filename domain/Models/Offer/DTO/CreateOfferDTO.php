@@ -12,6 +12,8 @@ final readonly class CreateOfferDTO
         public string $unitPrice,
         public int $totalQuantity,
         public OfferStatus $status,
+        public string $harvestDate,
+        public int $lifespanDays,
     ) {}
 
     public static function from(array $data): self
@@ -22,6 +24,8 @@ final readonly class CreateOfferDTO
             unitPrice: $data['unit_price'],
             totalQuantity: $data['total_quantity'],
             status: OfferStatus::from($data['status'] ?? OfferStatus::INACTIVE->value),
+            harvestDate: $data['harvest_date'],
+            lifespanDays: (int) $data['lifespan_days'],
         );
     }
 }

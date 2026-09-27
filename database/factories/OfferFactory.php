@@ -24,6 +24,8 @@ class OfferFactory extends Factory
             'total_quantity' => $this->faker->numberBetween(1, 1000),
             'reserved_quantity' => 0,
             'status' => OfferStatus::INACTIVE,
+            'harvest_date' => $this->faker->dateTimeBetween('now', '+30 days')->format('Y-m-d'),
+            'lifespan_days' => $this->faker->numberBetween(1, 30),
         ];
     }
 }

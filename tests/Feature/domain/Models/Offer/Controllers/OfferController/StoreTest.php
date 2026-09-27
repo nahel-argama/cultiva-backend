@@ -27,11 +27,14 @@ class StoreTest extends TestCase
         $producer = ProducerFactory::new()->create();
         $category = CategoryFactory::new()->create(['name' => 'Categoria de teste']);
         Sanctum::actingAs($producer->company->user, ['access']);
+        $harvestDate = now()->addDays(5)->format('Y-m-d');
         $payload = [
             'source_product_id' => '0002',
             'category_id' => $category->id,
             'unit_price' => '12.50',
             'total_quantity' => 20,
+            'harvest_date' => $harvestDate,
+            'lifespan_days' => 7,
         ];
 
         // Action
@@ -47,7 +50,9 @@ class StoreTest extends TestCase
             ->assertJsonPath('data.reserved_quantity', 0)
             ->assertJsonPath('data.available_quantity', 20)
             ->assertJsonPath('data.status', 'active')
-            ->assertJsonPath('data.is_visible', true);
+            ->assertJsonPath('data.is_visible', true)
+            ->assertJsonPath('data.harvest_date', $harvestDate)
+            ->assertJsonPath('data.lifespan_days', 7);
         $this->assertDatabaseHas('offers', [
             'producer_id' => $producer->id,
             'source_product_id' => '0002',
@@ -57,6 +62,8 @@ class StoreTest extends TestCase
             'total_quantity' => 20,
             'reserved_quantity' => 0,
             'status' => 'active',
+            'harvest_date' => $harvestDate,
+            'lifespan_days' => 7,
         ]);
     }
 
@@ -71,6 +78,7 @@ class StoreTest extends TestCase
         $producer = ProducerFactory::new()->create();
         $category = CategoryFactory::new()->create();
         Sanctum::actingAs($producer->company->user, ['access']);
+        $harvestDate = now()->addDays(2)->format('Y-m-d');
         $payload = [
             'source_product_id' => 2,
             'category_id' => $category->id,
@@ -79,6 +87,8 @@ class StoreTest extends TestCase
             'status' => 'inactive',
             'producer_id' => 999,
             'reserved_quantity' => 99,
+            'harvest_date' => $harvestDate,
+            'lifespan_days' => 5,
         ];
 
         // Action
@@ -89,11 +99,15 @@ class StoreTest extends TestCase
             ->assertJsonPath('data.source_product_id', '0002')
             ->assertJsonPath('data.product_name', 'Tomate Italiano')
             ->assertJsonPath('data.status', 'active')
-            ->assertJsonPath('data.is_visible', true);
+            ->assertJsonPath('data.is_visible', true)
+            ->assertJsonPath('data.harvest_date', $harvestDate)
+            ->assertJsonPath('data.lifespan_days', 5);
         $this->assertDatabaseHas('offers', [
             'producer_id' => $producer->id,
             'source_product_id' => '0002',
             'product_name' => 'Tomate Italiano',
+            'harvest_date' => $harvestDate,
+            'lifespan_days' => 5,
         ]);
     }
 
@@ -109,6 +123,8 @@ class StoreTest extends TestCase
             'category_id' => 1,
             'unit_price' => '12.50',
             'total_quantity' => 10,
+            'harvest_date' => now()->addDays(2)->format('Y-m-d'),
+            'lifespan_days' => 5,
         ], $changes);
 
         // Action
@@ -129,6 +145,13 @@ class StoreTest extends TestCase
             'more than two decimal places' => [['unit_price' => '1.999']],
             'negative total quantity' => [['total_quantity' => -1]],
             'invalid status' => [['status' => 'draft']],
+            'missing harvest date' => [['harvest_date' => '']],
+            'invalid harvest date format' => [['harvest_date' => '01-10-2026']],
+            'past harvest date' => [['harvest_date' => now()->subDay()->format('Y-m-d')]],
+            'missing lifespan days' => [['lifespan_days' => null]],
+            'zero lifespan days' => [['lifespan_days' => 0]],
+            'negative lifespan days' => [['lifespan_days' => -1]],
+            'non integer lifespan days' => [['lifespan_days' => 'invalid']],
         ];
     }
 
@@ -147,6 +170,8 @@ class StoreTest extends TestCase
             'category_id' => 999,
             'unit_price' => '12.50',
             'total_quantity' => 10,
+            'harvest_date' => now()->addDays(2)->format('Y-m-d'),
+            'lifespan_days' => 5,
         ];
 
         // Action
@@ -172,6 +197,8 @@ class StoreTest extends TestCase
             'category_id' => $category->id,
             'unit_price' => '12.50',
             'total_quantity' => 10,
+            'harvest_date' => now()->addDays(2)->format('Y-m-d'),
+            'lifespan_days' => 5,
         ];
 
         // Action
@@ -197,6 +224,8 @@ class StoreTest extends TestCase
             'category_id' => $category->id,
             'unit_price' => '12.50',
             'total_quantity' => 10,
+            'harvest_date' => now()->addDays(2)->format('Y-m-d'),
+            'lifespan_days' => 5,
         ];
 
         // Action
@@ -222,6 +251,8 @@ class StoreTest extends TestCase
             'category_id' => $category->id,
             'unit_price' => '12.50',
             'total_quantity' => 10,
+            'harvest_date' => now()->addDays(2)->format('Y-m-d'),
+            'lifespan_days' => 5,
         ];
 
         // Action

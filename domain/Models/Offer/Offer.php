@@ -25,6 +25,8 @@ use Override;
  * @property-read int $total_quantity
  * @property-read int $reserved_quantity
  * @property-read OfferStatus $status
+ * @property-read CarbonImmutable $harvest_date
+ * @property-read int $lifespan_days
  * @property-read CarbonImmutable $created_at
  * @property-read ?CarbonImmutable $updated_at
  * @property-read Producer $producer
@@ -45,6 +47,8 @@ class Offer extends Model
         'total_quantity',
         'reserved_quantity',
         'status',
+        'harvest_date',
+        'lifespan_days',
     ];
 
     #[Override]
@@ -55,6 +59,8 @@ class Offer extends Model
             'total_quantity' => 'integer',
             'reserved_quantity' => 'integer',
             'status' => OfferStatus::class,
+            'harvest_date' => 'immutable_date',
+            'lifespan_days' => 'integer',
         ];
     }
 
