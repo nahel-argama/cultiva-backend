@@ -27,6 +27,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('delivery_id')->nullable()->constrained('deliveries')->nullOnDelete();
             $table->foreignId('vehicle_id')->nullable()->constrained('vehicles')->nullOnDelete();
+            $table->foreignId('cargo_type_id')->constrained('cargo_types')->restrictOnDelete();
             $table->string('status', 20)->default('available');
             $table->timestamp('started_at')->nullable();
             $table->timestamp('completed_at')->nullable();
