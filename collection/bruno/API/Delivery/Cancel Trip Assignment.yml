@@ -1,0 +1,25 @@
+info:
+  name: Cancel Trip Assignment
+  type: http
+  seq: 4
+
+http:
+  method: POST
+  url: "{{base_url}}/v1/delivery/trips/:trip/cancel"
+  headers:
+    - name: Accept
+      value: application/json
+  params:
+    - name: trip
+      value: "1"
+      type: path
+  auth:
+    type: bearer
+    token: "{{access_token}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: true
