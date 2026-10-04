@@ -6,6 +6,7 @@ use Cultiva\Base\Exceptions\CultivaException;
 use Cultiva\Models\Offer\Offer;
 use Cultiva\Models\Offer\Enums\OfferStatus;
 use Cultiva\Models\Purchase\DTO\CreatePurchaseDTO;
+use Cultiva\Models\Purchase\Events\PurchaseCreated;
 use Cultiva\Models\Purchase\Purchase;
 use Cultiva\Models\Retailer\Retailer;
 use Illuminate\Support\Facades\DB;
@@ -15,7 +16,7 @@ final class CreatePurchaseAction
 {
     public function execute(Retailer $retailer, int $offerId, CreatePurchaseDTO $data): Purchase
     {
-        return DB::transaction(function () use ($retailer, $offerId, $data): Purchase {
+        $purchase = DB::transaction(function () use ($retailer, $offerId, $data): Purchase {
             $offer = Offer::query()->lockForUpdate()->findOrFail($offerId);
 
             $availableQuantity = $offer->availableQuantity();
@@ -49,6 +50,10 @@ final class CreatePurchaseAction
 
             return $purchase;
         });
+
+        event(new PurchaseCreated($purchase));
+
+        return $purchase;
     }
 
     private function calculateTotalPrice(float $unitPrice, int $quantity): float
