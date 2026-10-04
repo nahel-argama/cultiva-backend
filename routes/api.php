@@ -13,5 +13,6 @@ Route::group([
             require __DIR__.'/api/offers.php';
             require __DIR__.'/api/purchases.php';
             require __DIR__.'/api/wishlist.php';
+            require __DIR__.'/api/delivery.php';
         });
 });
