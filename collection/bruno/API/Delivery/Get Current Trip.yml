@@ -1,0 +1,21 @@
+info:
+  name: Get Current Trip
+  type: http
+  seq: 2
+
+http:
+  method: GET
+  url: "{{base_url}}/v1/delivery/trips/current"
+  headers:
+    - name: Accept
+      value: application/json
+  auth:
+    type: bearer
+    token: "{{access_token}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: true

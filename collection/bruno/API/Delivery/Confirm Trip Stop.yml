@@ -1,0 +1,25 @@
+info:
+  name: Confirm Trip Stop
+  type: http
+  seq: 5
+
+http:
+  method: POST
+  url: "{{base_url}}/v1/delivery/stops/:stop/confirm"
+  headers:
+    - name: Accept
+      value: application/json
+  params:
+    - name: stop
+      value: "1"
+      type: path
+  auth:
+    type: bearer
+    token: "{{access_token}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: true

@@ -1,0 +1,21 @@
+info:
+  name: List Available Trips
+  type: http
+  seq: 1
+
+http:
+  method: GET
+  url: "{{base_url}}/v1/delivery/trips?page={{page}}&per_page={{per_page}}"
+  headers:
+    - name: Accept
+      value: application/json
+  auth:
+    type: bearer
+    token: "{{access_token}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: true
