@@ -6,6 +6,7 @@ use Carbon\CarbonImmutable;
 use Cultiva\Base\Exceptions\CultivaException;
 use Cultiva\Models\Delivery\Delivery;
 use Cultiva\Models\DeliveryOrder\Enums\DeliveryOrderStatus;
+use Cultiva\Models\DeliveryTrip\DeliveryTrip;
 use Cultiva\Models\DeliveryTrip\DeliveryTripStop;
 use Cultiva\Models\DeliveryTrip\Enums\DeliveryTripStatus;
 use Cultiva\Models\DeliveryTrip\Enums\DeliveryTripStopStatus;
@@ -45,24 +46,10 @@ final class ConfirmTripStopAction
                 'completed_at' => $now,
             ]);
 
-            if ($stop->stop_type === DeliveryTripStopType::PICKUP) {
-                $stop->pickupOrders()->update([
-                    'status' => DeliveryOrderStatus::IN_TRANSIT,
-                    'picked_up_at' => $now,
-                ]);
-
-                if ($trip->status === DeliveryTripStatus::ASSIGNED) {
-                    $trip->update([
-                        'status' => DeliveryTripStatus::IN_PROGRESS,
-                        'started_at' => $trip->started_at ?? $now,
-                    ]);
-                }
-            } elseif ($stop->stop_type === DeliveryTripStopType::DROPOFF) {
-                $stop->dropoffOrders()->update([
-                    'status' => DeliveryOrderStatus::DELIVERED,
-                    'delivered_at' => $now,
-                ]);
-            }
+            match ($stop->stop_type) {
+                DeliveryTripStopType::PICKUP => $this->handlePickup($stop, $trip, $now),
+                DeliveryTripStopType::DROPOFF => $this->handleDropoff($stop, $now),
+            };
 
             $hasPendingStops = $trip->stops()
                 ->where('status', '!=', DeliveryTripStopStatus::COMPLETED)
@@ -77,5 +64,28 @@ final class ConfirmTripStopAction
 
             return $stop->fresh(['deliveryAddress', 'trip']);
         });
+    }
+
+    private function handlePickup(DeliveryTripStop $stop, DeliveryTrip $trip, CarbonImmutable $now): void
+    {
+        $stop->pickupOrders()->update([
+            'status' => DeliveryOrderStatus::IN_TRANSIT,
+            'picked_up_at' => $now,
+        ]);
+
+        if ($trip->status === DeliveryTripStatus::ASSIGNED) {
+            $trip->update([
+                'status' => DeliveryTripStatus::IN_PROGRESS,
+                'started_at' => $trip->started_at ?? $now,
+            ]);
+        }
+    }
+
+    private function handleDropoff(DeliveryTripStop $stop, CarbonImmutable $now): void
+    {
+        $stop->dropoffOrders()->update([
+            'status' => DeliveryOrderStatus::DELIVERED,
+            'delivered_at' => $now,
+        ]);
     }
 }
