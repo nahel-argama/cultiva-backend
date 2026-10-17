@@ -138,7 +138,7 @@ class LoginControllerTest extends TestCase
                 'data' => [
                     'tokens' => ['access_token', 'refresh_token'],
                     'profile' => [
-                        'vehicle' => ['plate', 'cargo_type'],
+                        'vehicle' => ['plate', 'cargo_type', 'capacity'],
                     ],
                 ],
             ]);

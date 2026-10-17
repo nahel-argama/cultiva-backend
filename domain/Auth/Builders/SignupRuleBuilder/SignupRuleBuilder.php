@@ -87,6 +87,7 @@ class SignupRuleBuilder implements SignupRuleBuilderInterface
             'delivery.cnh_category'       => ['required', Rule::enum(CnhCategory::class)],
             'delivery.vehicle.plate'      => ['required', 'string', 'min:7', 'max:8', 'unique:vehicles,plate'],
             'delivery.vehicle.cargo_type' => ['required', Rule::enum(CargoType::class)],
+            'delivery.vehicle.capacity'   => ['required', 'numeric', 'gt:0'],
         ]);
 
         return $this;

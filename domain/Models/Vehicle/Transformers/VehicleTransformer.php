@@ -11,6 +11,7 @@ final class VehicleTransformer
         return [
             'plate'      => $vehicle->plate,
             'cargo_type' => $vehicle->cargoType->code->value,
+            'capacity'   => $vehicle->capacity,
         ];
     }
 }

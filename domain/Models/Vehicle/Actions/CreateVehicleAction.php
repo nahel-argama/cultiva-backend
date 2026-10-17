@@ -16,6 +16,7 @@ class CreateVehicleAction
             'delivery_id'   => $deliveryId,
             'plate'         => $dto->plate,
             'cargo_type_id' => $cargoType->id,
+            'capacity'      => $dto->capacity,
         ]);
     }
 }

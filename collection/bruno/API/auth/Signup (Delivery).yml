@@ -39,7 +39,8 @@ http:
           "cnh_category": "B",
           "vehicle": {
             "plate": "BRA2E19",
-            "cargo_type": "refrigerated"
+            "cargo_type": "refrigerated",
+            "capacity": 1500.5
           }
         }
       }

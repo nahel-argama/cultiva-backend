@@ -85,6 +85,7 @@ return new class extends Migration
 
             $table->string('plate', 8)->unique();
             $table->foreignId('cargo_type_id')->constrained('cargo_types')->restrictOnDelete();
+            $table->float('capacity');
 
             $table->timestamps();
             $table->softDeletes();
