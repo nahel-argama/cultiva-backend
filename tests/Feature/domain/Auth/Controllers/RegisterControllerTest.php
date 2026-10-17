@@ -79,8 +79,7 @@ class RegisterControllerTest extends TestCase
         ]);
 
         $this->assertDatabaseHas('addresses', [
-            'addressable_type' => Company::class,
-            'addressable_id' => $user->company->id,
+            'company_id' => $user->company->id,
             'zip' => '89010025',
         ]);
     }
@@ -151,8 +150,7 @@ class RegisterControllerTest extends TestCase
         ]);
 
         $this->assertDatabaseHas('addresses', [
-            'addressable_type' => Company::class,
-            'addressable_id' => $user->company->id,
+            'company_id' => $user->company->id,
             'zip' => '89010025',
         ]);
     }
@@ -244,8 +242,7 @@ class RegisterControllerTest extends TestCase
         ]);
 
         $this->assertDatabaseHas('addresses', [
-            'addressable_type' => Company::class,
-            'addressable_id' => $user->company->id,
+            'company_id' => $user->company->id,
             'zip' => '89010025',
         ]);
     }

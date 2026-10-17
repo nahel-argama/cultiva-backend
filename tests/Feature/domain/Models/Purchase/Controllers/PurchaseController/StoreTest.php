@@ -223,8 +223,7 @@ class StoreTest extends TestCase
         // Arrange
         $retailer = RetailerFactory::new()->create();
         AddressFactory::new()->create([
-            'addressable_type' => $retailer->company::class,
-            'addressable_id' => $retailer->company->id,
+            'company_id' => $retailer->company->id,
             'zip' => '89020000',
             'street' => 'Rua do Varejista',
             'number' => '200',
@@ -235,8 +234,7 @@ class StoreTest extends TestCase
 
         $producer = ProducerFactory::new()->create();
         AddressFactory::new()->create([
-            'addressable_type' => $producer->company::class,
-            'addressable_id' => $producer->company->id,
+            'company_id' => $producer->company->id,
             'zip' => '89010000',
             'street' => 'Rua do Produtor',
             'number' => '100',
@@ -276,8 +274,7 @@ class StoreTest extends TestCase
     private function createAddressFor(Retailer|Producer $entity): void
     {
         AddressFactory::new()->create([
-            'addressable_type' => $entity->company::class,
-            'addressable_id' => $entity->company->id,
+            'company_id' => $entity->company->id,
             'zip' => '89010000',
             'street' => 'Rua Teste',
             'number' => '100',
