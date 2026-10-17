@@ -192,6 +192,7 @@ class RegisterControllerTest extends TestCase
                 'vehicle' => [
                     'plate' => 'BRA2E19',
                     'cargo_type' => 'refrigerated',
+                    'capacity' => 1500.5,
                 ],
             ],
         ];
@@ -209,10 +210,11 @@ class RegisterControllerTest extends TestCase
                     'profile' => [
                         'trade_name',
                         'cnh_category',
-                        'vehicle' => ['plate', 'cargo_type'],
+                        'vehicle' => ['plate', 'cargo_type', 'capacity'],
                     ],
                 ],
-            ]);
+            ])
+            ->assertJsonPath('data.profile.vehicle.capacity', 1500.5);
 
         $this->assertDatabaseHas('users', [
             'email' => 'rafael@example.com',
@@ -238,6 +240,7 @@ class RegisterControllerTest extends TestCase
             'delivery_id'   => $user->delivery->id,
             'plate'         => 'BRA2E19',
             'cargo_type_id' => $refrigeratedType->id,
+            'capacity'      => 1500.5,
         ]);
 
         $this->assertDatabaseHas('addresses', [
@@ -245,6 +248,46 @@ class RegisterControllerTest extends TestCase
             'addressable_id' => $user->company->id,
             'zip' => '89010025',
         ]);
+    }
+
+    public function test_should_return_422_when_delivery_vehicle_capacity_is_missing_or_non_positive(): void
+    {
+        // Arrange
+        $payload = [
+            'user' => [
+                'name' => 'Rafael Santos',
+                'email' => 'rafael@example.com',
+                'password' => 'Password123!',
+                'password_confirmation' => 'Password123!',
+            ],
+            'profile_type' => 'delivery',
+            'company' => [
+                'trade_name' => 'Santos Log Express',
+                'legal_name' => 'Santos Transportes LTDA',
+                'document_number' => '12345678000195',
+                'phone' => '5511987654321',
+                'address' => [
+                    'zip' => '89010025',
+                    'number' => '789',
+                ],
+            ],
+            'delivery' => [
+                'cnh_number' => '12345678901',
+                'cnh_category' => 'B',
+                'vehicle' => [
+                    'plate' => 'BRA2E19',
+                    'cargo_type' => 'refrigerated',
+                    'capacity' => 0,
+                ],
+            ],
+        ];
+
+        // Action
+        $response = $this->postJson('/v1/auth/signup', $payload);
+
+        // Assert
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['delivery.vehicle.capacity']);
     }
 
     public function test_should_return_signup_metadata_successfully(): void

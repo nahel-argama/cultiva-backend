@@ -24,6 +24,7 @@ class VehicleFactory extends Factory
             'delivery_id'   => DeliveryFactory::new(),
             'cargo_type_id' => $this->faker->randomElement(CargoType::pluck('id')->toArray()),
             'plate'         => strtoupper($this->faker->unique()->bothify('???#?##')),
+            'capacity'      => $this->faker->randomFloat(2, 100, 5000),
         ];
     }
 }

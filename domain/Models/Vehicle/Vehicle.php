@@ -17,6 +17,7 @@ use Override;
  * @property-read int $delivery_id
  * @property-read int $cargo_type_id
  * @property-read string $plate
+ * @property-read float $capacity
  * @property-read CarbonImmutable $created_at
  * @property-read ?CarbonImmutable $updated_at
  * @property-read ?CarbonImmutable $deleted_at
@@ -32,6 +33,7 @@ class Vehicle extends Model
         'delivery_id',
         'cargo_type_id',
         'plate',
+        'capacity',
     ];
 
     #[Override]
@@ -39,6 +41,7 @@ class Vehicle extends Model
     {
         return [
             'cargo_type_id' => 'integer',
+            'capacity' => 'float',
         ];
     }
 
