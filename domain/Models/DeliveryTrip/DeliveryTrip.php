@@ -6,7 +6,7 @@ use Carbon\CarbonImmutable;
 use Cultiva\Models\CargoType\CargoType;
 use Cultiva\Models\Delivery\Delivery;
 use Cultiva\Models\DeliveryOrder\DeliveryOrder;
-use Cultiva\Models\DeliveryTrip\Enums\DeliveryTripStatus;
+use Cultiva\Models\DeliveryTrip\Enums\DeliveryTripStatus as DeliveryTripStatusEnum;
 use Cultiva\Models\Vehicle\Vehicle;
 use Database\Factories\DeliveryTripFactory;
 use Illuminate\Database\Eloquent\Collection;
@@ -21,7 +21,7 @@ use Override;
  * @property-read ?int $delivery_id
  * @property-read ?int $vehicle_id
  * @property-read int $cargo_type_id
- * @property-read DeliveryTripStatus $status
+ * @property-read DeliveryTripStatusEnum $status
  * @property-read ?CarbonImmutable $started_at
  * @property-read ?CarbonImmutable $completed_at
  * @property-read ?CarbonImmutable $cancelled_at
@@ -30,6 +30,7 @@ use Override;
  * @property-read ?Delivery $delivery
  * @property-read ?Vehicle $vehicle
  * @property-read CargoType $cargoType
+ * @property-read DeliveryTripStatus $statusRecord
  * @property-read Collection<int, DeliveryTripStop> $stops
  * @property-read Collection<int, DeliveryOrder> $orders
  */
@@ -57,11 +58,19 @@ class DeliveryTrip extends Model
             'delivery_id' => 'integer',
             'vehicle_id' => 'integer',
             'cargo_type_id' => 'integer',
-            'status' => DeliveryTripStatus::class,
+            'status' => DeliveryTripStatusEnum::class,
             'started_at' => 'immutable_datetime',
             'completed_at' => 'immutable_datetime',
             'cancelled_at' => 'immutable_datetime',
         ];
+    }
+
+    /**
+     * @return BelongsTo<DeliveryTripStatus, $this>
+     */
+    public function statusRecord(): BelongsTo
+    {
+        return $this->belongsTo(DeliveryTripStatus::class, 'status', 'code');
     }
 
     /**

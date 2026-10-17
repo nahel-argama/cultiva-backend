@@ -3,7 +3,7 @@
 namespace Cultiva\Models\DeliveryOrder;
 
 use Carbon\CarbonImmutable;
-use Cultiva\Models\DeliveryOrder\Enums\DeliveryOrderStatus;
+use Cultiva\Models\DeliveryOrder\Enums\DeliveryOrderStatus as DeliveryOrderStatusEnum;
 use Cultiva\Models\DeliveryTrip\DeliveryTrip;
 use Cultiva\Models\DeliveryTrip\DeliveryTripStop;
 use Cultiva\Models\Purchase\Purchase;
@@ -22,7 +22,7 @@ use Override;
  * @property-read int $pickup_address_id
  * @property-read int $dropoff_address_id
  * @property-read int $quantity
- * @property-read DeliveryOrderStatus $status
+ * @property-read DeliveryOrderStatusEnum $status
  * @property-read ?CarbonImmutable $picked_up_at
  * @property-read ?CarbonImmutable $delivered_at
  * @property-read ?CarbonImmutable $failed_at
@@ -35,6 +35,7 @@ use Override;
  * @property-read ?DeliveryTripStop $dropoffStop
  * @property-read DeliveryAddress $pickupAddress
  * @property-read DeliveryAddress $dropoffAddress
+ * @property-read DeliveryOrderStatus $statusRecord
  */
 class DeliveryOrder extends Model
 {
@@ -69,12 +70,20 @@ class DeliveryOrder extends Model
             'pickup_address_id' => 'integer',
             'dropoff_address_id' => 'integer',
             'quantity' => 'integer',
-            'status' => DeliveryOrderStatus::class,
+            'status' => DeliveryOrderStatusEnum::class,
             'picked_up_at' => 'immutable_datetime',
             'delivered_at' => 'immutable_datetime',
             'failed_at' => 'immutable_datetime',
             'cancelled_at' => 'immutable_datetime',
         ];
+    }
+
+    /**
+     * @return BelongsTo<DeliveryOrderStatus, $this>
+     */
+    public function statusRecord(): BelongsTo
+    {
+        return $this->belongsTo(DeliveryOrderStatus::class, 'status', 'code');
     }
 
     /**
