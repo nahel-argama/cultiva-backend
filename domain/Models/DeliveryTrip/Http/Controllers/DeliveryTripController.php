@@ -8,7 +8,9 @@ use Cultiva\Models\DeliveryTrip\Actions\CancelTripAssignmentAction;
 use Cultiva\Models\DeliveryTrip\Actions\ConfirmTripStopAction;
 use Cultiva\Models\DeliveryTrip\Actions\GetCurrentTripAction;
 use Cultiva\Models\DeliveryTrip\Actions\ListAvailableTripsAction;
+use Cultiva\Models\DeliveryTrip\Actions\ListFinishedTripsAction;
 use Cultiva\Models\DeliveryTrip\Http\Requests\ListAvailableTripsRequest;
+use Cultiva\Models\DeliveryTrip\Http\Requests\ListFinishedTripsRequest;
 use Cultiva\Models\DeliveryTrip\Http\Resources\DeliveryTripResource;
 use Cultiva\Models\DeliveryTrip\Http\Resources\DeliveryTripStopResource;
 use Illuminate\Http\JsonResponse;
@@ -21,6 +23,19 @@ final class DeliveryTripController extends Controller
     public function index(
         ListAvailableTripsRequest $request,
         ListAvailableTripsAction $action,
+    ): AnonymousResourceCollection {
+        $delivery = $request->user()->delivery()->firstOrFail();
+        $page = $request->integer('page', 1);
+        $perPage = $request->integer('per_page', 15);
+
+        $trips = $action->execute($delivery, $page, $perPage);
+
+        return DeliveryTripResource::collection($trips);
+    }
+
+    public function finished(
+        ListFinishedTripsRequest $request,
+        ListFinishedTripsAction $action,
     ): AnonymousResourceCollection {
         $delivery = $request->user()->delivery()->firstOrFail();
         $page = $request->integer('page', 1);

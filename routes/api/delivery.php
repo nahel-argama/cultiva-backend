@@ -9,6 +9,7 @@ Route::group([
     'middleware' => 'profile:delivery',
 ], function (): void {
     Route::get('trips', [DeliveryTripController::class, 'index'])->name('trips.index');
+    Route::get('trips/finished', [DeliveryTripController::class, 'finished'])->name('trips.finished');
     Route::get('trips/current', [DeliveryTripController::class, 'current'])->name('trips.current');
     Route::post('trips/{trip}/assign', [DeliveryTripController::class, 'assign'])->name('trips.assign');
     Route::post('trips/{trip}/cancel', [DeliveryTripController::class, 'cancel'])->name('trips.cancel');
