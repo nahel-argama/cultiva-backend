@@ -3,7 +3,7 @@
 namespace Database\Factories;
 
 use Cultiva\Models\Address\Address;
-use Cultiva\Models\Producer\Producer;
+use Database\Factories\CompanyFactory;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -22,8 +22,7 @@ class AddressFactory extends Factory
     public function definition(): array
     {
         return [
-            'addressable_type' => Producer::class,
-            'addressable_id'   => ProducerFactory::new(),
+            'company_id'       => CompanyFactory::new(),
             'zip'              => $this->faker->numerify('########'),
             'street'           => $this->faker->streetName(),
             'number'           => $this->faker->buildingNumber(),

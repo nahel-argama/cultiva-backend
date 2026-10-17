@@ -20,8 +20,7 @@ class StoreTest extends TestCase
         // Arrange
         $retailer = RetailerFactory::new()->create();
         AddressFactory::new()->create([
-            'addressable_type' => $retailer->company::class,
-            'addressable_id' => $retailer->company->id,
+            'company_id' => $retailer->company->id,
             'state' => 'SP',
         ]);
         Http::fake([
@@ -43,8 +42,7 @@ class StoreTest extends TestCase
         // Arrange
         $retailer = RetailerFactory::new()->create();
         AddressFactory::new()->create([
-            'addressable_type' => $retailer->company::class,
-            'addressable_id' => $retailer->company->id,
+            'company_id' => $retailer->company->id,
             'state' => 'SP',
         ]);
         Http::fake([
@@ -75,8 +73,7 @@ class StoreTest extends TestCase
         // Arrange
         $retailer = RetailerFactory::new()->create();
         AddressFactory::new()->create([
-            'addressable_type' => $retailer->company::class,
-            'addressable_id' => $retailer->company->id,
+            'company_id' => $retailer->company->id,
             'state' => 'SP',
         ]);
         Http::fake([
@@ -117,8 +114,7 @@ class StoreTest extends TestCase
         // Arrange
         $retailer = RetailerFactory::new()->create();
         AddressFactory::new()->create([
-            'addressable_type' => $retailer->company::class,
-            'addressable_id' => $retailer->company->id,
+            'company_id' => $retailer->company->id,
             'state' => 'SP',
         ]);
         Http::fake([
@@ -170,8 +166,7 @@ class StoreTest extends TestCase
         // Arrange
         $retailer = RetailerFactory::new()->create();
         Address::query()->create([
-            'addressable_type' => $retailer->company::class,
-            'addressable_id' => $retailer->company->id,
+            'company_id' => $retailer->company->id,
             'zip' => '01001000',
             'street' => 'Rua A',
             'number' => '1',

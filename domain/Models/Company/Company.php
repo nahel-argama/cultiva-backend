@@ -13,7 +13,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
-use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -78,10 +77,10 @@ class Company extends Model
     }
 
     /**
-     * @return MorphOne<Address, $this>
+     * @return HasOne<Address, $this>
      */
-    public function address(): MorphOne
+    public function address(): HasOne
     {
-        return $this->morphOne(Address::class, 'addressable');
+        return $this->hasOne(Address::class);
     }
 }

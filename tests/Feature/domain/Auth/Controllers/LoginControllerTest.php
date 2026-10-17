@@ -37,8 +37,7 @@ class LoginControllerTest extends TestCase
         $producer = ProducerFactory::new()->create(['company_id' => $company->id]);
 
         AddressFactory::new()->create([
-            'addressable_type' => Company::class,
-            'addressable_id' => $company->id,
+            'company_id' => $company->id,
         ]);
 
         // Action
@@ -78,8 +77,7 @@ class LoginControllerTest extends TestCase
         $retailer = RetailerFactory::new()->create(['company_id' => $company->id]);
 
         AddressFactory::new()->create([
-            'addressable_type' => Company::class,
-            'addressable_id' => $company->id,
+            'company_id' => $company->id,
         ]);
 
         // Action
@@ -121,8 +119,7 @@ class LoginControllerTest extends TestCase
         VehicleFactory::new()->create(['delivery_id' => $delivery->id]);
 
         AddressFactory::new()->create([
-            'addressable_type' => Company::class,
-            'addressable_id' => $company->id,
+            'company_id' => $company->id,
         ]);
 
         // Action

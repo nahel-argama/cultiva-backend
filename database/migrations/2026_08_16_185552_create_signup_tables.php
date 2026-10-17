@@ -18,9 +18,22 @@ return new class extends Migration
             $table->softDeletes()->after('updated_at');
         });
 
+        Schema::create('companies', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('user_id')->unique()->constrained('users')->cascadeOnDelete();
+
+            $table->string('document_number', 14)->unique();
+            $table->string('trade_name', 100);
+            $table->string('legal_name', 100)->nullable();
+            $table->string('phone', 15);
+
+            $table->timestamps();
+            $table->softDeletes();
+        });
+
         Schema::create('addresses', function (Blueprint $table) {
             $table->id();
-            $table->morphs('addressable');
+            $table->foreignId('company_id')->unique()->constrained('companies')->cascadeOnDelete();
 
             $table->string('zip', 8);
             $table->string('street', 100);
@@ -33,19 +46,6 @@ return new class extends Migration
             $table->geography('coordinate', subtype: 'point', srid: 4326)->nullable();
 
             $table->timestamps();
-        });
-
-        Schema::create('companies', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('user_id')->unique()->constrained('users')->cascadeOnDelete();
-
-            $table->string('document_number', 14)->unique();
-            $table->string('trade_name', 100);
-            $table->string('legal_name', 100)->nullable();
-            $table->string('phone', 15);
-
-            $table->timestamps();
-            $table->softDeletes();
         });
 
         Schema::create('producers', function (Blueprint $table) {
