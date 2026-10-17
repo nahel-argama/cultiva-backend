@@ -37,9 +37,16 @@ class DeliveryTripStopTest extends TestCase
         $this->assertInstanceOf(DeliveryTripStop::class, $stop);
         $this->assertSame(DeliveryTripStopType::PICKUP, $stop->stop_type);
         $this->assertSame(DeliveryTripStopStatus::ARRIVED, $stop->status);
+        $this->assertNotNull($stop->statusRecord);
+        $this->assertSame(DeliveryTripStopStatus::ARRIVED, $stop->statusRecord->code);
+        $this->assertSame('Chegou', $stop->statusRecord->description);
         $this->assertSame(1, $stop->sequence);
         $this->assertSame($trip->id, $stop->trip->id);
         $this->assertSame($address->id, $stop->deliveryAddress->id);
+        $this->assertDatabaseHas('delivery_trip_stop_statuses', [
+            'code' => 'arrived',
+            'description' => 'Chegou',
+        ]);
         $this->assertDatabaseHas('delivery_trip_stops', [
             'id' => $stop->id,
             'trip_id' => $trip->id,

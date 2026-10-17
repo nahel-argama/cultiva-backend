@@ -39,9 +39,16 @@ class DeliveryTripTest extends TestCase
         // Assert
         $this->assertInstanceOf(DeliveryTrip::class, $trip);
         $this->assertSame(DeliveryTripStatus::ASSIGNED, $trip->status);
+        $this->assertNotNull($trip->statusRecord);
+        $this->assertSame(DeliveryTripStatus::ASSIGNED, $trip->statusRecord->code);
+        $this->assertSame('Atribuída', $trip->statusRecord->description);
         $this->assertSame($delivery->id, $trip->delivery->id);
         $this->assertSame($vehicle->id, $trip->vehicle->id);
         $this->assertSame($cargoType->id, $trip->cargoType->id);
+        $this->assertDatabaseHas('delivery_trip_statuses', [
+            'code' => 'assigned',
+            'description' => 'Atribuída',
+        ]);
         $this->assertDatabaseHas('delivery_trips', [
             'id' => $trip->id,
             'cargo_type_id' => $cargoType->id,

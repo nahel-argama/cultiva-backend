@@ -51,6 +51,9 @@ class DeliveryOrderTest extends TestCase
         // Assert
         $this->assertInstanceOf(DeliveryOrder::class, $order);
         $this->assertSame(DeliveryOrderStatus::IN_TRANSIT, $order->status);
+        $this->assertNotNull($order->statusRecord);
+        $this->assertSame(DeliveryOrderStatus::IN_TRANSIT, $order->statusRecord->code);
+        $this->assertSame('Em trânsito', $order->statusRecord->description);
         $this->assertSame(10, $order->quantity);
         $this->assertSame($purchase->id, $order->purchase->id);
         $this->assertSame($trip->id, $order->trip->id);
@@ -58,6 +61,10 @@ class DeliveryOrderTest extends TestCase
         $this->assertSame($dropoffStop->id, $order->dropoffStop->id);
         $this->assertSame($pickupAddress->id, $order->pickupAddress->id);
         $this->assertSame($dropoffAddress->id, $order->dropoffAddress->id);
+        $this->assertDatabaseHas('delivery_order_statuses', [
+            'code' => 'in_transit',
+            'description' => 'Em trânsito',
+        ]);
         $this->assertDatabaseHas('delivery_orders', [
             'id' => $order->id,
             'purchase_id' => $purchase->id,
