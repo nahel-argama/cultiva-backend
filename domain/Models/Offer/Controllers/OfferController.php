@@ -27,7 +27,8 @@ final class OfferController extends Controller
         $perPage = $request->integer('per_page', 15);
         $user = $request->user();
 
-        $offers = $action->execute($user, $page, $perPage);
+        $search = $request->validated('search');
+        $offers = $action->execute($user, $page, $perPage, $search);
 
         return OfferResource::collection($offers);
     }

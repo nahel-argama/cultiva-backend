@@ -36,6 +36,7 @@ final class PurchaseController extends Controller
             $request->user()->retailer()->firstOrFail(),
             $request->integer('page', 1),
             $request->integer('per_page', 15),
+            $request->validated('search'),
         );
 
         return PurchaseResource::collection($paginator);
@@ -49,6 +50,7 @@ final class PurchaseController extends Controller
             $request->user()->producer()->firstOrFail(),
             $request->integer('page', 1),
             $request->integer('per_page', 15),
+            $request->validated('search'),
         );
 
         return PurchaseResource::collection($paginator);

@@ -8,12 +8,15 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 final class ListAvailableOffersAction
 {
-    public function execute(int $page, int $perPage): LengthAwarePaginator
+    public function execute(int $page, int $perPage, ?string $search = null): LengthAwarePaginator
     {
+        $search = trim($search ?? '');
+
         return Offer::query()
             ->with('category')
             ->where('status', OfferStatus::ACTIVE->value)
             ->whereColumn('total_quantity', '>', 'reserved_quantity')
+            ->when($search !== '', fn ($query) => $query->where('product_name', 'ilike', '%'.$search.'%'))
             ->latest('created_at')
             ->latest('id')
             ->paginate(perPage: $perPage, page: $page);

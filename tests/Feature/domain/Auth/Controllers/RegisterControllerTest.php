@@ -34,7 +34,7 @@ class RegisterControllerTest extends TestCase
                 'trade_name' => 'Sítio Primavera',
                 'legal_name' => 'Sítio Primavera LTDA',
                 'document_number' => '12345678000195',
-                'phone' => '5511987654321',
+                'phone' => '00000000000',
                 'address' => [
                     'zip' => '89010025',
                     'number' => '123',
@@ -71,6 +71,7 @@ class RegisterControllerTest extends TestCase
         $this->assertDatabaseHas('companies', [
             'user_id' => $user->id,
             'document_number' => '12345678000195',
+            'phone' => '00000000000',
         ]);
 
         $this->assertDatabaseHas('producers', [
@@ -105,7 +106,7 @@ class RegisterControllerTest extends TestCase
                 'trade_name' => 'Mercado Central',
                 'legal_name' => 'Mercado Central LTDA',
                 'document_number' => '12345678000195',
-                'phone' => '5511987654321',
+                'phone' => '00000000000',
                 'address' => [
                     'zip' => '89010025',
                     'number' => '456',
@@ -142,6 +143,7 @@ class RegisterControllerTest extends TestCase
         $this->assertDatabaseHas('companies', [
             'user_id' => $user->id,
             'document_number' => '12345678000195',
+            'phone' => '00000000000',
         ]);
 
         $this->assertDatabaseHas('retailers', [
@@ -176,7 +178,7 @@ class RegisterControllerTest extends TestCase
                 'trade_name' => 'Santos Log Express',
                 'legal_name' => 'Santos Transportes LTDA',
                 'document_number' => '12345678000195',
-                'phone' => '5511987654321',
+                'phone' => '00000000000',
                 'address' => [
                     'zip' => '89010025',
                     'number' => '789',
@@ -224,6 +226,7 @@ class RegisterControllerTest extends TestCase
         $this->assertDatabaseHas('companies', [
             'user_id' => $user->id,
             'document_number' => '12345678000195',
+            'phone' => '00000000000',
         ]);
 
         $this->assertDatabaseHas('deliveries', [
@@ -262,7 +265,7 @@ class RegisterControllerTest extends TestCase
                 'trade_name' => 'Santos Log Express',
                 'legal_name' => 'Santos Transportes LTDA',
                 'document_number' => '12345678000195',
-                'phone' => '5511987654321',
+                'phone' => '00000000000',
                 'address' => [
                     'zip' => '89010025',
                     'number' => '789',

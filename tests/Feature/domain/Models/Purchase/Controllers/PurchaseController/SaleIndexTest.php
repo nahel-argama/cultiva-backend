@@ -30,6 +30,62 @@ class SaleIndexTest extends TestCase
         $this->assertCount(1, $response->json('data'));
     }
 
+    public function test_should_search_products_before_pagination_without_leaking_other_accounts(): void
+    {
+        // Arrange
+        $matching = PurchaseFactory::new()->create(['product_name' => 'Tomate Cereja']);
+        $second = PurchaseFactory::new()->create([
+            'producer_id' => $matching->producer_id,
+            'product_name' => 'Tomate Italiano',
+        ]);
+        PurchaseFactory::new()->create(['producer_id' => $matching->producer_id, 'product_name' => 'Batata']);
+        $foreign = PurchaseFactory::new()->create(['product_name' => 'Tomate Cereja']);
+        Sanctum::actingAs($matching->producer->company->user, ['access']);
+
+        // Action
+        $response = $this->getJson('/v1/sales?search=tOMate&per_page=1&page=2');
+
+        // Assert
+        $response->assertOk()
+            ->assertJsonPath('meta.total', 2)
+            ->assertJsonPath('data.0.id', $matching->id);
+        $this->getJson('/v1/sales?search=abacaxi')->assertOk()->assertJsonCount(0, 'data');
+        $this->getJson('/v1/sales?search=')->assertOk()->assertJsonPath('meta.total', 3);
+        $this->getJson('/v1/sales?search='.str_repeat('a', 256))
+            ->assertUnprocessable()->assertJsonValidationErrors('search');
+        $this->getJson('/v1/sales?search='.$second->id)->assertOk()
+            ->assertJsonPath('meta.total', 1)->assertJsonPath('data.0.id', $second->id);
+        $this->getJson('/v1/sales?search='.$foreign->id)->assertOk()->assertJsonCount(0, 'data');
+    }
+
+    public function test_should_return_real_buyer_details_without_exposing_supplier_as_counterparty(): void
+    {
+        // Arrange
+        $purchase = PurchaseFactory::new()->create();
+        $retailer = $purchase->retailer;
+        $company = $retailer->company;
+        Sanctum::actingAs($purchase->producer->company->user, ['access']);
+
+        // Action
+        $response = $this->getJson('/v1/sales');
+
+        // Assert
+        $response->assertOk()->assertJsonPath('data.0.counterparty', [
+            'id' => $retailer->id,
+            'role' => 'retailer',
+            'trade_name' => $company->trade_name,
+            'legal_name' => $company->legal_name,
+            'document_number' => $company->document_number,
+            'name' => $company->user->name,
+            'email' => $company->user->email,
+            'phone' => $company->phone,
+            'address' => null,
+        ])->assertJsonPath('data.0.category', [
+            'id' => $purchase->offer->category->id,
+            'name' => $purchase->offer->category->name,
+        ]);
+    }
+
     public function test_should_return_403_for_retailer_accessing_sales(): void
     {
         // Arrange

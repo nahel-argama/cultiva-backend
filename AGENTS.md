@@ -20,6 +20,10 @@ docker compose exec php composer <command>
 
 Never run Laravel Pint (`vendor/bin/pint`, `composer pint`, or equivalent). PHP formatting is handled exclusively by Intelephense.
 
+### Isolated test database
+
+Tests must use the PostgreSQL database `cultiva_test`, never the development database `app`. `phpunit.xml` enforces this database and clears `DB_URL`; `Tests\TestCase` checks the resolved database before database traits can run. Do not bypass this guard or point `RefreshDatabase` at development data. Prepare `cultiva_test` with the PostGIS extension as documented in `specs/001-product-offers/quickstart.md`.
+
 ---
 
 ## 2. Project Namespaces & Structure

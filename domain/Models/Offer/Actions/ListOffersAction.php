@@ -13,15 +13,16 @@ final class ListOffersAction
         private readonly ListAvailableOffersAction $availableOffers,
     ) {}
 
-    public function execute(User $user, int $page, int $perPage): LengthAwarePaginator
+    public function execute(User $user, int $page, int $perPage, ?string $search = null): LengthAwarePaginator
     {
         return match ($user->profile_type) {
             ProfileType::PRODUCER => $this->producerOffers->execute(
                 $user->producer()->firstOrFail(),
                 $page,
                 $perPage,
+                $search,
             ),
-            ProfileType::RETAILER => $this->availableOffers->execute($page, $perPage),
+            ProfileType::RETAILER => $this->availableOffers->execute($page, $perPage, $search),
         };
     }
 }

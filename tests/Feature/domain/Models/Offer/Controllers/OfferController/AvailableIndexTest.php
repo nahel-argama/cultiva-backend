@@ -77,6 +77,33 @@ class AvailableIndexTest extends TestCase
         $this->assertCount(2, $response->json('data'));
     }
 
+    public function test_should_search_only_visible_offers_before_pagination(): void
+    {
+        // Arrange
+        $retailer = RetailerFactory::new()->create();
+        $matching = OfferFactory::new()->create([
+            'product_name' => 'Tomate Cereja',
+            'status' => OfferStatus::ACTIVE,
+        ]);
+        OfferFactory::new()->create(['product_name' => 'Batata', 'status' => OfferStatus::ACTIVE]);
+        OfferFactory::new()->create(['product_name' => 'Tomate Inativo', 'status' => OfferStatus::INACTIVE]);
+        OfferFactory::new()->create([
+            'product_name' => 'Tomate Esgotado',
+            'status' => OfferStatus::ACTIVE,
+            'total_quantity' => 5,
+            'reserved_quantity' => 5,
+        ]);
+        Sanctum::actingAs($retailer->company->user, ['access']);
+
+        // Action
+        $response = $this->getJson('/v1/offers?search=tOMate&per_page=1');
+
+        // Assert
+        $response->assertOk()
+            ->assertJsonPath('meta.total', 1)
+            ->assertJsonPath('data.0.id', $matching->id);
+    }
+
     public function test_should_return_401_without_token(): void
     {
         // Arrange

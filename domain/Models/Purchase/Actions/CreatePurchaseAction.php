@@ -53,7 +53,7 @@ final class CreatePurchaseAction
 
         event(new PurchaseCreated($purchase));
 
-        return $purchase;
+        return $purchase->load(['producer.company.user', 'producer.company.address', 'offer.category']);
     }
 
     private function calculateTotalPrice(float $unitPrice, int $quantity): float

@@ -54,6 +54,31 @@ class IndexTest extends TestCase
         $this->assertCount(2, $response->json('data'));
     }
 
+    public function test_should_search_products_before_pagination_without_leaking_other_accounts(): void
+    {
+        // Arrange
+        $matching = OfferFactory::new()->create(['product_name' => 'Tomate Cereja']);
+        OfferFactory::new()->create([
+            'producer_id' => $matching->producer_id,
+            'product_name' => 'Tomate Italiano',
+        ]);
+        OfferFactory::new()->create(['producer_id' => $matching->producer_id, 'product_name' => 'Batata']);
+        OfferFactory::new()->create(['product_name' => 'Tomate Cereja']);
+        Sanctum::actingAs($matching->producer->company->user, ['access']);
+
+        // Action
+        $response = $this->getJson('/v1/offers?search=tOMate&per_page=1&page=2');
+
+        // Assert
+        $response->assertOk()
+            ->assertJsonPath('meta.total', 2)
+            ->assertJsonPath('data.0.id', $matching->id);
+        $this->getJson('/v1/offers?search=abacaxi')->assertOk()->assertJsonCount(0, 'data');
+        $this->getJson('/v1/offers?search=')->assertOk()->assertJsonPath('meta.total', 3);
+        $this->getJson('/v1/offers?search='.str_repeat('a', 256))
+            ->assertUnprocessable()->assertJsonValidationErrors('search');
+    }
+
     public function test_should_return_401_without_token(): void
     {
         // Arrange

@@ -47,10 +47,12 @@ O serviço `php` já possui o mapeamento `host.docker.internal:host-gateway`. N�
 
 ## 3. Configure o ambiente de testes
 
-Suba o banco local:
+Suba o serviço de banco e prepare um banco exclusivo para testes:
 
 ```bash
 docker compose up -d database
+docker compose exec database createdb -U root cultiva_test
+docker compose exec database psql -U root -d cultiva_test -c 'CREATE EXTENSION IF NOT EXISTS postgis'
 ```
 
 Confirme no `.env` local:
@@ -61,9 +63,9 @@ PRODUCT_SOURCE_BASE_URL=http://host.docker.internal:8001/api
 PRODUCT_SOURCE_TIMEOUT=5
 ```
 
-O `phpunit.xml` define `APP_ENV=testing`; sem um arquivo específico de testes, Laravel reutiliza o `.env` local e sua `APP_KEY`.
+O `.env` continua usando `app` para desenvolvimento. O `phpunit.xml` define `APP_ENV=testing`, força `DB_DATABASE=cultiva_test` e remove qualquer `DB_URL` que sobrescreveria esse destino. As demais configurações de conexão e a `APP_KEY` continuam vindo do ambiente local.
 
-`RefreshDatabase` pode recriar tabelas e apagar dados de `app`. Este roteiro assume que o banco local é descartável e nunca aponta para produção ou dados compartilhados.
+`RefreshDatabase` recria tabelas somente em `cultiva_test`. `Tests\TestCase` interrompe a inicialização antes das traits de banco se a conexão resolvida apontar para outro banco. Não substitua o banco de testes por `app`.
 
 ## 4. Prepare banco e categorias
 

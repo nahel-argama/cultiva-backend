@@ -14,7 +14,7 @@ use Illuminate\Validation\Rule;
 
 class SignupRuleBuilder implements SignupRuleBuilderInterface
 {
-    private const string PHONE_REGEX = '/^[0-9]{13}$/';
+    private const string PHONE_REGEX = '/^[0-9]{11}$/';
     private const string ZIP_REGEX = '/^[0-9]{8}$/';
     private const string DOCUMENT_REGEX = '/^[0-9]{14}$/';
 

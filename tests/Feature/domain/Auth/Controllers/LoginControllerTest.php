@@ -57,6 +57,10 @@ class LoginControllerTest extends TestCase
 
         $this->assertDatabaseCount('personal_access_tokens', 2);
         $this->assertNotNull($user->fresh()->last_login);
+
+        $this->withToken($response->json('data.tokens.access_token'))
+            ->getJson('/v1/offers?search=&page=1&per_page=12')
+            ->assertOk();
     }
 
     public function test_should_return_authenticated_retailer_profile(): void
