@@ -3,6 +3,7 @@
 namespace Cultiva\Models\User\Actions;
 
 use Cultiva\Auth\Actions\GetDocumentValidationStatusAction;
+use Cultiva\Auth\Enums\DocumentValidationStatus;
 use Cultiva\Integrations\DocumentValidation\Actions\ValidateRgDocumentAction;
 use Cultiva\Models\User\User;
 use Illuminate\Support\Facades\Cache;
@@ -31,43 +32,38 @@ class VerifyUserDocumentAction
                     'is_verified' => true,
                 ]);
 
-                Cache::put(
-                    GetDocumentValidationStatusAction::CACHE_PREFIX . $user->id,
-                    [
-                        'status' => 'approved',
-                        'message' => Lang::get('auth.document_verification.approved_message'),
-                    ],
-                    self::CACHE_TTL_SECONDS,
+                $this->cacheStatus(
+                    $user,
+                    DocumentValidationStatus::APPROVED,
+                    Lang::get('auth.document_verification.approved_message'),
                 );
             } else {
                 $message = $result->confidenceReasoning !== ''
                     ? $result->confidenceReasoning
                     : Lang::get('auth.document_verification.failed_message');
 
-                Cache::put(
-                    GetDocumentValidationStatusAction::CACHE_PREFIX . $user->id,
-                    [
-                        'status' => 'failed',
-                        'message' => $message,
-                    ],
-                    self::CACHE_TTL_SECONDS,
-                );
+                $this->cacheStatus($user, DocumentValidationStatus::FAILED, $message);
             }
 
             return $user;
         } catch (Throwable $exception) {
-            Cache::put(
-                GetDocumentValidationStatusAction::CACHE_PREFIX . $user->id,
-                [
-                    'status' => 'failed',
-                    'message' => $exception->getMessage(),
-                ],
-                self::CACHE_TTL_SECONDS,
-            );
+            $this->cacheStatus($user, DocumentValidationStatus::FAILED, $exception->getMessage());
 
             throw $exception;
         } finally {
             Storage::disk('local')->delete($filePath);
         }
+    }
+
+    private function cacheStatus(User $user, DocumentValidationStatus $status, string $message): void
+    {
+        Cache::put(
+            GetDocumentValidationStatusAction::CACHE_PREFIX . $user->id,
+            [
+                'status' => $status->value,
+                'message' => $message,
+            ],
+            self::CACHE_TTL_SECONDS,
+        );
     }
 }
