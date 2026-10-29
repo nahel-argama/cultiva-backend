@@ -45,6 +45,7 @@ services:
       - "5432:5432"
     volumes:
       - db-data:/var/lib/postgresql/data
+      - ./docker/postgres/init-databases.sh:/docker-entrypoint-initdb.d/20_init_databases.sh:ro
     environment:
       - POSTGRES_DB=app
       - POSTGRES_USER=root
