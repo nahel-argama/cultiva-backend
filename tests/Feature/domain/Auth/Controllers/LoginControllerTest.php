@@ -13,6 +13,7 @@ use Database\Factories\VehicleFactory;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Lang;
+use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
 class LoginControllerTest extends TestCase
@@ -164,5 +165,34 @@ class LoginControllerTest extends TestCase
             ->assertJson([
                 'message' => Lang::get('auth.login.invalid_credentials'),
             ]);
+    }
+
+    public function test_should_return_current_user_profile_and_verification_status_on_me_route(): void
+    {
+        // Arrange
+        $user = UserFactory::new()->create([
+            'name' => 'Maria Silva',
+            'email' => 'maria@example.com',
+            'is_verified' => false,
+        ]);
+
+        $company = CompanyFactory::new()->create(['user_id' => $user->id]);
+        $producer = ProducerFactory::new()->create(['company_id' => $company->id]);
+        AddressFactory::new()->create(['company_id' => $company->id]);
+
+        Sanctum::actingAs($user, ['access']);
+
+        // Action
+        $response = $this->getJson('/v1/auth/me');
+
+        // Assert
+        $response->assertOk()
+            ->assertJsonPath('data.user.name', 'Maria Silva')
+            ->assertJsonPath('data.user.email', 'maria@example.com')
+            ->assertJsonPath('data.user.is_verified', false)
+            ->assertJsonPath('data.profile_type', 'producer')
+            ->assertJsonPath('data.profile.trade_name', $company->trade_name)
+            ->assertJsonPath('data.profile.activity_segment', $producer->activity_segment->value)
+            ->assertJsonMissingPath('data.tokens');
     }
 }

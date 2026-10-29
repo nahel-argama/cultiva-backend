@@ -11,6 +11,7 @@ final class UserTransformer
         return [
             'name' => $user->name,
             'email' => $user->email,
+            'is_verified' => (bool) $user->is_verified,
         ];
     }
 }

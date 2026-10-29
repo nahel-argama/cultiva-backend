@@ -5,8 +5,15 @@ namespace Tests\Feature\domain\Auth\Controllers;
 use Cultiva\Models\CargoType\CargoType;
 use Cultiva\Models\Company\Company;
 use Cultiva\Models\User\User;
+use Database\Factories\UserFactory;
+use Gemini\Laravel\Facades\Gemini;
+use Gemini\Responses\GenerativeModel\GenerateContentResponse;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Lang;
+use Illuminate\Support\Facades\Storage;
+use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
 class RegisterControllerTest extends TestCase
@@ -313,5 +320,149 @@ class RegisterControllerTest extends TestCase
             ->assertJsonPath('data.business_type.supermarket', 'Supermercado')
             ->assertJsonPath('data.cnh_category.A', 'Categoria A')
             ->assertJsonPath('data.cargo_type.dry', 'Carga Seca');
+    }
+
+    public function test_should_upload_document_and_verify_user_when_rg_is_authentic(): void
+    {
+        // Arrange
+        Storage::fake('local');
+
+        $fixture = require base_path('tests/Fixtures/Integrations/DocumentValidation/rg_valid.php');
+
+        Gemini::fake([
+            GenerateContentResponse::fake([
+                'candidates' => [
+                    [
+                        'content' => [
+                            'parts' => [
+                                ['text' => $fixture],
+                            ],
+                        ],
+                    ],
+                ],
+            ]),
+        ]);
+
+        $user = UserFactory::new()->create([
+            'is_verified' => false,
+        ]);
+
+        Sanctum::actingAs($user, ['access']);
+
+        $payload = [
+            'document' => UploadedFile::fake()->image('rg.jpg'),
+        ];
+
+        // Action
+        $response = $this->postJson('/v1/auth/upload-document', $payload);
+
+        // Assert
+        $response->assertStatus(202)
+            ->assertJson([
+                'message' => Lang::get('auth.document_verification.queued'),
+            ]);
+
+        $this->assertDatabaseHas('users', [
+            'id' => $user->id,
+            'is_verified' => true,
+        ]);
+
+        $this->assertSame([], Storage::disk('local')->allFiles('documents'));
+    }
+
+    public function test_should_keep_user_unverified_when_uploaded_document_is_invalid_rg(): void
+    {
+        // Arrange
+        Storage::fake('local');
+
+        $fixture = require base_path('tests/Fixtures/Integrations/DocumentValidation/rg_invalid.php');
+
+        Gemini::fake([
+            GenerateContentResponse::fake([
+                'candidates' => [
+                    [
+                        'content' => [
+                            'parts' => [
+                                ['text' => $fixture],
+                            ],
+                        ],
+                    ],
+                ],
+            ]),
+        ]);
+
+        $user = UserFactory::new()->create([
+            'is_verified' => false,
+        ]);
+
+        Sanctum::actingAs($user, ['access']);
+
+        $payload = [
+            'document' => UploadedFile::fake()->image('not-an-rg.png'),
+        ];
+
+        // Action
+        $response = $this->postJson('/v1/auth/upload-document', $payload);
+
+        // Assert
+        $response->assertStatus(202)
+            ->assertJson([
+                'message' => Lang::get('auth.document_verification.queued'),
+            ]);
+
+        $this->assertDatabaseHas('users', [
+            'id' => $user->id,
+            'is_verified' => false,
+        ]);
+
+        $this->assertSame([], Storage::disk('local')->allFiles('documents'));
+    }
+
+    public function test_should_return_422_when_uploading_document_for_already_verified_user(): void
+    {
+        // Arrange
+        Storage::fake('local');
+
+        $user = UserFactory::new()->create([
+            'is_verified' => true,
+        ]);
+
+        Sanctum::actingAs($user, ['access']);
+
+        $payload = [
+            'document' => UploadedFile::fake()->image('rg.jpg'),
+        ];
+
+        // Action
+        $response = $this->postJson('/v1/auth/upload-document', $payload);
+
+        // Assert
+        $response->assertStatus(422)
+            ->assertJson([
+                'message' => Lang::get('auth.document_verification.already_verified'),
+            ]);
+    }
+
+    public function test_should_return_422_when_uploaded_document_has_invalid_mime_type(): void
+    {
+        // Arrange
+        Storage::fake('local');
+
+        $user = UserFactory::new()->create([
+            'is_verified' => false,
+        ]);
+
+        Sanctum::actingAs($user, ['access']);
+
+        $payload = [
+            'document' => UploadedFile::fake()->create('document.pdf', 100, 'application/pdf'),
+        ];
+
+        // Action
+        $response = $this->postJson('/v1/auth/upload-document', $payload);
+
+        // Assert
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['document']);
     }
 }

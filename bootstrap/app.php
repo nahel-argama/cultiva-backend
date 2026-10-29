@@ -1,6 +1,7 @@
 <?php
 
 use Cultiva\Auth\Middleware\EnsureProfile;
+use Cultiva\Auth\Middleware\EnsureUserIsVerified;
 use Cultiva\Base\Exceptions\CultivaException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -22,6 +23,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'ability' => CheckForAnyAbility::class,
             'profile' => EnsureProfile::class,
+            'verified' => EnsureUserIsVerified::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

@@ -15,6 +15,7 @@ return new class extends Migration
             $table->string('profile_type');
             $table->timestamp('last_login')->nullable()->after('remember_token');
             $table->boolean('is_active')->default(true)->after('last_login');
+            $table->boolean('is_verified')->default(false)->after('is_active');
             $table->softDeletes()->after('updated_at');
         });
 

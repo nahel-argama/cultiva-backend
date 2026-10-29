@@ -8,4 +8,7 @@ return [
         'not_found' => 'Product not found in the external catalog.',
         'unavailable' => 'Product catalog unavailable.',
     ],
+    'document_validation' => [
+        'unavailable' => 'Document validation service unavailable.',
+    ],
 ];
