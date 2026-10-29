@@ -8,6 +8,8 @@ use Cultiva\Integrations\DocumentValidation\DTO\DocumentValidationResultDTO;
 use Cultiva\Models\User\Actions\VerifyUserDocumentAction;
 use Database\Factories\UserFactory;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Facades\Storage;
 use Mockery;
 use Mockery\MockInterface;
@@ -56,6 +58,11 @@ class VerifyUserDocumentActionTest extends TestCase
             'is_verified' => true,
         ]);
         Storage::disk('local')->assertMissing('documents/rg.jpg');
+
+        $cachedStatus = Cache::get("document_verification:status:{$user->id}");
+        $this->assertNotNull($cachedStatus);
+        $this->assertSame('approved', $cachedStatus['status']);
+        $this->assertSame(Lang::get('auth.document_verification.approved_message'), $cachedStatus['message']);
     }
 
     public function test_should_keep_user_unverified_and_delete_temp_file_when_rg_is_invalid(): void
@@ -94,6 +101,11 @@ class VerifyUserDocumentActionTest extends TestCase
             'is_verified' => false,
         ]);
         Storage::disk('local')->assertMissing('documents/invalid.png');
+
+        $cachedStatus = Cache::get("document_verification:status:{$user->id}");
+        $this->assertNotNull($cachedStatus);
+        $this->assertSame('failed', $cachedStatus['status']);
+        $this->assertSame('Not an RG.', $cachedStatus['message']);
     }
 
     public function test_should_delete_temp_file_even_when_validation_throws_exception(): void
@@ -123,6 +135,11 @@ class VerifyUserDocumentActionTest extends TestCase
         } catch (CultivaException $exception) {
             $this->assertSame(503, $exception->getStatusCode());
             Storage::disk('local')->assertMissing('documents/error.jpg');
+
+            $cachedStatus = Cache::get("document_verification:status:{$user->id}");
+            $this->assertNotNull($cachedStatus);
+            $this->assertSame('failed', $cachedStatus['status']);
+            $this->assertSame('Document validation service unavailable.', $cachedStatus['message']);
         }
     }
 }

@@ -16,5 +16,9 @@ return [
     'document_verification' => [
         'queued' => 'Document uploaded and queued for verification.',
         'already_verified' => 'The user is already verified.',
+        'status_not_found' => 'No document validation in progress.',
+        'pending_message' => 'Document verification is in progress.',
+        'approved_message' => 'Document verified successfully.',
+        'failed_message' => 'Document verification failed.',
     ],
 ];

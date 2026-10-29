@@ -10,6 +10,7 @@ use Gemini\Laravel\Facades\Gemini;
 use Gemini\Responses\GenerativeModel\GenerateContentResponse;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Facades\Storage;
@@ -464,5 +465,62 @@ class RegisterControllerTest extends TestCase
         // Assert
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['document']);
+    }
+
+    public function test_should_return_document_validation_status_when_in_cache(): void
+    {
+        // Arrange
+        $user = UserFactory::new()->create([
+            'is_verified' => false,
+        ]);
+
+        Sanctum::actingAs($user, ['access']);
+
+        Cache::put("document_verification:status:{$user->id}", [
+            'status' => 'pending',
+            'message' => 'Document verification is in progress.',
+        ], now()->addDay());
+
+        // Action
+        $response = $this->getJson('/v1/auth/signup/document/status');
+
+        // Assert
+        $response->assertStatus(200)
+            ->assertJson([
+                'data' => [
+                    'status' => 'pending',
+                    'message' => 'Document verification is in progress.',
+                ],
+            ]);
+    }
+
+    public function test_should_return_404_when_no_document_validation_is_in_cache(): void
+    {
+        // Arrange
+        $user = UserFactory::new()->create([
+            'is_verified' => false,
+        ]);
+
+        Sanctum::actingAs($user, ['access']);
+
+        Cache::forget("document_verification:status:{$user->id}");
+
+        // Action
+        $response = $this->getJson('/v1/auth/signup/document/status');
+
+        // Assert
+        $response->assertStatus(404)
+            ->assertJson([
+                'message' => Lang::get('auth.document_verification.status_not_found'),
+            ]);
+    }
+
+    public function test_should_return_401_when_unauthenticated_on_document_status(): void
+    {
+        // Action
+        $response = $this->getJson('/v1/auth/signup/document/status');
+
+        // Assert
+        $response->assertStatus(401);
     }
 }

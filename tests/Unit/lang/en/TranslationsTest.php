@@ -32,6 +32,10 @@ class TranslationsTest extends TestCase
         $this->assertSame('Product not found.', Lang::get('wishlist.product_not_found'));
         $this->assertSame('Document uploaded and queued for verification.', Lang::get('auth.document_verification.queued'));
         $this->assertSame('The user is already verified.', Lang::get('auth.document_verification.already_verified'));
+        $this->assertSame('No document validation in progress.', Lang::get('auth.document_verification.status_not_found'));
+        $this->assertSame('Document verification is in progress.', Lang::get('auth.document_verification.pending_message'));
+        $this->assertSame('Document verified successfully.', Lang::get('auth.document_verification.approved_message'));
+        $this->assertSame('Document verification failed.', Lang::get('auth.document_verification.failed_message'));
         $this->assertSame('Document validation service unavailable.', Lang::get('integrations.document_validation.unavailable'));
     }
 }

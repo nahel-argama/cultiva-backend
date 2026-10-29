@@ -10,6 +10,7 @@ use Database\Factories\UserFactory;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Bus;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
@@ -23,6 +24,7 @@ class UploadDocumentActionTest extends TestCase
         // Arrange
         Storage::fake('local');
         Bus::fake([VerifyUserDocumentJob::class]);
+        Cache::flush();
 
         $user = UserFactory::new()->create([
             'is_verified' => false,
@@ -42,6 +44,11 @@ class UploadDocumentActionTest extends TestCase
         // Assert
         $this->assertTrue($result->is($user));
 
+        $cachedStatus = Cache::get("document_verification:status:{$user->id}");
+        $this->assertNotNull($cachedStatus);
+        $this->assertSame('pending', $cachedStatus['status']);
+        $this->assertSame(Lang::get('auth.document_verification.pending_message'), $cachedStatus['message']);
+
         Bus::assertDispatched(VerifyUserDocumentJob::class, function (VerifyUserDocumentJob $job) use ($user) {
             Storage::disk('local')->assertExists($job->filePath);
 
@@ -56,6 +63,7 @@ class UploadDocumentActionTest extends TestCase
         // Arrange
         Storage::fake('local');
         Bus::fake([VerifyUserDocumentJob::class]);
+        Cache::flush();
 
         $user = UserFactory::new()->create([
             'is_verified' => true,
