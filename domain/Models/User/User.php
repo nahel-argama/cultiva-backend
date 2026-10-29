@@ -26,6 +26,7 @@ use Override;
  * @property-read ?string $remember_token
  * @property-read ?CarbonImmutable $last_login
  * @property-read bool $is_active
+ * @property-read bool $is_verified
  * @property-read ProfileType $profile_type
  * @property-read ?CarbonImmutable $email_verified_at
  * @property-read CarbonImmutable $created_at
@@ -49,6 +50,7 @@ class User extends Authenticatable
         'remember_token',
         'last_login',
         'is_active',
+        'is_verified',
         'profile_type',
     ];
 
@@ -62,6 +64,7 @@ class User extends Authenticatable
     {
         return [
             'is_active' => 'boolean',
+            'is_verified' => 'boolean',
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'last_login' => 'datetime',

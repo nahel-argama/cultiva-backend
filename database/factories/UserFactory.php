@@ -36,6 +36,7 @@ class UserFactory extends Factory
             'remember_token'    => null,
             'last_login'        => null,
             'is_active'         => true,
+            'is_verified'       => true,
             'profile_type'      => ProfileType::PRODUCER,
         ];
     }

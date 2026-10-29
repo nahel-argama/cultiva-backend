@@ -60,4 +60,18 @@ class UserTest extends TestCase
         $this->assertFalse($sut->isProducer());
         $this->assertFalse($sut->isRetailer());
     }
+
+    public function test_should_cast_is_verified_from_user_column(): void
+    {
+        // Arrange
+        $sut = new User([
+            'is_verified' => 1,
+        ]);
+
+        // Action
+        $result = $sut->is_verified;
+
+        // Assert
+        $this->assertTrue($result);
+    }
 }

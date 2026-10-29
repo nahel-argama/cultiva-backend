@@ -15,6 +15,7 @@ class TranslationsTest extends TestCase
         // Action & Assert
         $this->assertSame('Unauthenticated.', Lang::get('auth.unauthenticated'));
         $this->assertSame('You do not have permission to access this resource.', Lang::get('auth.forbidden'));
+        $this->assertSame('The user is not verified.', Lang::get('auth.unverified'));
         $this->assertSame('The user does not have a valid profile type.', Lang::get('auth.sign_up.user_without_profile'));
         $this->assertSame('A registration is already in progress for this email.', Lang::get('auth.sign_up.in_progress'));
         $this->assertSame('Invalid credentials.', Lang::get('auth.login.invalid_credentials'));
@@ -29,5 +30,8 @@ class TranslationsTest extends TestCase
         $this->assertSame('A company address is required to add a wishlist item.', Lang::get('wishlist.address_required'));
         $this->assertSame('This product is already in the wishlist.', Lang::get('wishlist.already_exists'));
         $this->assertSame('Product not found.', Lang::get('wishlist.product_not_found'));
+        $this->assertSame('Document uploaded and queued for verification.', Lang::get('auth.document_verification.queued'));
+        $this->assertSame('The user is already verified.', Lang::get('auth.document_verification.already_verified'));
+        $this->assertSame('Document validation service unavailable.', Lang::get('integrations.document_validation.unavailable'));
     }
 }

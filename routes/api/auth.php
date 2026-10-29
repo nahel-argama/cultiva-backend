@@ -12,4 +12,10 @@ Route::group([
     Route::post('signup', [RegisterController::class, 'signUp'])->name('signup');
     Route::get('signup/metadata', [RegisterController::class, 'metadata'])->name('metadata');
     Route::post('login', [LoginController::class, 'login'])->name('login');
+
+    Route::middleware(['auth:sanctum', 'ability:access'])
+        ->group(function (): void {
+            Route::get('me', [LoginController::class, 'me'])->name('me');
+            Route::post('upload-document', [RegisterController::class, 'uploadDocument'])->name('upload-document');
+        });
 });
