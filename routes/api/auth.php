@@ -17,5 +17,6 @@ Route::group([
         ->group(function (): void {
             Route::get('me', [LoginController::class, 'me'])->name('me');
             Route::post('upload-document', [RegisterController::class, 'uploadDocument'])->name('upload-document');
+            Route::get('signup/document/status', [RegisterController::class, 'documentStatus'])->name('signup.document.status');
         });
 });
