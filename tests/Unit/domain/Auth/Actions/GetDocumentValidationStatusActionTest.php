@@ -3,6 +3,7 @@
 namespace Tests\Unit\domain\Auth\Actions;
 
 use Cultiva\Auth\Actions\GetDocumentValidationStatusAction;
+use Cultiva\Auth\Enums\DocumentValidationStatus;
 use Cultiva\Base\Exceptions\CultivaException;
 use Database\Factories\UserFactory;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -30,7 +31,8 @@ class GetDocumentValidationStatusActionTest extends TestCase
         $result = $sut->execute($user);
 
         // Assert
-        $this->assertSame('pending', $result->status);
+        $this->assertSame(DocumentValidationStatus::PENDING, $result->status);
+        $this->assertSame('pending', $result->status->value);
         $this->assertSame('Document verification is in progress.', $result->message);
     }
 

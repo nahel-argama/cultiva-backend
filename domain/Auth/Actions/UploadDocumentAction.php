@@ -3,6 +3,7 @@
 namespace Cultiva\Auth\Actions;
 
 use Cultiva\Auth\DTO\UploadDocumentDTO;
+use Cultiva\Auth\Enums\DocumentValidationStatus;
 use Cultiva\Base\Exceptions\CultivaException;
 use Cultiva\Models\User\Jobs\VerifyUserDocumentJob;
 use Cultiva\Models\User\User;
@@ -22,7 +23,7 @@ class UploadDocumentAction
         Cache::put(
             GetDocumentValidationStatusAction::CACHE_PREFIX . $dto->user->id,
             [
-                'status' => 'pending',
+                'status' => DocumentValidationStatus::PENDING->value,
                 'message' => Lang::get('auth.document_verification.pending_message'),
             ],
             self::CACHE_TTL_SECONDS,
