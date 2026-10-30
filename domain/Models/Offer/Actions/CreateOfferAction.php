@@ -7,6 +7,7 @@ use Cultiva\Integrations\ProductSource\Actions\GetProductAction;
 use Cultiva\Models\Category\Category;
 use Cultiva\Models\Offer\DTO\CreateOfferDTO;
 use Cultiva\Models\Offer\Enums\OfferStatus;
+use Cultiva\Models\Offer\Jobs\PopulateProductImageJob;
 use Cultiva\Models\Offer\Offer;
 use Cultiva\Models\Producer\Producer;
 use Illuminate\Support\Facades\Lang;
@@ -25,7 +26,7 @@ final class CreateOfferAction
 
         $product = $this->getProduct->execute($data->sourceProductId);
 
-        return $producer->offers()->create([
+        $offer = $producer->offers()->create([
             'category_id' => $data->categoryId,
             'source_product_id' => $product->id,
             'product_name' => $product->name,
@@ -36,5 +37,9 @@ final class CreateOfferAction
             'harvest_date' => $data->harvestDate,
             'lifespan_days' => $data->lifespanDays,
         ]);
+
+        PopulateProductImageJob::dispatch($product->id, $product->name);
+
+        return $offer;
     }
 }

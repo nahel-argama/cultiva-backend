@@ -3,6 +3,7 @@
 use Cultiva\Auth\Middleware\EnsureProfile;
 use Cultiva\Auth\Middleware\EnsureUserIsVerified;
 use Cultiva\Base\Exceptions\CultivaException;
+use Cultiva\Models\Offer\Commands\PopulateProductImagesCommand;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -17,6 +18,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
         apiPrefix: '',
     )
+    ->withCommands([
+        PopulateProductImagesCommand::class,
+    ])
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->statefulApi();
         $middleware->throttleWithRedis();

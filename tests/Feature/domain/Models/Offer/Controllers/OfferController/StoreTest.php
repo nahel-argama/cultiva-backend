@@ -2,12 +2,15 @@
 
 namespace Tests\Feature\domain\Models\Offer\Controllers\OfferController;
 
+use Cultiva\Models\Offer\Jobs\PopulateProductImageJob;
 use Database\Factories\CategoryFactory;
 use Database\Factories\ProducerFactory;
 use Database\Factories\RetailerFactory;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Queue;
+use Illuminate\Support\Facades\Storage;
 use Laravel\Sanctum\Sanctum;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
@@ -302,5 +305,39 @@ class StoreTest extends TestCase
         // Assert
         $response->assertForbidden();
         $this->assertDatabaseCount('offers', 0);
+    }
+
+    public function test_should_dispatch_populate_product_image_job_and_include_image_url_on_offer_creation(): void
+    {
+        // Arrange
+        Queue::fake();
+        Storage::fake('public');
+        config(['services.product_source.base_url' => 'http://product-source.test/api']);
+        $fixture = require base_path('tests/Fixtures/Integrations/ProductSource/product_success.php');
+        Http::fake([
+            'http://product-source.test/api/products/0002' => Http::response($fixture, 200),
+        ]);
+        $producer = ProducerFactory::new()->create();
+        $category = CategoryFactory::new()->create();
+        Sanctum::actingAs($producer->company->user, ['access']);
+        $payload = [
+            'source_product_id' => '0002',
+            'category_id' => $category->id,
+            'unit_price' => '12.50',
+            'total_quantity' => 20,
+            'harvest_date' => now()->addDays(5)->format('Y-m-d'),
+            'lifespan_days' => 7,
+        ];
+
+        // Action
+        $response = $this->postJson('/v1/offers', $payload);
+
+        // Assert
+        $response->assertCreated()
+            ->assertJsonPath('data.image_url', Storage::disk('public')->url('products/0002.webp'));
+
+        Queue::assertPushed(PopulateProductImageJob::class, function (PopulateProductImageJob $job) {
+            return $job->sourceProductId === '0002' && $job->productName === 'Tomate Italiano';
+        });
     }
 }
