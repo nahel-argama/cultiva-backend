@@ -4,6 +4,7 @@ namespace Cultiva\Models\Wishlist\Actions;
 
 use Cultiva\Base\Exceptions\CultivaException;
 use Cultiva\Integrations\ProductSource\Actions\GetProductAction;
+use Cultiva\Models\Offer\Jobs\PopulateProductImageJob;
 use Cultiva\Models\Retailer\Retailer;
 use Cultiva\Models\Wishlist\DTO\AddWishlistItemDTO;
 use Cultiva\Models\Wishlist\WishlistItem;
@@ -39,11 +40,15 @@ final class AddWishlistItemAction
                 throw new CultivaException(409, Lang::get('wishlist.already_exists'));
             }
 
-            return $retailer->wishlistItems()->create([
+            $wishlistItem = $retailer->wishlistItems()->create([
                 'source_product_id' => $product->id,
                 'product_name' => $product->name,
                 'state' => $company->address->state,
             ]);
+
+            PopulateProductImageJob::dispatch($product->id, $product->name);
+
+            return $wishlistItem;
         } finally {
             $lock->release();
         }

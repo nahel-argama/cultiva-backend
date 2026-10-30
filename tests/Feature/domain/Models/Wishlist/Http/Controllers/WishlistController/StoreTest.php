@@ -3,6 +3,7 @@
 namespace Tests\Feature\domain\Models\Wishlist\Http\Controllers\WishlistController;
 
 use Cultiva\Models\Address\Address;
+use Cultiva\Models\Offer\Jobs\PopulateProductImageJob;
 use Database\Factories\AddressFactory;
 use Database\Factories\ProducerFactory;
 use Database\Factories\RetailerFactory;
@@ -10,6 +11,8 @@ use Database\Factories\WishlistItemFactory;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Lang;
+use Illuminate\Support\Facades\Queue;
+use Illuminate\Support\Facades\Storage;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
@@ -192,5 +195,39 @@ class StoreTest extends TestCase
         $secondResponse->assertStatus(409);
         $this->assertDatabaseCount('wishlist_items', 1);
         $this->assertTrue(Cache::lock("wishlist:{$retailer->id}:product-123", 60)->get(fn() => true));
+    }
+
+    public function test_should_dispatch_populate_product_image_job_and_include_image_url_on_wishlist_item_creation(): void
+    {
+        // Arrange
+        Queue::fake();
+        Storage::fake('public');
+        $retailer = RetailerFactory::new()->create();
+        AddressFactory::new()->create([
+            'company_id' => $retailer->company->id,
+            'state' => 'SP',
+        ]);
+        Http::fake([
+            '*/products/product-123' => Http::response([
+                'id' => 'product-123',
+                'name' => 'Tomate',
+                'normal_name' => 'Tomate',
+            ], 200),
+        ]);
+        Sanctum::actingAs($retailer->company->user, ['access']);
+
+        // Action
+        $response = $this->postJson('/v1/wishlist/items', [
+            'product_id' => 'product-123',
+        ]);
+
+        // Assert
+        $response->assertCreated()
+            ->assertJsonPath('data.source_product_id', 'product-123')
+            ->assertJsonPath('data.image_url', Storage::disk('public')->url('products/product-123.webp'));
+
+        Queue::assertPushed(PopulateProductImageJob::class, function (PopulateProductImageJob $job) {
+            return $job->sourceProductId === 'product-123' && $job->productName === 'Tomate';
+        });
     }
 }
