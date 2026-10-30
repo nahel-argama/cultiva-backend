@@ -4,7 +4,9 @@ networks:
 
 volumes:
   db-data:
+    name: cultiva_db_data
   redis-data:
+    name: cultiva_redis_data
 
 services:
   php:
