@@ -11,7 +11,7 @@ http:
       value: application/json
   params:
     - name: wishlist_item_id
-      value: "{{wishlist_item_id}}"
+      value: "2"
       type: path
   auth:
     type: bearer
@@ -22,4 +22,3 @@ settings:
   timeout: 0
   followRedirects: true
   maxRedirects: 5
-  forwardAuthorizationHeader: true

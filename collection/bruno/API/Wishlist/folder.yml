@@ -1,3 +1,6 @@
-name: Wishlist
-type: folder
-seq: 5
+info:
+  name: Wishlist
+  type: folder
+  seq: 1
+
+request: {}
