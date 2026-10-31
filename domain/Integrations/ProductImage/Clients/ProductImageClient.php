@@ -2,6 +2,8 @@
 
 namespace Cultiva\Integrations\ProductImage\Clients;
 
+use Cultiva\Integrations\ProductImage\DTO\DownloadedImageDTO;
+use finfo;
 use Illuminate\Http\Client\Factory as HttpFactory;
 use Throwable;
 
@@ -13,7 +15,7 @@ class ProductImageClient
         private readonly HttpFactory $http,
     ) {}
 
-    public function searchAndDownload(string $query): ?string
+    public function searchAndDownload(string $query): ?DownloadedImageDTO
     {
         $imageUrl = $this->searchDuckDuckGo($query) ?? $this->searchWikimedia($query);
 
@@ -111,20 +113,61 @@ class ProductImageClient
         }
     }
 
-    private function download(string $url): ?string
+    private function download(string $url): ?DownloadedImageDTO
     {
         try {
             $response = $this->http->withHeaders([
                 'User-Agent' => self::USER_AGENT,
             ])->timeout(10)->get($url);
 
-            if ($response->successful()) {
-                return $response->body();
+            if (! $response->successful()) {
+                return null;
             }
 
-            return null;
+            $body = $response->body();
+            $extension = $this->determineExtension($response->header('Content-Type'), $url, $body);
+
+            return new DownloadedImageDTO(
+                content: $body,
+                extension: $extension,
+            );
         } catch (Throwable) {
             return null;
         }
+    }
+
+    private function determineExtension(?string $contentType, string $url, string $body): string
+    {
+        if ($contentType !== null) {
+            $normalizedContentType = strtolower(trim(explode(';', $contentType)[0]));
+            $ext = match ($normalizedContentType) {
+                'image/jpeg', 'image/jpg' => 'jpg',
+                'image/png' => 'png',
+                'image/webp' => 'webp',
+                'image/gif' => 'gif',
+                default => null,
+            };
+
+            if ($ext !== null) {
+                return $ext;
+            }
+        }
+
+        $urlPath = parse_url($url, PHP_URL_PATH);
+        $urlExt = strtolower(pathinfo($urlPath ?? '', PATHINFO_EXTENSION));
+        if (in_array($urlExt, ['jpg', 'jpeg', 'png', 'webp', 'gif'], true)) {
+            return $urlExt === 'jpeg' ? 'jpg' : $urlExt;
+        }
+
+        $finfo = new finfo(FILEINFO_MIME_TYPE);
+        $mime = $finfo->buffer($body);
+
+        return match ($mime) {
+            'image/jpeg' => 'jpg',
+            'image/png' => 'png',
+            'image/webp' => 'webp',
+            'image/gif' => 'gif',
+            default => 'jpg',
+        };
     }
 }
