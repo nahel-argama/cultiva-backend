@@ -15,7 +15,7 @@ class PopulateProductImageJobTest extends TestCase
         $actionMock->shouldReceive('execute')
             ->once()
             ->with('123', 'Tomate')
-            ->andReturn('products/123.webp');
+            ->andReturn('products/123.jpg');
 
         $job = new PopulateProductImageJob('123', 'Tomate');
         $job->handle($actionMock);

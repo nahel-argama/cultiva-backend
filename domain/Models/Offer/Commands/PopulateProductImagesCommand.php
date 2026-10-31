@@ -11,7 +11,7 @@ class PopulateProductImagesCommand extends Command
 {
     protected $signature = 'products:populate-images {--source-id= : Specific source product ID to populate}';
 
-    protected $description = 'Populate product images into public storage in WebP format';
+    protected $description = 'Populate product images into public storage in JPEG format';
 
     public function handle(PopulateProductImageAction $action): int
     {
