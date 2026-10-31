@@ -3,6 +3,7 @@
 namespace Tests\Feature\domain\Models\Offer\Controllers\OfferController;
 
 use Cultiva\Models\Offer\Enums\OfferStatus;
+use Database\Factories\AddressFactory;
 use Database\Factories\CategoryFactory;
 use Database\Factories\OfferFactory;
 use Database\Factories\ProducerFactory;
@@ -127,6 +128,93 @@ class AvailableIndexTest extends TestCase
 
         // Assert
         $response->assertForbidden();
+    }
+
+    public function test_should_order_available_offers_by_distance_and_include_distance_km_in_response(): void
+    {
+        // Arrange
+        $retailer = RetailerFactory::new()->create();
+        AddressFactory::new()->create([
+            'company_id' => $retailer->company->id,
+            'coordinate' => 'POINT(-49.0629788 -26.9244749)',
+        ]);
+
+        $closerProducer = ProducerFactory::new()->create();
+        AddressFactory::new()->create([
+            'company_id' => $closerProducer->company->id,
+            'coordinate' => 'POINT(-49.0700000 -26.9300000)',
+        ]);
+        $closerOffer = OfferFactory::new()->create([
+            'producer_id' => $closerProducer->id,
+            'status' => OfferStatus::ACTIVE,
+            'total_quantity' => 10,
+            'reserved_quantity' => 0,
+            'created_at' => now()->subHours(2),
+        ]);
+
+        $furtherProducer = ProducerFactory::new()->create();
+        AddressFactory::new()->create([
+            'company_id' => $furtherProducer->company->id,
+            'coordinate' => 'POINT(-49.1500000 -26.9900000)',
+        ]);
+        $furtherOffer = OfferFactory::new()->create([
+            'producer_id' => $furtherProducer->id,
+            'status' => OfferStatus::ACTIVE,
+            'total_quantity' => 10,
+            'reserved_quantity' => 0,
+            'created_at' => now()->subHour(),
+        ]);
+
+        $noCoordinateProducer = ProducerFactory::new()->create();
+        $noCoordinateOffer = OfferFactory::new()->create([
+            'producer_id' => $noCoordinateProducer->id,
+            'status' => OfferStatus::ACTIVE,
+            'total_quantity' => 10,
+            'reserved_quantity' => 0,
+            'created_at' => now(),
+        ]);
+
+        Sanctum::actingAs($retailer->company->user, ['access']);
+
+        // Action
+        $response = $this->getJson('/v1/offers');
+
+        // Assert
+        $response->assertOk()
+            ->assertJsonPath('data.0.id', $closerOffer->id)
+            ->assertJsonPath('data.0.distance_km', 0.93)
+            ->assertJsonPath('data.1.id', $furtherOffer->id)
+            ->assertJsonPath('data.1.distance_km', 11.29)
+            ->assertJsonPath('data.2.id', $noCoordinateOffer->id)
+            ->assertJsonPath('data.2.distance_km', null);
+    }
+
+    public function test_should_return_null_distance_km_when_retailer_has_no_coordinates(): void
+    {
+        // Arrange
+        $retailer = RetailerFactory::new()->create();
+
+        $producer = ProducerFactory::new()->create();
+        AddressFactory::new()->create([
+            'company_id' => $producer->company->id,
+            'coordinate' => 'POINT(-49.0700000 -26.9300000)',
+        ]);
+        $offer = OfferFactory::new()->create([
+            'producer_id' => $producer->id,
+            'status' => OfferStatus::ACTIVE,
+            'total_quantity' => 10,
+            'reserved_quantity' => 0,
+        ]);
+
+        Sanctum::actingAs($retailer->company->user, ['access']);
+
+        // Action
+        $response = $this->getJson('/v1/offers');
+
+        // Assert
+        $response->assertOk()
+            ->assertJsonPath('data.0.id', $offer->id)
+            ->assertJsonPath('data.0.distance_km', null);
     }
 
 }
