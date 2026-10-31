@@ -4,14 +4,11 @@ namespace Cultiva\Models\Offer\Actions;
 
 use Cultiva\Integrations\ProductImage\Clients\ProductImageClient;
 use Cultiva\Integrations\ProductSource\Actions\GetProductAction;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Throwable;
 
 class PopulateProductImageAction
 {
-    private const SUPPORTED_EXTENSIONS = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
-
     public function __construct(
         private readonly ProductImageClient $client,
         private readonly GetProductAction $getProduct,
@@ -19,8 +16,10 @@ class PopulateProductImageAction
 
     public function execute(string $sourceProductId, ?string $productName = null): string
     {
-        if ($existingPath = $this->findExistingImagePath($sourceProductId)) {
-            return $existingPath;
+        $path = "products/{$sourceProductId}.jpg";
+
+        if (Storage::disk('public')->exists($path)) {
+            return $path;
         }
 
         try {
@@ -30,38 +29,38 @@ class PopulateProductImageAction
             }
 
             $query = "{$productName} produto isolado fundo branco";
-            $downloadedImage = $this->client->searchAndDownload($query);
+            $rawBytes = $this->client->searchAndDownload($query);
 
-            if ($downloadedImage !== null) {
-                $path = "products/{$sourceProductId}.{$downloadedImage->extension}";
-                Storage::disk('public')->put($path, $downloadedImage->content);
-
-                return $path;
+            if ($rawBytes !== null) {
+                $jpegBytes = $this->convertToJpeg($rawBytes);
+                if ($jpegBytes !== null) {
+                    Storage::disk('public')->put($path, $jpegBytes);
+                }
             }
         } catch (Throwable $e) {
-            Log::warning("Error while trying to populate product image for source_product_id: {$sourceProductId}. Error: {$e->getMessage()}");
+            $this->storePlaceholder($path);
         }
 
-        Log::warning("Failed to populate product image for source_product_id: {$sourceProductId}");
-
-        return $this->storePlaceholder($sourceProductId);
+        return $path;
     }
 
-    private function findExistingImagePath(string $sourceProductId): ?string
+    private function convertToJpeg(string $rawBytes): ?string
     {
-        foreach (self::SUPPORTED_EXTENSIONS as $ext) {
-            $path = "products/{$sourceProductId}.{$ext}";
-            if (Storage::disk('public')->exists($path)) {
-                return $path;
-            }
+        $image = @imagecreatefromstring($rawBytes);
+
+        if ($image === false) {
+            return null;
         }
 
-        return null;
+        ob_start();
+        imagejpeg($image, null, 85);
+        $jpegBytes = ob_get_clean();
+
+        return $jpegBytes ?: null;
     }
 
-    private function storePlaceholder(string $sourceProductId): string
+    private function storePlaceholder(string $path): void
     {
-        $path = "products/{$sourceProductId}.jpg";
         $placeholder = imagecreatetruecolor(200, 200);
         $bg = imagecolorallocate($placeholder, 240, 240, 240);
         imagefill($placeholder, 0, 0, $bg);
@@ -69,10 +68,7 @@ class PopulateProductImageAction
         ob_start();
         imagejpeg($placeholder, null, 80);
         $placeholderBytes = ob_get_clean();
-        imagedestroy($placeholder);
 
         Storage::disk('public')->put($path, $placeholderBytes);
-
-        return $path;
     }
 }

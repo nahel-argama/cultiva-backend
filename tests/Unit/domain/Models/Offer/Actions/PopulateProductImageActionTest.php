@@ -3,7 +3,6 @@
 namespace Tests\Unit\domain\Models\Offer\Actions;
 
 use Cultiva\Integrations\ProductImage\Clients\ProductImageClient;
-use Cultiva\Integrations\ProductImage\DTO\DownloadedImageDTO;
 use Cultiva\Integrations\ProductSource\Actions\GetProductAction;
 use Cultiva\Integrations\ProductSource\Clients\ProductSourceClient;
 use Cultiva\Models\Offer\Actions\PopulateProductImageAction;
@@ -49,25 +48,39 @@ class PopulateProductImageActionTest extends TestCase
         $this->assertSame('pre-existing-jpg', Storage::disk('public')->get('products/123.jpg'));
     }
 
-    public function test_it_searches_downloads_and_stores_image_in_its_plain_format(): void
+    public function test_it_searches_downloads_converts_to_jpeg_and_stores_image(): void
     {
-        $plainBytes = 'plain-png-raw-binary-content';
+        $gd = imagecreatetruecolor(10, 10);
+        ob_start();
+        imagepng($gd);
+        $pngBytes = ob_get_clean();
+        imagedestroy($gd);
 
         $this->clientMock->shouldReceive('searchAndDownload')
             ->once()
             ->with('Tomate produto isolado fundo branco')
-            ->andReturn(new DownloadedImageDTO(content: $plainBytes, extension: 'png'));
+            ->andReturn($pngBytes);
 
         $result = $this->sut->execute('123', 'Tomate');
 
-        $this->assertSame('products/123.png', $result);
-        $this->assertTrue(Storage::disk('public')->exists('products/123.png'));
-        $this->assertSame($plainBytes, Storage::disk('public')->get('products/123.png'));
+        $this->assertSame('products/123.jpg', $result);
+        $this->assertTrue(Storage::disk('public')->exists('products/123.jpg'));
+
+        $storedBytes = Storage::disk('public')->get('products/123.jpg');
+        $imageInfo = getimagesizefromstring($storedBytes);
+        $this->assertNotFalse($imageInfo);
+        $this->assertSame(10, $imageInfo[0]);
+        $this->assertSame(10, $imageInfo[1]);
+        $this->assertSame(IMAGETYPE_JPEG, $imageInfo[2]);
     }
 
     public function test_it_fetches_product_name_from_get_product_action_if_not_provided(): void
     {
-        $plainBytes = 'plain-jpg-raw-binary-content';
+        $gd = imagecreatetruecolor(10, 10);
+        ob_start();
+        imagejpeg($gd);
+        $jpegBytes = ob_get_clean();
+        imagedestroy($gd);
 
         $mockResponse = Mockery::mock(Response::class);
         $mockResponse->shouldReceive('status')->andReturn(200);
@@ -85,13 +98,12 @@ class PopulateProductImageActionTest extends TestCase
         $this->clientMock->shouldReceive('searchAndDownload')
             ->once()
             ->with('Banana produto isolado fundo branco')
-            ->andReturn(new DownloadedImageDTO(content: $plainBytes, extension: 'jpg'));
+            ->andReturn($jpegBytes);
 
         $result = $this->sut->execute('456');
 
         $this->assertSame('products/456.jpg', $result);
         $this->assertTrue(Storage::disk('public')->exists('products/456.jpg'));
-        $this->assertSame($plainBytes, Storage::disk('public')->get('products/456.jpg'));
     }
 
     public function test_it_logs_warning_and_stores_placeholder_when_download_fails(): void

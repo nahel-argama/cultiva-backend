@@ -29,6 +29,7 @@ class TranslationsTest extends TestCase
         $this->assertSame('Product catalog unavailable.', Lang::get('integrations.product_source.unavailable'));
         $this->assertSame('A company address is required to add a wishlist item.', Lang::get('wishlist.address_required'));
         $this->assertSame('This product is already in the wishlist.', Lang::get('wishlist.already_exists'));
+        $this->assertSame('This product is already being added to the wishlist.', Lang::get('wishlist.in_progress'));
         $this->assertSame('Product not found.', Lang::get('wishlist.product_not_found'));
         $this->assertSame('Document uploaded and queued for verification.', Lang::get('auth.document_verification.queued'));
         $this->assertSame('The user is already verified.', Lang::get('auth.document_verification.already_verified'));
