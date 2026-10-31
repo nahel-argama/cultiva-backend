@@ -22,7 +22,12 @@ final class ListOffersAction
                 $perPage,
                 $search,
             ),
-            ProfileType::RETAILER => $this->availableOffers->execute($page, $perPage, $search),
+            ProfileType::RETAILER => $this->availableOffers->execute(
+                $user,
+                $page,
+                $perPage,
+                $search,
+            ),
         };
     }
 }
