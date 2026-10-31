@@ -25,7 +25,7 @@ class PopulateProductImagesCommandTest extends TestCase
         ob_start();
         imagejpeg($gd);
         $jpegBytes = ob_get_clean();
-        imagedestroy($gd);
+
 
         Http::fake([
             'http://product-source.test/api/products/0002' => Http::response($fixture, 200),
@@ -63,7 +63,7 @@ class PopulateProductImagesCommandTest extends TestCase
         ob_start();
         imagejpeg($gd);
         $jpegBytes = ob_get_clean();
-        imagedestroy($gd);
+
 
         Http::fake([
             'duckduckgo.com/?*' => Http::response('<html><script>vqd=123-456&</script></html>', 200),

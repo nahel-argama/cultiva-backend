@@ -54,7 +54,6 @@ class PopulateProductImageActionTest extends TestCase
         ob_start();
         imagepng($gd);
         $pngBytes = ob_get_clean();
-        imagedestroy($gd);
 
         $this->clientMock->shouldReceive('searchAndDownload')
             ->once()
@@ -80,7 +79,6 @@ class PopulateProductImageActionTest extends TestCase
         ob_start();
         imagejpeg($gd);
         $jpegBytes = ob_get_clean();
-        imagedestroy($gd);
 
         $mockResponse = Mockery::mock(Response::class);
         $mockResponse->shouldReceive('status')->andReturn(200);
