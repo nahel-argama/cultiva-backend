@@ -14,13 +14,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libicu-dev \
     libjpeg62-turbo-dev \
     libfreetype6-dev \
-    libwebp-dev \
     && rm -rf /var/lib/apt/lists/*
 
 RUN docker-php-ext-configure gd \
     --with-freetype \
-    --with-jpeg \
-    --with-webp
+    --with-jpeg
 
 RUN docker-php-ext-install \
     pdo_pgsql \

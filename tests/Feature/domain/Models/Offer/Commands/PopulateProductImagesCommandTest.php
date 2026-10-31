@@ -43,7 +43,7 @@ class PopulateProductImagesCommandTest extends TestCase
             ->expectsOutputToContain('Populated image for product: 0002')
             ->assertSuccessful();
 
-        $this->assertTrue(Storage::disk('public')->exists('products/0002.webp'));
+        $this->assertTrue(Storage::disk('public')->exists('products/0002.jpg'));
     }
 
     public function test_should_populate_images_for_all_existing_offers_when_no_source_id_option(): void
@@ -80,6 +80,6 @@ class PopulateProductImagesCommandTest extends TestCase
             ->expectsOutputToContain('Populated image for product: 0003')
             ->assertSuccessful();
 
-        $this->assertTrue(Storage::disk('public')->exists('products/0003.webp'));
+        $this->assertTrue(Storage::disk('public')->exists('products/0003.jpg'));
     }
 }

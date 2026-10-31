@@ -202,6 +202,7 @@ class StoreTest extends TestCase
         // Arrange
         Queue::fake();
         Storage::fake('public');
+        Storage::disk('public')->put('products/product-123.jpg', 'fake-image-bytes');
         $retailer = RetailerFactory::new()->create();
         AddressFactory::new()->create([
             'company_id' => $retailer->company->id,
@@ -224,10 +225,40 @@ class StoreTest extends TestCase
         // Assert
         $response->assertCreated()
             ->assertJsonPath('data.source_product_id', 'product-123')
-            ->assertJsonPath('data.image_url', Storage::disk('public')->url('products/product-123.webp'));
+            ->assertJsonPath('data.image_url', Storage::disk('public')->url('products/product-123.jpg'));
 
         Queue::assertPushed(PopulateProductImageJob::class, function (PopulateProductImageJob $job) {
             return $job->sourceProductId === 'product-123' && $job->productName === 'Tomate';
         });
+    }
+
+    public function test_should_return_null_image_url_when_product_image_is_not_yet_stored(): void
+    {
+        // Arrange
+        Queue::fake();
+        Storage::fake('public');
+        $retailer = RetailerFactory::new()->create();
+        AddressFactory::new()->create([
+            'company_id' => $retailer->company->id,
+            'state' => 'SP',
+        ]);
+        Http::fake([
+            '*/products/product-456' => Http::response([
+                'id' => 'product-456',
+                'name' => 'Alface',
+                'normal_name' => 'Alface',
+            ], 200),
+        ]);
+        Sanctum::actingAs($retailer->company->user, ['access']);
+
+        // Action
+        $response = $this->postJson('/v1/wishlist/items', [
+            'product_id' => 'product-456',
+        ]);
+
+        // Assert
+        $response->assertCreated()
+            ->assertJsonPath('data.source_product_id', 'product-456')
+            ->assertJsonPath('data.image_url', null);
     }
 }
