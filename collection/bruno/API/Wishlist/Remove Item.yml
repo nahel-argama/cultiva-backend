@@ -11,7 +11,7 @@ http:
       value: application/json
   params:
     - name: wishlist_item_id
-      value: "2"
+      value: "1"
       type: path
   auth:
     type: bearer
