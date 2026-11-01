@@ -4,6 +4,7 @@ namespace Cultiva\Models\Offer\Actions;
 
 use Cultiva\Integrations\ProductImage\Clients\ProductImageClient;
 use Cultiva\Integrations\ProductSource\Actions\GetProductAction;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Throwable;
 
@@ -28,18 +29,23 @@ class PopulateProductImageAction
                 $productName = $product->name;
             }
 
-            $query = "{$productName} produto isolado fundo branco";
+            $query = "{$productName} alimento in natura hortifruti pescado fresco";
             $rawBytes = $this->client->searchAndDownload($query);
 
             if ($rawBytes !== null) {
                 $jpegBytes = $this->convertToJpeg($rawBytes);
                 if ($jpegBytes !== null) {
                     Storage::disk('public')->put($path, $jpegBytes);
+
+                    return $path;
                 }
             }
         } catch (Throwable $e) {
-            $this->storePlaceholder($path);
+            Log::warning("Error while trying to populate product image for source_product_id: {$sourceProductId}. Error: {$e->getMessage()}");
         }
+
+        Log::warning("Failed to populate product image for source_product_id: {$sourceProductId}");
+        $this->storePlaceholder($path);
 
         return $path;
     }

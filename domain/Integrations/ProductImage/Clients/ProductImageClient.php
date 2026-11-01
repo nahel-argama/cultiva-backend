@@ -15,7 +15,9 @@ class ProductImageClient
 
     public function searchAndDownload(string $query): ?string
     {
-        $imageUrl = $this->searchDuckDuckGo($query) ?? $this->searchWikimedia($query);
+        $imageUrl = $this->searchDuckDuckGo($query)
+            ?? $this->searchBing($query)
+            ?? $this->searchWikimedia($query);
 
         if ($imageUrl === null) {
             return null;
@@ -63,6 +65,41 @@ class ProductImageClient
             }
 
             return $results[0]['image'] ?? null;
+        } catch (Throwable) {
+            return null;
+        }
+    }
+
+    private function searchBing(string $query): ?string
+    {
+        try {
+            $response = $this->http->withHeaders([
+                'User-Agent' => self::USER_AGENT,
+            ])->timeout(5)->get('https://www.bing.com/images/search', [
+                'q' => $query,
+                'qft' => '+filterui:photo-photo',
+                'form' => 'IRFLTR',
+                'first' => 1,
+            ]);
+
+            if (! $response->successful()) {
+                return null;
+            }
+
+            if (! preg_match_all('/murl&quot;:&quot;(https?:\/\/[^&]+)&quot;/', $response->body(), $matches)) {
+                return null;
+            }
+
+            foreach ($matches[1] as $url) {
+                $decodedUrl = html_entity_decode($url, ENT_QUOTES | ENT_HTML5);
+                if (str_contains($decodedUrl, 'lookaside.fbsbx.com') || str_contains($decodedUrl, 'lookaside.instagram.com')) {
+                    continue;
+                }
+
+                return $decodedUrl;
+            }
+
+            return null;
         } catch (Throwable) {
             return null;
         }
