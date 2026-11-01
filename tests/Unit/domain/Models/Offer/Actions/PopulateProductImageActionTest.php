@@ -57,7 +57,7 @@ class PopulateProductImageActionTest extends TestCase
 
         $this->clientMock->shouldReceive('searchAndDownload')
             ->once()
-            ->with('Tomate produto isolado fundo branco')
+            ->with('Tomate alimento in natura hortifruti pescado fresco')
             ->andReturn($pngBytes);
 
         $result = $this->sut->execute('123', 'Tomate');
@@ -95,7 +95,7 @@ class PopulateProductImageActionTest extends TestCase
 
         $this->clientMock->shouldReceive('searchAndDownload')
             ->once()
-            ->with('Banana produto isolado fundo branco')
+            ->with('Banana alimento in natura hortifruti pescado fresco')
             ->andReturn($jpegBytes);
 
         $result = $this->sut->execute('456');
@@ -110,7 +110,7 @@ class PopulateProductImageActionTest extends TestCase
 
         $this->clientMock->shouldReceive('searchAndDownload')
             ->once()
-            ->with('Abacaxi produto isolado fundo branco')
+            ->with('Abacaxi alimento in natura hortifruti pescado fresco')
             ->andReturn(null);
 
         $result = $this->sut->execute('789', 'Abacaxi');

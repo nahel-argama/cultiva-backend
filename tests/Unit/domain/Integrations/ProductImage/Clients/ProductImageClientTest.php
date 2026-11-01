@@ -33,10 +33,27 @@ class ProductImageClientTest extends TestCase
         $this->assertSame('fake-jpg-binary-content', $result);
     }
 
-    public function test_it_falls_back_to_wikimedia_when_duckduckgo_returns_no_results(): void
+    public function test_it_falls_back_to_bing_when_duckduckgo_returns_no_results(): void
     {
         Http::fake([
             'duckduckgo.com/?*' => Http::response('<html>no token</html>', 200),
+            'www.bing.com/images/search*' => Http::response(
+                '<html><a m="{&quot;murl&quot;:&quot;https://images.example.com/namorado-fresco.jpg&quot;}"></a></html>',
+                200
+            ),
+            'images.example.com/namorado-fresco.jpg' => Http::response('bing-jpg-binary-content', 200, ['Content-Type' => 'image/jpeg']),
+        ]);
+
+        $result = $this->sut->searchAndDownload('Namorado alimento in natura hortifruti pescado fresco');
+
+        $this->assertSame('bing-jpg-binary-content', $result);
+    }
+
+    public function test_it_falls_back_to_wikimedia_when_duckduckgo_and_bing_return_no_results(): void
+    {
+        Http::fake([
+            'duckduckgo.com/?*' => Http::response('<html>no token</html>', 200),
+            'www.bing.com/images/search*' => Http::response('<html>no results</html>', 200),
             'commons.wikimedia.org/w/api.php*' => Http::response([
                 'query' => [
                     'pages' => [
@@ -54,7 +71,7 @@ class ProductImageClientTest extends TestCase
             'upload.wikimedia.org/tomato_wikimedia.png' => Http::response('wikimedia-png-binary-content', 200, ['Content-Type' => 'image/png']),
         ]);
 
-        $result = $this->sut->searchAndDownload('Tomate produto isolado fundo branco');
+        $result = $this->sut->searchAndDownload('Tomate alimento in natura hortifruti pescado fresco');
 
         $this->assertSame('wikimedia-png-binary-content', $result);
     }
@@ -63,6 +80,7 @@ class ProductImageClientTest extends TestCase
     {
         Http::fake([
             'duckduckgo.com/?*' => Http::response('<html>no token</html>', 200),
+            'www.bing.com/images/search*' => Http::response('<html>no results</html>', 200),
             'commons.wikimedia.org/w/api.php*' => Http::response([
                 'query' => [
                     'pages' => [],
