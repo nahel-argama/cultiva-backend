@@ -6,7 +6,7 @@ use Cultiva\Models\Offer\Enums\OfferStatus;
 use Cultiva\Models\Offer\Offer;
 use Cultiva\Models\User\User;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use Illuminate\Database\Query\Builder;
+use Illuminate\Database\Eloquent\Builder;
 
 final class ListAvailableOffersAction
 {
@@ -28,7 +28,7 @@ final class ListAvailableOffersAction
             )
             ->where('offers.status', OfferStatus::ACTIVE->value)
             ->whereColumn('offers.total_quantity', '>', 'offers.reserved_quantity')
-            ->when($search !== '', fn (Builder $query) => $query->where('offers.product_name', 'ilike', '%'.$search.'%'))
+            ->when($search !== '', fn(Builder $query) => $query->where('offers.product_name', 'ilike', '%' . $search . '%'))
             ->orderBy('distance_km')
             ->latest('offers.created_at')
             ->latest('offers.id')

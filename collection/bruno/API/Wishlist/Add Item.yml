@@ -24,7 +24,7 @@ http:
 runtime:
   variables:
     - name: product_id
-      value: "118"
+      value: "187"
 
 settings:
   encodeUrl: true

@@ -28,9 +28,7 @@ class VerifyUserDocumentAction
             $result = $this->validateRgDocument->execute($base64Content, $mimeType);
 
             if ($result->isAuthenticRg()) {
-                $user->update([
-                    'is_verified' => true,
-                ]);
+                $user->markAsVerified();
 
                 $this->cacheStatus(
                     $user,

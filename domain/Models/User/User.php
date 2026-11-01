@@ -118,4 +118,11 @@ class User extends Authenticatable
     {
         return $this->profile_type === ProfileType::DELIVERY;
     }
+
+    public function markAsVerified(): void
+    {
+        $this->update([
+            'is_verified' => true,
+        ]);
+    }
 }

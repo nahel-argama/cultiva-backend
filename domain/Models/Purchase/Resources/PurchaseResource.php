@@ -26,7 +26,7 @@ final class PurchaseResource extends JsonResource
             'unit_price' => $this->unit_price,
             'total_price' => $this->total_price,
             'created_at' => $this->created_at->toISOString(),
-            'counterparty' => [
+            'counterparty' => $company === null ? null : [
                 'id' => $counterparty->id,
                 'role' => $role,
                 'trade_name' => $company->trade_name,
