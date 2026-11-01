@@ -64,6 +64,7 @@ class SaleIndexTest extends TestCase
         $purchase = PurchaseFactory::new()->create();
         $retailer = $purchase->retailer;
         $company = $retailer->company;
+        $address = $company->address;
         Sanctum::actingAs($purchase->producer->company->user, ['access']);
 
         // Action
@@ -79,7 +80,16 @@ class SaleIndexTest extends TestCase
             'name' => $company->user->name,
             'email' => $company->user->email,
             'phone' => $company->phone,
-            'address' => null,
+            'address' => [
+                'zip' => $address->zip,
+                'street' => $address->street,
+                'number' => $address->number,
+                'complement' => $address->complement,
+                'reference_point' => $address->reference_point,
+                'neighborhood' => $address->neighborhood,
+                'city' => $address->city,
+                'state' => $address->state,
+            ],
         ])->assertJsonPath('data.0.category', [
             'id' => $purchase->offer->category->id,
             'name' => $purchase->offer->category->name,

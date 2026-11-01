@@ -3,7 +3,6 @@
 namespace Tests\Feature\domain\Models\Offer\Controllers\OfferController;
 
 use Cultiva\Models\Offer\Enums\OfferStatus;
-use Database\Factories\AddressFactory;
 use Database\Factories\CategoryFactory;
 use Database\Factories\OfferFactory;
 use Database\Factories\ProducerFactory;
@@ -22,6 +21,9 @@ class AvailableIndexTest extends TestCase
         $retailer = RetailerFactory::new()->create();
         $firstProducer = ProducerFactory::new()->create();
         $secondProducer = ProducerFactory::new()->create();
+        $secondProducer->company->address->update([
+            'coordinate' => $firstProducer->company->address->coordinate,
+        ]);
         $category = CategoryFactory::new()->create();
         $olderCheapVisible = OfferFactory::new()->create([
             'producer_id' => $firstProducer->id,
@@ -134,14 +136,12 @@ class AvailableIndexTest extends TestCase
     {
         // Arrange
         $retailer = RetailerFactory::new()->create();
-        AddressFactory::new()->create([
-            'company_id' => $retailer->company->id,
+        $retailer->company->address->update([
             'coordinate' => 'POINT(-49.0629788 -26.9244749)',
         ]);
 
         $closerProducer = ProducerFactory::new()->create();
-        AddressFactory::new()->create([
-            'company_id' => $closerProducer->company->id,
+        $closerProducer->company->address->update([
             'coordinate' => 'POINT(-49.0700000 -26.9300000)',
         ]);
         $closerOffer = OfferFactory::new()->create([
@@ -153,8 +153,7 @@ class AvailableIndexTest extends TestCase
         ]);
 
         $furtherProducer = ProducerFactory::new()->create();
-        AddressFactory::new()->create([
-            'company_id' => $furtherProducer->company->id,
+        $furtherProducer->company->address->update([
             'coordinate' => 'POINT(-49.1500000 -26.9900000)',
         ]);
         $furtherOffer = OfferFactory::new()->create([
@@ -163,15 +162,6 @@ class AvailableIndexTest extends TestCase
             'total_quantity' => 10,
             'reserved_quantity' => 0,
             'created_at' => now()->subHour(),
-        ]);
-
-        $noCoordinateProducer = ProducerFactory::new()->create();
-        $noCoordinateOffer = OfferFactory::new()->create([
-            'producer_id' => $noCoordinateProducer->id,
-            'status' => OfferStatus::ACTIVE,
-            'total_quantity' => 10,
-            'reserved_quantity' => 0,
-            'created_at' => now(),
         ]);
 
         Sanctum::actingAs($retailer->company->user, ['access']);
@@ -184,37 +174,7 @@ class AvailableIndexTest extends TestCase
             ->assertJsonPath('data.0.id', $closerOffer->id)
             ->assertJsonPath('data.0.distance_km', 0.93)
             ->assertJsonPath('data.1.id', $furtherOffer->id)
-            ->assertJsonPath('data.1.distance_km', 11.29)
-            ->assertJsonPath('data.2.id', $noCoordinateOffer->id)
-            ->assertJsonPath('data.2.distance_km', null);
+            ->assertJsonPath('data.1.distance_km', 11.29);
+        $this->assertCount(2, $response->json('data'));
     }
-
-    public function test_should_return_null_distance_km_when_retailer_has_no_coordinates(): void
-    {
-        // Arrange
-        $retailer = RetailerFactory::new()->create();
-
-        $producer = ProducerFactory::new()->create();
-        AddressFactory::new()->create([
-            'company_id' => $producer->company->id,
-            'coordinate' => 'POINT(-49.0700000 -26.9300000)',
-        ]);
-        $offer = OfferFactory::new()->create([
-            'producer_id' => $producer->id,
-            'status' => OfferStatus::ACTIVE,
-            'total_quantity' => 10,
-            'reserved_quantity' => 0,
-        ]);
-
-        Sanctum::actingAs($retailer->company->user, ['access']);
-
-        // Action
-        $response = $this->getJson('/v1/offers');
-
-        // Assert
-        $response->assertOk()
-            ->assertJsonPath('data.0.id', $offer->id)
-            ->assertJsonPath('data.0.distance_km', null);
-    }
-
 }

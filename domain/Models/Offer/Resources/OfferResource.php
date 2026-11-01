@@ -23,7 +23,7 @@ final class OfferResource extends JsonResource
             'is_visible' => $this->isVisible(),
             'harvest_date' => $this->harvest_date?->toDateString(),
             'lifespan_days' => $this->lifespan_days,
-            'distance_km' => isset($this->distance_km) && $this->distance_km !== null ? (float) $this->distance_km : null,
+            'distance_km' => $this->whenHas('distance_km', fn (): float => (float) $this->distance_km),
             'created_at' => $this->created_at->toISOString(),
             'updated_at' => $this->updated_at->toISOString(),
         ];

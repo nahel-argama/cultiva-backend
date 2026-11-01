@@ -23,7 +23,7 @@ class DeliveryAddressFactory extends Factory
             'neighborhood' => $this->faker->citySuffix(),
             'city' => $this->faker->city(),
             'state' => $this->faker->stateAbbr(),
-            'coordinate' => null,
+            'coordinate' => "POINT({$this->faker->longitude()} {$this->faker->latitude()})",
         ];
     }
 }

@@ -22,7 +22,7 @@ class AddressFactory extends Factory
     public function definition(): array
     {
         return [
-            'company_id'       => CompanyFactory::new(),
+            'company_id'       => CompanyFactory::new()->withoutAfterCreating(),
             'zip'              => $this->faker->numerify('########'),
             'street'           => $this->faker->streetName(),
             'number'           => $this->faker->buildingNumber(),

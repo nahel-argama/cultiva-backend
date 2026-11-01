@@ -2,9 +2,7 @@
 
 namespace Tests\Feature\domain\Models\Wishlist\Http\Controllers\WishlistController;
 
-use Cultiva\Models\Address\Address;
 use Cultiva\Models\Offer\Jobs\PopulateProductImageJob;
-use Database\Factories\AddressFactory;
 use Database\Factories\ProducerFactory;
 use Database\Factories\RetailerFactory;
 use Database\Factories\WishlistItemFactory;
@@ -22,10 +20,6 @@ class StoreTest extends TestCase
     {
         // Arrange
         $retailer = RetailerFactory::new()->create();
-        AddressFactory::new()->create([
-            'company_id' => $retailer->company->id,
-            'state' => 'SP',
-        ]);
         Http::fake([
             '*/products/product-123' => Http::response(status: 404),
         ]);
@@ -44,10 +38,6 @@ class StoreTest extends TestCase
     {
         // Arrange
         $retailer = RetailerFactory::new()->create();
-        AddressFactory::new()->create([
-            'company_id' => $retailer->company->id,
-            'state' => 'SP',
-        ]);
         Http::fake([
             '*/products/product-123' => Http::response([
                 'id' => 'product-123',
@@ -77,10 +67,6 @@ class StoreTest extends TestCase
     {
         // Arrange
         $retailer = RetailerFactory::new()->create();
-        AddressFactory::new()->create([
-            'company_id' => $retailer->company->id,
-            'state' => 'SP',
-        ]);
         $lockWasHeldDuringLookup = false;
         Http::fake([
             '*/products/product-123' => function () use ($retailer, &$lockWasHeldDuringLookup) {
@@ -108,10 +94,6 @@ class StoreTest extends TestCase
     {
         // Arrange
         $retailer = RetailerFactory::new()->create();
-        AddressFactory::new()->create([
-            'company_id' => $retailer->company->id,
-            'state' => 'SP',
-        ]);
         Http::fake([
             '*/products/product-123' => function () use ($retailer) {
                 WishlistItemFactory::new()->create([
@@ -149,10 +131,7 @@ class StoreTest extends TestCase
     {
         // Arrange
         $retailer = RetailerFactory::new()->create();
-        AddressFactory::new()->create([
-            'company_id' => $retailer->company->id,
-            'state' => 'SP',
-        ]);
+        $state = $retailer->company->address->state;
         Http::fake([
             '*/products/product-123' => Http::response([
                 'id' => 'product-123',
@@ -171,12 +150,12 @@ class StoreTest extends TestCase
         $response->assertCreated()
             ->assertJsonPath('data.source_product_id', 'product-123')
             ->assertJsonPath('data.product_name', 'Tomate')
-            ->assertJsonPath('data.state', 'SP');
+            ->assertJsonPath('data.state', $state);
         $this->assertDatabaseHas('wishlist_items', [
             'retailer_id' => $retailer->id,
             'source_product_id' => 'product-123',
             'product_name' => 'Tomate',
-            'state' => 'SP',
+            'state' => $state,
         ]);
         $this->assertTrue(Cache::lock("wishlist:{$retailer->id}:product-123", 60)->get(fn() => true));
     }
@@ -201,15 +180,6 @@ class StoreTest extends TestCase
     {
         // Arrange
         $retailer = RetailerFactory::new()->create();
-        Address::query()->create([
-            'company_id' => $retailer->company->id,
-            'zip' => '01001000',
-            'street' => 'Rua A',
-            'number' => '1',
-            'neighborhood' => 'Centro',
-            'city' => 'São Paulo',
-            'state' => 'SP',
-        ]);
         Http::fake([
             '*/products/product-123' => Http::response([
                 'id' => 'product-123',
@@ -236,10 +206,6 @@ class StoreTest extends TestCase
         Queue::fake();
         Storage::fake('public');
         $retailer = RetailerFactory::new()->create();
-        AddressFactory::new()->create([
-            'company_id' => $retailer->company->id,
-            'state' => 'SP',
-        ]);
         Http::fake([
             '*/products/product-123' => Http::response([
                 'id' => 'product-123',

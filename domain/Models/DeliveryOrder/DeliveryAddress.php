@@ -20,7 +20,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read string $neighborhood
  * @property-read string $city
  * @property-read string $state
- * @property-read mixed $coordinate
+ * @property-read string $coordinate
  * @property-read CarbonImmutable $created_at
  * @property-read ?CarbonImmutable $updated_at
  * @property-read Collection<int, DeliveryOrder> $pickupOrders

@@ -3,7 +3,6 @@
 namespace Tests\Feature\domain\Auth\Controllers;
 
 use Cultiva\Models\Company\Company;
-use Database\Factories\AddressFactory;
 use Database\Factories\CompanyFactory;
 use Database\Factories\DeliveryFactory;
 use Database\Factories\ProducerFactory;
@@ -36,10 +35,6 @@ class LoginControllerTest extends TestCase
         $company = CompanyFactory::new()->create(['user_id' => $user->id]);
 
         $producer = ProducerFactory::new()->create(['company_id' => $company->id]);
-
-        AddressFactory::new()->create([
-            'company_id' => $company->id,
-        ]);
 
         // Action
         $response = $this->postJson('/v1/auth/login', $payload);
@@ -81,10 +76,6 @@ class LoginControllerTest extends TestCase
 
         $retailer = RetailerFactory::new()->create(['company_id' => $company->id]);
 
-        AddressFactory::new()->create([
-            'company_id' => $company->id,
-        ]);
-
         // Action
         $response = $this->postJson('/v1/auth/login', $payload);
 
@@ -122,10 +113,6 @@ class LoginControllerTest extends TestCase
         $delivery = DeliveryFactory::new()->create(['company_id' => $company->id]);
 
         VehicleFactory::new()->create(['delivery_id' => $delivery->id]);
-
-        AddressFactory::new()->create([
-            'company_id' => $company->id,
-        ]);
 
         // Action
         $response = $this->postJson('/v1/auth/login', $payload);
@@ -178,7 +165,6 @@ class LoginControllerTest extends TestCase
 
         $company = CompanyFactory::new()->create(['user_id' => $user->id]);
         $producer = ProducerFactory::new()->create(['company_id' => $company->id]);
-        AddressFactory::new()->create(['company_id' => $company->id]);
 
         Sanctum::actingAs($user, ['access']);
 
