@@ -28,7 +28,7 @@ final class CepAddressTransformer
 
     public function transform(array $data): GeoAddressDTO
     {
-        $coordinates = $data['location']['coordinates'] ?? [];
+        $coordinates = $data['location']['coordinates'];
 
         return new GeoAddressDTO(
             zipCode: $data['cep'],

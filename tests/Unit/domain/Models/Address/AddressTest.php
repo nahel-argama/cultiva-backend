@@ -15,25 +15,32 @@ class AddressTest extends TestCase
 
     public function test_should_create_address_belonging_to_company(): void
     {
-        // Arrange
-        $company = CompanyFactory::new()->create();
-
-        // Action
+        // Arrange & Action
         $address = AddressFactory::new()->create([
-            'company_id' => $company->id,
             'street' => 'Rua das Palmeiras',
             'number' => '100',
         ]);
+        $company = $address->company;
 
         // Assert
         $this->assertInstanceOf(Address::class, $address);
-        $this->assertSame($company->id, $address->company->id);
-        $this->assertInstanceOf(Company::class, $address->company);
+        $this->assertInstanceOf(Company::class, $company);
         $this->assertSame($address->id, $company->address->id);
+        $this->assertNotNull($address->coordinate);
         $this->assertDatabaseHas('addresses', [
             'id' => $address->id,
             'company_id' => $company->id,
             'street' => 'Rua das Palmeiras',
         ]);
+    }
+
+    public function test_should_automatically_create_address_with_coordinate_when_company_is_created(): void
+    {
+        // Arrange & Action
+        $company = CompanyFactory::new()->create();
+
+        // Assert
+        $this->assertInstanceOf(Address::class, $company->address);
+        $this->assertNotNull($company->address->coordinate);
     }
 }

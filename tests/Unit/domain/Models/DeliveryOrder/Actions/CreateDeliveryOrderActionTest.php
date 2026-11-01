@@ -2,12 +2,9 @@
 
 namespace Tests\Unit\domain\Models\DeliveryOrder\Actions;
 
-use Cultiva\Base\Exceptions\CultivaException;
-use Cultiva\Models\Address\Address;
 use Cultiva\Models\DeliveryOrder\Actions\CreateDeliveryOrderAction;
 use Cultiva\Models\DeliveryOrder\DeliveryOrder;
 use Cultiva\Models\DeliveryOrder\Enums\DeliveryOrderStatus;
-use Database\Factories\AddressFactory;
 use Database\Factories\OfferFactory;
 use Database\Factories\ProducerFactory;
 use Database\Factories\PurchaseFactory;
@@ -23,26 +20,10 @@ class CreateDeliveryOrderActionTest extends TestCase
     {
         // Arrange
         $producer = ProducerFactory::new()->create();
-        $producerAddress = AddressFactory::new()->create([
-            'company_id' => $producer->company->id,
-            'zip' => '89010000',
-            'street' => 'Rua do Produtor',
-            'number' => '100',
-            'neighborhood' => 'Centro',
-            'city' => 'Blumenau',
-            'state' => 'SC',
-        ]);
+        $producerAddress = $producer->company->address;
 
         $retailer = RetailerFactory::new()->create();
-        $retailerAddress = AddressFactory::new()->create([
-            'company_id' => $retailer->company->id,
-            'zip' => '89020000',
-            'street' => 'Rua do Varejista',
-            'number' => '200',
-            'neighborhood' => 'Garcia',
-            'city' => 'Blumenau',
-            'state' => 'SC',
-        ]);
+        $retailerAddress = $retailer->company->address;
 
         $offer = OfferFactory::new()->create([
             'producer_id' => $producer->id,
@@ -71,22 +52,22 @@ class CreateDeliveryOrderActionTest extends TestCase
 
         $this->assertDatabaseHas('delivery_addresses', [
             'id' => $result->pickup_address_id,
-            'zip' => '89010000',
-            'street' => 'Rua do Produtor',
-            'number' => '100',
-            'neighborhood' => 'Centro',
-            'city' => 'Blumenau',
-            'state' => 'SC',
+            'zip' => $producerAddress->zip,
+            'street' => $producerAddress->street,
+            'number' => $producerAddress->number,
+            'neighborhood' => $producerAddress->neighborhood,
+            'city' => $producerAddress->city,
+            'state' => $producerAddress->state,
         ]);
 
         $this->assertDatabaseHas('delivery_addresses', [
             'id' => $result->dropoff_address_id,
-            'zip' => '89020000',
-            'street' => 'Rua do Varejista',
-            'number' => '200',
-            'neighborhood' => 'Garcia',
-            'city' => 'Blumenau',
-            'state' => 'SC',
+            'zip' => $retailerAddress->zip,
+            'street' => $retailerAddress->street,
+            'number' => $retailerAddress->number,
+            'neighborhood' => $retailerAddress->neighborhood,
+            'city' => $retailerAddress->city,
+            'state' => $retailerAddress->state,
         ]);
 
         $this->assertDatabaseHas('delivery_orders', [
@@ -97,58 +78,5 @@ class CreateDeliveryOrderActionTest extends TestCase
             'quantity' => 15,
             'status' => DeliveryOrderStatus::PENDING->value,
         ]);
-    }
-
-    public function test_should_throw_exception_when_producer_has_no_address(): void
-    {
-        // Arrange
-        $producer = ProducerFactory::new()->create();
-        $retailer = RetailerFactory::new()->create();
-        AddressFactory::new()->create([
-            'company_id' => $retailer->company->id,
-        ]);
-
-        $offer = OfferFactory::new()->create([
-            'producer_id' => $producer->id,
-        ]);
-
-        $purchase = PurchaseFactory::new()->create([
-            'offer_id' => $offer->id,
-            'producer_id' => $producer->id,
-            'retailer_id' => $retailer->id,
-        ]);
-
-        $sut = new CreateDeliveryOrderAction();
-
-        // Action & Assert
-        $this->expectException(CultivaException::class);
-        $sut->execute($purchase);
-    }
-
-    public function test_should_throw_exception_when_retailer_has_no_address(): void
-    {
-        // Arrange
-        $producer = ProducerFactory::new()->create();
-        AddressFactory::new()->create([
-            'company_id' => $producer->company->id,
-        ]);
-
-        $retailer = RetailerFactory::new()->create();
-
-        $offer = OfferFactory::new()->create([
-            'producer_id' => $producer->id,
-        ]);
-
-        $purchase = PurchaseFactory::new()->create([
-            'offer_id' => $offer->id,
-            'producer_id' => $producer->id,
-            'retailer_id' => $retailer->id,
-        ]);
-
-        $sut = new CreateDeliveryOrderAction();
-
-        // Action & Assert
-        $this->expectException(CultivaException::class);
-        $sut->execute($purchase);
     }
 }

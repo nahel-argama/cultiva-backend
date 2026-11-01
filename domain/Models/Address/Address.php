@@ -20,10 +20,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property-read string $neighborhood
  * @property-read string $city
  * @property-read string $state
- * @property-read mixed $coordinate
+ * @property-read string $coordinate
  * @property-read CarbonImmutable $created_at
  * @property-read ?CarbonImmutable $updated_at
- * @property-read ?Company $company
+ * @property-read Company $company
  */
 class Address extends Model
 {

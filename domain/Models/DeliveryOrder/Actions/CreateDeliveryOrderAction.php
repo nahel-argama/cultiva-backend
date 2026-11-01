@@ -2,7 +2,6 @@
 
 namespace Cultiva\Models\DeliveryOrder\Actions;
 
-use Cultiva\Base\Exceptions\CultivaException;
 use Cultiva\Models\DeliveryOrder\DeliveryAddress;
 use Cultiva\Models\DeliveryOrder\DeliveryOrder;
 use Cultiva\Models\DeliveryOrder\Enums\DeliveryOrderStatus;
@@ -18,12 +17,8 @@ class CreateDeliveryOrderAction
             'retailer.company.address',
         ]);
 
-        $producerAddress = $purchase->producer?->company?->address;
-        $retailerAddress = $purchase->retailer?->company?->address;
-
-        if (! $producerAddress || ! $retailerAddress) {
-            throw new CultivaException(422, 'Cannot create delivery order without pickup and dropoff addresses.');
-        }
+        $producerAddress = $purchase->producer->company->address;
+        $retailerAddress = $purchase->retailer->company->address;
 
         return DB::transaction(function () use ($purchase, $producerAddress, $retailerAddress): DeliveryOrder {
             $pickupDeliveryAddress = DeliveryAddress::create([

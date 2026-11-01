@@ -33,6 +33,7 @@ class DeliveryAddressTest extends TestCase
         $this->assertSame('Centro', $address->neighborhood);
         $this->assertSame('Blumenau', $address->city);
         $this->assertSame('SC', $address->state);
+        $this->assertNotNull($address->coordinate);
         $this->assertDatabaseHas('delivery_addresses', [
             'id' => $address->id,
             'zip' => '89010025',

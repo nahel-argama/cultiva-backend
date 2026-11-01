@@ -12,7 +12,7 @@ final class PurchaseResource extends JsonResource
     {
         $role = $request->user()->isRetailer() ? 'producer' : 'retailer';
         $counterparty = $this->resource->{$role};
-        $company = $counterparty?->company;
+        $company = $counterparty->company;
         $category = $this->offer?->category;
 
         return [
@@ -26,18 +26,16 @@ final class PurchaseResource extends JsonResource
             'unit_price' => $this->unit_price,
             'total_price' => $this->total_price,
             'created_at' => $this->created_at->toISOString(),
-            'counterparty' => $company === null ? null : [
+            'counterparty' => [
                 'id' => $counterparty->id,
                 'role' => $role,
                 'trade_name' => $company->trade_name,
                 'legal_name' => $company->legal_name,
                 'document_number' => $company->document_number,
-                'name' => $company->user?->name,
-                'email' => $company->user?->email,
+                'name' => $company->user->name,
+                'email' => $company->user->email,
                 'phone' => $company->phone,
-                'address' => $company->address === null
-                    ? null
-                    : app(AddressTransformer::class)->transform($company->address),
+                'address' => app(AddressTransformer::class)->transform($company->address),
             ],
             'category' => $category === null ? null : [
                 'id' => $category->id,

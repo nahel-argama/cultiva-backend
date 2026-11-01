@@ -18,7 +18,7 @@ class CreateAddressActionTest extends TestCase
     public function test_should_create_address_for_company(): void
     {
         // Arrange
-        $company = CompanyFactory::new()->create();
+        $company = CompanyFactory::new()->withoutAfterCreating()->create();
 
         $dto = AddressRegisterDTO::fromArray([
             'zip' => '89010025',

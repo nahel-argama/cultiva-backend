@@ -25,11 +25,11 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read CarbonImmutable $created_at
  * @property-read ?CarbonImmutable $updated_at
  * @property-read ?CarbonImmutable $deleted_at
- * @property-read ?User $user
+ * @property-read User $user
  * @property-read ?Producer $producer
  * @property-read ?Retailer $retailer
  * @property-read ?Delivery $delivery
- * @property-read ?Address $address
+ * @property-read Address $address
  */
 class Company extends Model
 {

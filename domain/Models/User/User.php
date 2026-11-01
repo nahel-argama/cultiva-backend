@@ -32,7 +32,7 @@ use Override;
  * @property-read CarbonImmutable $created_at
  * @property-read ?CarbonImmutable $updated_at
  * @property-read ?CarbonImmutable $deleted_at
- * @property-read ?Company $company
+ * @property-read Company $company
  * @property-read ?Retailer $retailer
  * @property-read ?Producer $producer
  * @property-read ?Delivery $delivery

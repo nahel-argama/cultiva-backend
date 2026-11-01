@@ -3,9 +3,6 @@
 namespace Tests\Feature\domain\Models\Purchase\Controllers\PurchaseController;
 
 use Cultiva\Models\Offer\Enums\OfferStatus;
-use Cultiva\Models\Producer\Producer;
-use Cultiva\Models\Retailer\Retailer;
-use Database\Factories\AddressFactory;
 use Database\Factories\DeliveryFactory;
 use Database\Factories\OfferFactory;
 use Database\Factories\ProducerFactory;
@@ -23,7 +20,6 @@ class StoreTest extends TestCase
     {
         // Arrange
         $retailer = RetailerFactory::new()->create();
-        $this->createAddressFor($retailer);
         $offer = OfferFactory::new()->create([
             'unit_price' => '10.00',
             'total_quantity' => 100,
@@ -31,7 +27,6 @@ class StoreTest extends TestCase
             'status' => OfferStatus::ACTIVE,
             'product_name' => 'Tomate Italiano',
         ]);
-        $this->createAddressFor($offer->producer);
         Sanctum::actingAs($retailer->company->user, ['access']);
 
         // Action
@@ -72,14 +67,12 @@ class StoreTest extends TestCase
     {
         // Arrange
         $retailer = RetailerFactory::new()->create();
-        $this->createAddressFor($retailer);
         $offer = OfferFactory::new()->create([
             'unit_price' => '12.50',
             'total_quantity' => 20,
             'reserved_quantity' => 5,
             'status' => OfferStatus::ACTIVE,
         ]);
-        $this->createAddressFor($offer->producer);
         Sanctum::actingAs($retailer->company->user, ['access']);
 
         // Action
@@ -196,14 +189,11 @@ class StoreTest extends TestCase
         // Arrange
         $firstRetailer = RetailerFactory::new()->create();
         $secondRetailer = RetailerFactory::new()->create();
-        $this->createAddressFor($firstRetailer);
-        $this->createAddressFor($secondRetailer);
         $offer = OfferFactory::new()->create([
             'total_quantity' => 10,
             'reserved_quantity' => 0,
             'status' => OfferStatus::ACTIVE,
         ]);
-        $this->createAddressFor($offer->producer);
 
         // Action
         Sanctum::actingAs($firstRetailer->company->user, ['access']);
@@ -226,26 +216,7 @@ class StoreTest extends TestCase
     {
         // Arrange
         $retailer = RetailerFactory::new()->create();
-        AddressFactory::new()->create([
-            'company_id' => $retailer->company->id,
-            'zip' => '89020000',
-            'street' => 'Rua do Varejista',
-            'number' => '200',
-            'neighborhood' => 'Garcia',
-            'city' => 'Blumenau',
-            'state' => 'SC',
-        ]);
-
         $producer = ProducerFactory::new()->create();
-        AddressFactory::new()->create([
-            'company_id' => $producer->company->id,
-            'zip' => '89010000',
-            'street' => 'Rua do Produtor',
-            'number' => '100',
-            'neighborhood' => 'Centro',
-            'city' => 'Blumenau',
-            'state' => 'SC',
-        ]);
 
         $offer = OfferFactory::new()->create([
             'producer_id' => $producer->id,
@@ -273,18 +244,5 @@ class StoreTest extends TestCase
         ]);
         $this->assertDatabaseCount('delivery_orders', 1);
         $this->assertDatabaseCount('delivery_addresses', 2);
-    }
-
-    private function createAddressFor(Retailer|Producer $entity): void
-    {
-        AddressFactory::new()->create([
-            'company_id' => $entity->company->id,
-            'zip' => '89010000',
-            'street' => 'Rua Teste',
-            'number' => '100',
-            'neighborhood' => 'Centro',
-            'city' => 'Blumenau',
-            'state' => 'SC',
-        ]);
     }
 }

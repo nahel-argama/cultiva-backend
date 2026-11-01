@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use Cultiva\Models\Company\Company;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Override;
 
 /**
  * @extends Factory<Company>
@@ -11,6 +12,18 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 class CompanyFactory extends Factory
 {
     protected $model = Company::class;
+
+    #[Override]
+    public function configure(): static
+    {
+        return $this->afterCreating(function (Company $company): void {
+            if (! $company->address()->exists()) {
+                AddressFactory::new()->create([
+                    'company_id' => $company->id,
+                ]);
+            }
+        });
+    }
 
     /**
      * Define the model's default state.

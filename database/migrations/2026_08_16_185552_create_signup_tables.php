@@ -44,7 +44,7 @@ return new class extends Migration
             $table->string('neighborhood', 50);
             $table->string('city', 50);
             $table->string('state', 2);
-            $table->geography('coordinate', subtype: 'point', srid: 4326)->nullable();
+            $table->geography('coordinate', subtype: 'point', srid: 4326);
 
             $table->timestamps();
         });

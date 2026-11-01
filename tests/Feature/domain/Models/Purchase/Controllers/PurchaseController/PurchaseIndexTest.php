@@ -3,7 +3,6 @@
 namespace Tests\Feature\domain\Models\Purchase\Controllers\PurchaseController;
 
 use Cultiva\Models\Offer\Enums\OfferStatus;
-use Database\Factories\AddressFactory;
 use Database\Factories\OfferFactory;
 use Database\Factories\PurchaseFactory;
 use Database\Factories\RetailerFactory;
@@ -81,7 +80,7 @@ class PurchaseIndexTest extends TestCase
         ]);
         $producer = $purchase->producer;
         $company = $producer->company;
-        $address = AddressFactory::new()->create(['company_id' => $company->id]);
+        $address = $company->address;
         $category = $purchase->offer->category;
         $purchase->offer->update(['product_name' => 'Nome atualizado', 'unit_price' => '99.00']);
         Sanctum::actingAs($purchase->retailer->company->user, ['access']);
@@ -119,17 +118,14 @@ class PurchaseIndexTest extends TestCase
         $this->assertDatabaseHas('purchases', ['id' => $purchase->id, 'product_name' => 'Tomate comprado']);
     }
 
-    public function test_should_allow_missing_supplier_address_and_soft_deleted_company(): void
+    public function test_should_return_null_counterparty_when_supplier_company_is_soft_deleted(): void
     {
         // Arrange
         $purchase = PurchaseFactory::new()->create();
         Sanctum::actingAs($purchase->retailer->company->user, ['access']);
+        $purchase->producer->company->delete();
 
         // Action & Assert
-        $this->getJson('/v1/purchases')->assertOk()
-            ->assertJsonPath('data.0.counterparty.id', $purchase->producer_id)
-            ->assertJsonPath('data.0.counterparty.address', null);
-        $purchase->producer->company->delete();
         $this->getJson('/v1/purchases')->assertOk()->assertJsonPath('data.0.counterparty', null);
     }
 
