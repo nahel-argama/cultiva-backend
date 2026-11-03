@@ -2,8 +2,8 @@
 
 namespace Tests\Feature\domain\Models\Offer\Controllers\OfferController;
 
+use Cultiva\Models\Category\Category;
 use Cultiva\Models\Offer\Enums\OfferStatus;
-use Database\Factories\CategoryFactory;
 use Database\Factories\DeliveryFactory;
 use Database\Factories\OfferFactory;
 use Database\Factories\ProducerFactory;
@@ -20,7 +20,7 @@ class IndexTest extends TestCase
         // Arrange
         $producer = ProducerFactory::new()->create();
         $otherProducer = ProducerFactory::new()->create();
-        $category = CategoryFactory::new()->create();
+        $category = Category::query()->firstOrFail();
         $olderInactive = OfferFactory::new()->create([
             'producer_id' => $producer->id,
             'category_id' => $category->id,

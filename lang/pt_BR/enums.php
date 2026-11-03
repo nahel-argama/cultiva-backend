@@ -5,6 +5,7 @@ return [
         'producer' => 'Produtor',
         'retailer' => 'Varejista',
         'delivery' => 'Entregador',
+        'golog_driver' => 'Motorista GoLog',
     ],
     'activity_segment' => [
         'vegetables' => 'Hortaliças',
@@ -59,5 +60,12 @@ return [
         'delivered' => 'Entregue',
         'failed' => 'Falhou',
         'cancelled' => 'Cancelado',
+    ],
+    'category' => [
+        'Frutas' => 'Frutas',
+        'Legumes' => 'Legumes',
+        'Verduras' => 'Verduras',
+        'Tubérculos e raízes' => 'Tubérculos e raízes',
+        'Grãos e cereais' => 'Grãos e cereais',
     ],
 ];

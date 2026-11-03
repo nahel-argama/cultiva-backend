@@ -2,8 +2,8 @@
 
 namespace Tests\Feature\domain\Models\Offer\Controllers\OfferController;
 
+use Cultiva\Models\Category\Category;
 use Cultiva\Models\Offer\Enums\OfferStatus;
-use Database\Factories\CategoryFactory;
 use Database\Factories\OfferFactory;
 use Database\Factories\ProducerFactory;
 use Database\Factories\RetailerFactory;
@@ -24,7 +24,7 @@ class AvailableIndexTest extends TestCase
         $secondProducer->company->address->update([
             'coordinate' => $firstProducer->company->address->coordinate,
         ]);
-        $category = CategoryFactory::new()->create();
+        $category = Category::query()->firstOrFail();
         $olderCheapVisible = OfferFactory::new()->create([
             'producer_id' => $firstProducer->id,
             'category_id' => $category->id,

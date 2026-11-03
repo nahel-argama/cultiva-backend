@@ -1,0 +1,44 @@
+info:
+  name: Create Driver User
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{golog_base_url}}/user"
+  headers:
+    - name: Accept
+      value: application/json
+    - name: Content-Type
+      value: application/json
+  auth:
+    type: bearer
+    token: "{{golog_token}}"
+  body:
+    type: json
+    data: |
+      {
+        "name": "Rafael Santos Motorista",
+        "email": "motorista.rafael@example.com",
+        "password": "Password123!",
+        "cpf": "12345678901",
+        "User Profile": "DRIVER",
+        "companyId": "{{golog_company_id}}"
+      }
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        if (res.getStatus() === 200) {
+          const body = res.getBody();
+          if (body.id) {
+            bru.setEnvVar('golog_driver_user_id', body.id, { persist: true });
+          }
+        }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

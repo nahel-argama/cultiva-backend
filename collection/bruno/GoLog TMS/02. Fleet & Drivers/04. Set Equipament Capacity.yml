@@ -1,0 +1,37 @@
+info:
+  name: Set Equipament Capacity
+  type: http
+  seq: 4
+
+http:
+  method: POST
+  url: "{{golog_base_url}}/equipament-capacity/equipament/:equipamentId"
+  headers:
+    - name: Accept
+      value: application/json
+    - name: Content-Type
+      value: application/json
+  params:
+    - name: equipamentId
+      value: "{{golog_equipament_id}}"
+      type: path
+  auth:
+    type: bearer
+    token: "{{golog_token}}"
+  body:
+    type: json
+    data: |
+      [
+        {
+          "demandTypeId": "{{demand_type_id}}",
+          "maxCapacity": 1500.0,
+          "softMaxCapacity": 1400.0,
+          "costPerUnitAboveSoftMax": 10.0
+        }
+      ]
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

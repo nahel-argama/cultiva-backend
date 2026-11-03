@@ -1,0 +1,48 @@
+info:
+  name: Create Address
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{golog_base_url}}/address"
+  headers:
+    - name: Accept
+      value: application/json
+    - name: Content-Type
+      value: application/json
+  auth:
+    type: bearer
+    token: "{{golog_token}}"
+  body:
+    type: json
+    data: |
+      {
+        "street": "Avenida Brasil",
+        "number": "1500",
+        "district": "Centro",
+        "city": "Sao Paulo",
+        "state": "SP",
+        "country": "Brasil",
+        "cep": "01000000",
+        "complement": "Galpao A",
+        "latitude": "-23.550520",
+        "longitude": "-46.633308"
+      }
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        if (res.getStatus() === 200) {
+          const body = res.getBody();
+          if (body.id) {
+            bru.setEnvVar('golog_address_id', body.id, { persist: true });
+          }
+        }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

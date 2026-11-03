@@ -2,7 +2,7 @@
 
 namespace Tests\Feature\domain\Models\Offer\Commands;
 
-use Database\Factories\CategoryFactory;
+use Cultiva\Models\Category\Category;
 use Database\Factories\OfferFactory;
 use Database\Factories\ProducerFactory;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -51,7 +51,7 @@ class PopulateProductImagesCommandTest extends TestCase
         // Arrange
         Storage::fake('public');
         $producer = ProducerFactory::new()->create();
-        $category = CategoryFactory::new()->create();
+        $category = Category::query()->firstOrFail();
         OfferFactory::new()->create([
             'producer_id' => $producer->id,
             'category_id' => $category->id,

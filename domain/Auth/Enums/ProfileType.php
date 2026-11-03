@@ -11,4 +11,5 @@ enum ProfileType: string
     case PRODUCER = 'producer';
     case RETAILER = 'retailer';
     case DELIVERY = 'delivery';
+    case GOLOG_DRIVER = 'golog_driver';
 }
