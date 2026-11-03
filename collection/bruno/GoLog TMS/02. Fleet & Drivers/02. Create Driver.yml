@@ -1,0 +1,42 @@
+info:
+  name: Create Driver
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: "{{golog_base_url}}/driver"
+  headers:
+    - name: Accept
+      value: application/json
+    - name: Content-Type
+      value: application/json
+  auth:
+    type: bearer
+    token: "{{golog_token}}"
+  body:
+    type: json
+    data: |
+      {
+        "userId": "{{golog_driver_user_id}}",
+        "cnhNumber": "12345678901",
+        "cnhExpiration": "2028-12-31",
+        "costPerHour": 45.00
+      }
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        if (res.getStatus() === 200) {
+          const body = res.getBody();
+          if (body.id) {
+            bru.setEnvVar('golog_driver_id', body.id, { persist: true });
+          }
+        }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

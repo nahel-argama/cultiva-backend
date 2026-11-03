@@ -1,0 +1,9 @@
+info:
+  name: GoLog TMS
+  type: folder
+  seq: 2
+
+request:
+  variables:
+    - name: golog_base_url
+      value: http://147.15.18.21:8081

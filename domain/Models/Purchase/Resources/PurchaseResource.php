@@ -39,7 +39,7 @@ final class PurchaseResource extends JsonResource
             ],
             'category' => $category === null ? null : [
                 'id' => $category->id,
-                'name' => $category->name,
+                'name' => $category->name instanceof \BackedEnum ? $category->name->value : (string) $category->name,
             ],
         ];
     }

@@ -6,6 +6,7 @@ namespace Cultiva\Auth\Builders\SignupRuleBuilder;
 
 use Cultiva\Auth\Builders\SignupRuleBuilder\Contracts\SignupRuleBuilderInterface;
 use Cultiva\Auth\Enums\ProfileType;
+use Cultiva\Integrations\GoLog\Enums\GoLogFuelType;
 use Cultiva\Models\Delivery\Enums\CnhCategory;
 use Cultiva\Models\CargoType\Enums\CargoType;
 use Cultiva\Models\Producer\Enums\ActivitySegment;
@@ -88,6 +89,25 @@ class SignupRuleBuilder implements SignupRuleBuilderInterface
             'delivery.vehicle.plate'      => ['required', 'string', 'min:7', 'max:8', 'unique:vehicles,plate'],
             'delivery.vehicle.cargo_type' => ['required', Rule::enum(CargoType::class)],
             'delivery.vehicle.capacity'   => ['required', 'numeric', 'gt:0'],
+        ]);
+
+        return $this;
+    }
+
+    public function addGoLogDriverRules(): static
+    {
+        $this->rules = array_merge($this->rules, [
+            'golog_driver.cpf'                        => ['required', 'string', 'digits:11'],
+            'golog_driver.cnh_number'                 => ['required', 'string', 'digits:11'],
+            'golog_driver.cnh_expiration'             => ['required', 'date', 'date_format:Y-m-d'],
+            'golog_driver.cost_per_hour'              => ['required', 'numeric', 'gt:0'],
+            'golog_driver.vehicle.plate'              => ['required', 'string', 'min:7', 'max:8'],
+            'golog_driver.vehicle.capacity'           => ['required', 'numeric', 'gt:0'],
+            'golog_driver.vehicle.renavam'            => ['required', 'string', 'digits:11'],
+            'golog_driver.vehicle.model'              => ['required', 'string', 'max:100'],
+            'golog_driver.vehicle.number_axles'       => ['required', 'integer', 'min:1'],
+            'golog_driver.vehicle.type_fuel'          => ['required', Rule::enum(GoLogFuelType::class)],
+            'golog_driver.vehicle.cost_per_kilometer' => ['required', 'numeric', 'gt:0'],
         ]);
 
         return $this;

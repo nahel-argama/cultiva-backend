@@ -92,7 +92,9 @@ class SaleIndexTest extends TestCase
             ],
         ])->assertJsonPath('data.0.category', [
             'id' => $purchase->offer->category->id,
-            'name' => $purchase->offer->category->name,
+            'name' => $purchase->offer->category->name instanceof \BackedEnum
+                ? $purchase->offer->category->name->value
+                : (string) $purchase->offer->category->name,
         ]);
     }
 

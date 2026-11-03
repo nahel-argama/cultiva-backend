@@ -1,5 +1,6 @@
 <?php
 
+use Cultiva\Models\Category\Enums\Category;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
@@ -18,11 +19,11 @@ return new class extends Migration
         $timestamp = now();
 
         DB::table('categories')->insert([
-            ['name' => 'Frutas', 'created_at' => $timestamp, 'updated_at' => $timestamp],
-            ['name' => 'Legumes', 'created_at' => $timestamp, 'updated_at' => $timestamp],
-            ['name' => 'Verduras', 'created_at' => $timestamp, 'updated_at' => $timestamp],
-            ['name' => 'Tubérculos e raízes', 'created_at' => $timestamp, 'updated_at' => $timestamp],
-            ['name' => 'Grãos e cereais', 'created_at' => $timestamp, 'updated_at' => $timestamp],
+            ['name' => Category::FRUTAS->value, 'created_at' => $timestamp, 'updated_at' => $timestamp],
+            ['name' => Category::LEGUMES->value, 'created_at' => $timestamp, 'updated_at' => $timestamp],
+            ['name' => Category::VERDURAS->value, 'created_at' => $timestamp, 'updated_at' => $timestamp],
+            ['name' => Category::TUBERCULOS_E_RAIZES->value, 'created_at' => $timestamp, 'updated_at' => $timestamp],
+            ['name' => Category::GRAOS_E_CEREAIS->value, 'created_at' => $timestamp, 'updated_at' => $timestamp],
         ]);
 
         Schema::create('offers', function (Blueprint $table): void {
