@@ -4,3 +4,19 @@ variables:
     value: http://localhost:80
   - secret: true
     name: access_token
+  - name: golog_base_url
+    value: http://147.15.18.21:8081
+  - secret: true
+    name: golog_token
+  - name: golog_company_id
+    value: d9d7b435-c256-405b-877c-848f4a22e22a
+  - name: golog_user_id
+    value: a7408c76-355f-4382-a3f7-25ff4c54ac54
+  - name: golog_driver_user_id
+    value: ""
+  - name: golog_driver_id
+    value: ""
+  - name: golog_equipament_id
+    value: ""
+  - name: golog_equipament_group_id
+    value: ""

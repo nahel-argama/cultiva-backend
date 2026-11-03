@@ -2,7 +2,8 @@
 
 namespace Tests\Feature\domain\Models\Offer\Controllers\OfferController;
 
-use Database\Factories\CategoryFactory;
+use Cultiva\Models\Category\Category;
+use Cultiva\Models\Category\Enums\Category as CategoryEnum;
 use Database\Factories\ProducerFactory;
 use Database\Factories\RetailerFactory;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -25,7 +26,7 @@ class StoreTest extends TestCase
             'http://product-source.test/api/products/0002' => Http::response($fixture, 200),
         ]);
         $producer = ProducerFactory::new()->create();
-        $category = CategoryFactory::new()->create(['name' => 'Categoria de teste']);
+        $category = Category::query()->where('name', CategoryEnum::LEGUMES)->firstOrFail();
         Sanctum::actingAs($producer->company->user, ['access']);
         $harvestDate = now()->addDays(5)->format('Y-m-d');
         $payload = [
@@ -76,7 +77,7 @@ class StoreTest extends TestCase
             'http://product-source.test/api/products/2' => Http::response($fixture, 200),
         ]);
         $producer = ProducerFactory::new()->create();
-        $category = CategoryFactory::new()->create();
+        $category = Category::query()->firstOrFail();
         Sanctum::actingAs($producer->company->user, ['access']);
         $harvestDate = now()->addDays(2)->format('Y-m-d');
         $payload = [
@@ -190,7 +191,7 @@ class StoreTest extends TestCase
             'http://product-source.test/api/products/99' => Http::response(['detail' => 'Product not found'], 404),
         ]);
         $producer = ProducerFactory::new()->create();
-        $category = CategoryFactory::new()->create();
+        $category = Category::query()->firstOrFail();
         Sanctum::actingAs($producer->company->user, ['access']);
         $payload = [
             'source_product_id' => '99',
@@ -217,7 +218,7 @@ class StoreTest extends TestCase
             'http://product-source.test/api/products/2' => fn () => throw new ConnectionException('Connection timed out'),
         ]);
         $producer = ProducerFactory::new()->create();
-        $category = CategoryFactory::new()->create();
+        $category = Category::query()->firstOrFail();
         Sanctum::actingAs($producer->company->user, ['access']);
         $payload = [
             'source_product_id' => '2',
@@ -244,7 +245,7 @@ class StoreTest extends TestCase
             'http://product-source.test/api/products/2' => Http::response([], 500),
         ]);
         $producer = ProducerFactory::new()->create();
-        $category = CategoryFactory::new()->create();
+        $category = Category::query()->firstOrFail();
         Sanctum::actingAs($producer->company->user, ['access']);
         $payload = [
             'source_product_id' => '2',

@@ -5,6 +5,7 @@ namespace Cultiva\Models\Company;
 use Carbon\CarbonImmutable;
 use Cultiva\Models\Address\Address;
 use Cultiva\Models\Delivery\Delivery;
+use Cultiva\Models\Delivery\GoLogDriver;
 use Cultiva\Models\Producer\Producer;
 use Cultiva\Models\Retailer\Retailer;
 use Cultiva\Models\User\User;
@@ -29,6 +30,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read ?Producer $producer
  * @property-read ?Retailer $retailer
  * @property-read ?Delivery $delivery
+ * @property-read ?GoLogDriver $gologDriver
  * @property-read Address $address
  */
 class Company extends Model
@@ -74,6 +76,14 @@ class Company extends Model
     public function delivery(): HasOne
     {
         return $this->hasOne(Delivery::class);
+    }
+
+    /**
+     * @return HasOne<GoLogDriver, $this>
+     */
+    public function gologDriver(): HasOne
+    {
+        return $this->hasOne(GoLogDriver::class);
     }
 
     /**

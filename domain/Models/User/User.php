@@ -6,6 +6,7 @@ use Carbon\CarbonImmutable;
 use Cultiva\Auth\Enums\ProfileType;
 use Cultiva\Models\Company\Company;
 use Cultiva\Models\Delivery\Delivery;
+use Cultiva\Models\Delivery\GoLogDriver;
 use Cultiva\Models\Producer\Producer;
 use Cultiva\Models\Retailer\Retailer;
 use Database\Factories\UserFactory;
@@ -36,6 +37,7 @@ use Override;
  * @property-read ?Retailer $retailer
  * @property-read ?Producer $producer
  * @property-read ?Delivery $delivery
+ * @property-read ?GoLogDriver $gologDriver
  */
 class User extends Authenticatable
 {
@@ -104,6 +106,14 @@ class User extends Authenticatable
         return $this->hasOneThrough(Delivery::class, Company::class, 'user_id', 'company_id');
     }
 
+    /**
+     * @return HasOneThrough<GoLogDriver, Company, $this>
+     */
+    public function gologDriver(): HasOneThrough
+    {
+        return $this->hasOneThrough(GoLogDriver::class, Company::class, 'user_id', 'company_id');
+    }
+
     public function isRetailer(): bool
     {
         return $this->profile_type === ProfileType::RETAILER;
@@ -117,6 +127,11 @@ class User extends Authenticatable
     public function isDelivery(): bool
     {
         return $this->profile_type === ProfileType::DELIVERY;
+    }
+
+    public function isGoLogDriver(): bool
+    {
+        return $this->profile_type === ProfileType::GOLOG_DRIVER;
     }
 
     public function markAsVerified(): void

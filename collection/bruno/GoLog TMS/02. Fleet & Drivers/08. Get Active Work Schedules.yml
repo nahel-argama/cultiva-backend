@@ -1,0 +1,24 @@
+info:
+  name: Get Active Work Schedules
+  type: http
+  seq: 8
+
+http:
+  method: GET
+  url: "{{golog_base_url}}/workSchedule/getByStatus?status=ATIVO"
+  headers:
+    - name: Accept
+      value: application/json
+  params:
+    - name: status
+      value: ATIVO
+      type: query
+  auth:
+    type: bearer
+    token: "{{golog_token}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

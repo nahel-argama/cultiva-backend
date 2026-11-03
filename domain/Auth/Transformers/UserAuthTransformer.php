@@ -5,6 +5,7 @@ namespace Cultiva\Auth\Transformers;
 use Cultiva\Auth\DTO\ProfileResultDTO;
 use Cultiva\Auth\Enums\ProfileType;
 use Cultiva\Models\Delivery\Transformers\DeliveryTransformer;
+use Cultiva\Models\Delivery\Transformers\GoLogDriverTransformer;
 use Cultiva\Models\Producer\Transformers\ProducerTransformer;
 use Cultiva\Models\Retailer\Transformers\RetailerTransformer;
 use Cultiva\Models\User\Transformers\UserTransformer;
@@ -17,6 +18,7 @@ final class UserAuthTransformer
         private readonly ProducerTransformer $producerTransformer,
         private readonly RetailerTransformer $retailerTransformer,
         private readonly DeliveryTransformer $deliveryTransformer,
+        private readonly GoLogDriverTransformer $gologDriverTransformer,
     ) {}
 
     public function transform(ProfileResultDTO $dto): array
@@ -28,6 +30,7 @@ final class UserAuthTransformer
             ProfileType::PRODUCER => $this->producerTransformer->transform($user->producer),
             ProfileType::RETAILER => $this->retailerTransformer->transform($user->retailer),
             ProfileType::DELIVERY => $this->deliveryTransformer->transform($user->delivery),
+            ProfileType::GOLOG_DRIVER => $this->gologDriverTransformer->transform($user->gologDriver),
         };
 
         $result = [

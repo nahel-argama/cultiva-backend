@@ -13,6 +13,7 @@ class SignupStrategyFactory
         private readonly ProducerSignupStrategy $producerStrategy,
         private readonly RetailerSignupStrategy $retailerStrategy,
         private readonly DeliverySignupStrategy $deliveryStrategy,
+        private readonly GoLogDriverSignupStrategy $gologDriverStrategy,
     ) {}
 
     public function make(ProfileType $profileType): SignupStrategyInterface
@@ -21,6 +22,7 @@ class SignupStrategyFactory
             ProfileType::PRODUCER => $this->producerStrategy,
             ProfileType::RETAILER => $this->retailerStrategy,
             ProfileType::DELIVERY => $this->deliveryStrategy,
+            ProfileType::GOLOG_DRIVER => $this->gologDriverStrategy,
         };
     }
 }

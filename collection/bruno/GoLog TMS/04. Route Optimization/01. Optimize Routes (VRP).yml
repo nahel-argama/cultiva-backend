@@ -1,0 +1,35 @@
+info:
+  name: Optimize Routes (VRP)
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{golog_base_url}}/api-route-optimization"
+  headers:
+    - name: Accept
+      value: application/json
+    - name: Content-Type
+      value: application/json
+  auth:
+    type: bearer
+    token: "{{golog_token}}"
+  body:
+    type: json
+    data: |
+      {
+        "shipmentIds": [
+          "{{golog_pickup_shipment_id}}",
+          "{{golog_dropoff_shipment_id}}"
+        ],
+        "workScheduleIds": [
+          "{{golog_work_schedule_id}}"
+        ],
+        "routePriority": "TEMPO"
+      }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

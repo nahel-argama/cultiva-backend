@@ -1,0 +1,47 @@
+info:
+  name: Create Tractor (Vehicle)
+  type: http
+  seq: 3
+
+http:
+  method: POST
+  url: "{{golog_base_url}}/tractor"
+  headers:
+    - name: Accept
+      value: application/json
+    - name: Content-Type
+      value: application/json
+  auth:
+    type: bearer
+    token: "{{golog_token}}"
+  body:
+    type: json
+    data: |
+      {
+        "plate": "BRA2E19",
+        "renavam": "12345678901",
+        "model": "Mercedes Sprinter",
+        "numberAxles": 2,
+        "maximumCapacity": 1500.0,
+        "Type Fuel": "DIESEL",
+        "costPerKilometer": 2.50,
+        "status": "ATIVO",
+        "companyId": "{{golog_company_id}}"
+      }
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        if (res.getStatus() === 200) {
+          const body = res.getBody();
+          if (body.id) {
+            bru.setEnvVar('golog_equipament_id', body.id, { persist: true });
+          }
+        }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

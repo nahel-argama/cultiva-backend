@@ -1,0 +1,30 @@
+info:
+  name: Create Transport Type
+  type: http
+  seq: 5
+
+http:
+  method: POST
+  url: "{{golog_base_url}}/type-transport"
+  headers:
+    - name: Accept
+      value: application/json
+    - name: Content-Type
+      value: application/json
+  auth:
+    type: bearer
+    token: "{{golog_token}}"
+  body:
+    type: json
+    data: |
+      {
+        "name": "REFRIGERADO",
+        "description": "Transporte de cargas refrigeradas ou climatizadas",
+        "care": "Manter temperatura estritamente controlada"
+      }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
