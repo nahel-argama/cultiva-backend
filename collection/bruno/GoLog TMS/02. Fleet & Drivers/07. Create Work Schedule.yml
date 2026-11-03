@@ -1,0 +1,54 @@
+info:
+  name: Create Work Schedule
+  type: http
+  seq: 7
+
+http:
+  method: POST
+  url: "{{golog_base_url}}/workSchedule"
+  headers:
+    - name: Accept
+      value: application/json
+    - name: Content-Type
+      value: application/json
+  auth:
+    type: bearer
+    token: "{{golog_token}}"
+  body:
+    type: json
+    data: |
+      {
+        "driverId": "{{golog_driver_id}}",
+        "equipamentGroupId": "{{golog_equipament_group_id}}",
+        "scheduleDate": "2026-11-02",
+        "startWorkday": {
+          "hour": 8,
+          "minute": 0,
+          "second": 0,
+          "nano": 0
+        },
+        "endWorkday": {
+          "hour": 18,
+          "minute": 0,
+          "second": 0,
+          "nano": 0
+        },
+        "status": "ATIVO"
+      }
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        if (res.getStatus() === 200) {
+          const body = res.getBody();
+          if (body && body.id) {
+            bru.setEnvVar('golog_work_schedule_id', body.id, { persist: true });
+          }
+        }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

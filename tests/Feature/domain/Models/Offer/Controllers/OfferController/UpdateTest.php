@@ -2,8 +2,9 @@
 
 namespace Tests\Feature\domain\Models\Offer\Controllers\OfferController;
 
+use Cultiva\Models\Category\Category;
+use Cultiva\Models\Category\Enums\Category as CategoryEnum;
 use Cultiva\Models\Offer\Enums\OfferStatus;
-use Database\Factories\CategoryFactory;
 use Database\Factories\OfferFactory;
 use Database\Factories\ProducerFactory;
 use Database\Factories\RetailerFactory;
@@ -23,8 +24,8 @@ class UpdateTest extends TestCase
         // Arrange
         Http::fake();
         $producer = ProducerFactory::new()->create();
-        $originalCategory = CategoryFactory::new()->create();
-        $newCategory = CategoryFactory::new()->create();
+        $originalCategory = Category::query()->where('name', CategoryEnum::FRUTAS)->firstOrFail();
+        $newCategory = Category::query()->where('name', CategoryEnum::LEGUMES)->firstOrFail();
         $offer = OfferFactory::new()->create([
             'producer_id' => $producer->id,
             'category_id' => $originalCategory->id,

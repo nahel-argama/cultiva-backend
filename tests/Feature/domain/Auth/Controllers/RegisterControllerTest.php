@@ -317,10 +317,224 @@ class RegisterControllerTest extends TestCase
             ->assertJsonPath('data.profile_type.producer', 'Produtor')
             ->assertJsonPath('data.profile_type.retailer', 'Varejista')
             ->assertJsonPath('data.profile_type.delivery', 'Entregador')
+            ->assertJsonPath('data.profile_type.golog_driver', 'Motorista GoLog')
             ->assertJsonPath('data.activity_segment.vegetables', 'Hortaliças')
             ->assertJsonPath('data.business_type.supermarket', 'Supermercado')
             ->assertJsonPath('data.cnh_category.A', 'Categoria A')
             ->assertJsonPath('data.cargo_type.dry', 'Carga Seca');
+    }
+
+    public function test_should_register_golog_driver_and_vehicle_and_persist_golog_identifiers(): void
+    {
+        // Arrange
+        config([
+            'services.golog.base_url' => 'http://golog.test',
+            'services.golog.email' => 'admin@golog.test',
+            'services.golog.password' => 'secret123',
+            'services.golog.timeout' => 5,
+        ]);
+
+        $cepFixture = require base_path('tests/Fixtures/Integrations/Geo/BrasilApi/cep_v2_success.php');
+        $loginFixture = require base_path('tests/Fixtures/Integrations/GoLog/login_success.php');
+        $userFixture = require base_path('tests/Fixtures/Integrations/GoLog/create_user_success.php');
+        $driverFixture = require base_path('tests/Fixtures/Integrations/GoLog/create_driver_success.php');
+        $tractorFixture = require base_path('tests/Fixtures/Integrations/GoLog/create_tractor_success.php');
+        $groupFixture = require base_path('tests/Fixtures/Integrations/GoLog/create_equipament_group_success.php');
+
+        Http::fake([
+            'https://brasilapi.com.br/api/cep/v2/89010025' => Http::response($cepFixture, 200),
+            'http://golog.test/login' => Http::response($loginFixture, 200),
+            'http://golog.test/user' => Http::response($userFixture, 200),
+            'http://golog.test/driver' => Http::response($driverFixture, 200),
+            'http://golog.test/tractor' => Http::response($tractorFixture, 200),
+            'http://golog.test/equipament-group' => Http::response($groupFixture, 200),
+        ]);
+
+        $payload = [
+            'user' => [
+                'name' => 'Rafael Santos Motorista',
+                'email' => 'rafael.golog@example.com',
+                'password' => 'Password123!',
+                'password_confirmation' => 'Password123!',
+            ],
+            'profile_type' => 'golog_driver',
+            'company' => [
+                'trade_name' => 'Santos Log Express',
+                'legal_name' => 'Santos Transportes LTDA',
+                'document_number' => '12345678000195',
+                'phone' => '11987654321',
+                'address' => [
+                    'zip' => '89010025',
+                    'number' => '789',
+                    'complement' => 'Galpão B',
+                    'reference_point' => 'Próximo à rodovia',
+                ],
+            ],
+            'golog_driver' => [
+                'cpf' => '12345678901',
+                'cnh_number' => '12345678901',
+                'cnh_expiration' => '2028-12-31',
+                'cost_per_hour' => 45.0,
+                'vehicle' => [
+                    'plate' => 'BRA2E19',
+                    'capacity' => 1500.5,
+                    'renavam' => '12345678901',
+                    'model' => 'Mercedes Sprinter',
+                    'number_axles' => 2,
+                    'type_fuel' => 'DIESEL',
+                    'cost_per_kilometer' => 2.5,
+                ],
+            ],
+        ];
+
+        // Action
+        $response = $this->postJson('/v1/auth/signup', $payload);
+
+        // Assert
+        $response->assertStatus(201)
+            ->assertJsonPath('data.profile_type', 'golog_driver')
+            ->assertJsonPath('data.profile.trade_name', 'Santos Log Express')
+            ->assertJsonPath('data.profile.golog_user_id', '11111111-2222-3333-4444-555555555555')
+            ->assertJsonPath('data.profile.golog_driver_id', '22222222-3333-4444-5555-666666666666')
+            ->assertJsonPath('data.profile.vehicle.golog_tractor_id', '33333333-4444-5555-6666-777777777777')
+            ->assertJsonPath('data.profile.vehicle.golog_equipament_group_id', '44444444-5555-6666-7777-888888888888');
+
+        $this->assertDatabaseHas('users', [
+            'email' => 'rafael.golog@example.com',
+            'profile_type' => 'golog_driver',
+        ]);
+
+        $user = User::where('email', 'rafael.golog@example.com')->first();
+
+        $this->assertDatabaseCount('deliveries', 0);
+        $this->assertDatabaseCount('vehicles', 0);
+
+        $this->assertDatabaseHas('golog_drivers', [
+            'company_id' => $user->company->id,
+            'golog_user_id' => '11111111-2222-3333-4444-555555555555',
+            'golog_driver_id' => '22222222-3333-4444-5555-666666666666',
+        ]);
+
+        $this->assertDatabaseHas('golog_vehicles', [
+            'golog_driver_id' => $user->gologDriver->id,
+            'golog_tractor_id' => '33333333-4444-5555-6666-777777777777',
+            'golog_equipament_group_id' => '44444444-5555-6666-7777-888888888888',
+        ]);
+    }
+
+    public function test_should_rollback_golog_driver_signup_when_golog_api_fails(): void
+    {
+        // Arrange
+        config([
+            'services.golog.base_url' => 'http://golog.test',
+            'services.golog.email' => 'admin@golog.test',
+            'services.golog.password' => 'secret123',
+            'services.golog.timeout' => 5,
+        ]);
+
+        $cepFixture = require base_path('tests/Fixtures/Integrations/Geo/BrasilApi/cep_v2_success.php');
+        $loginFixture = require base_path('tests/Fixtures/Integrations/GoLog/login_success.php');
+        $userFixture = require base_path('tests/Fixtures/Integrations/GoLog/create_user_success.php');
+        $driverFixture = require base_path('tests/Fixtures/Integrations/GoLog/create_driver_success.php');
+
+        Http::fake([
+            'https://brasilapi.com.br/api/cep/v2/89010025' => Http::response($cepFixture, 200),
+            'http://golog.test/login' => Http::response($loginFixture, 200),
+            'http://golog.test/user' => Http::response($userFixture, 200),
+            'http://golog.test/driver' => Http::response($driverFixture, 200),
+            'http://golog.test/tractor' => Http::response(['message' => 'Internal error'], 500),
+        ]);
+
+        $payload = [
+            'user' => [
+                'name' => 'Rafael Santos Motorista',
+                'email' => 'rafael.rollback@example.com',
+                'password' => 'Password123!',
+                'password_confirmation' => 'Password123!',
+            ],
+            'profile_type' => 'golog_driver',
+            'company' => [
+                'trade_name' => 'Santos Log Express',
+                'legal_name' => 'Santos Transportes LTDA',
+                'document_number' => '12345678000195',
+                'phone' => '11987654321',
+                'address' => [
+                    'zip' => '89010025',
+                    'number' => '789',
+                ],
+            ],
+            'golog_driver' => [
+                'cpf' => '12345678901',
+                'cnh_number' => '12345678901',
+                'cnh_expiration' => '2028-12-31',
+                'cost_per_hour' => 45.0,
+                'vehicle' => [
+                    'plate' => 'BRA2E19',
+                    'capacity' => 1500.5,
+                    'renavam' => '12345678901',
+                    'model' => 'Mercedes Sprinter',
+                    'number_axles' => 2,
+                    'type_fuel' => 'DIESEL',
+                    'cost_per_kilometer' => 2.5,
+                ],
+            ],
+        ];
+
+        // Action
+        $response = $this->postJson('/v1/auth/signup', $payload);
+
+        // Assert
+        $response->assertStatus(500);
+        $this->assertDatabaseMissing('users', ['email' => 'rafael.rollback@example.com']);
+        $this->assertDatabaseCount('golog_drivers', 0);
+        $this->assertDatabaseCount('golog_vehicles', 0);
+    }
+
+    public function test_should_return_422_when_golog_driver_required_fields_are_missing(): void
+    {
+        // Arrange
+        $payload = [
+            'user' => [
+                'name' => 'Rafael Santos Motorista',
+                'email' => 'rafael.invalid@example.com',
+                'password' => 'Password123!',
+                'password_confirmation' => 'Password123!',
+            ],
+            'profile_type' => 'golog_driver',
+            'company' => [
+                'trade_name' => 'Santos Log Express',
+                'legal_name' => 'Santos Transportes LTDA',
+                'document_number' => '12345678000195',
+                'phone' => '11987654321',
+                'address' => [
+                    'zip' => '89010025',
+                    'number' => '789',
+                ],
+            ],
+            'golog_driver' => [
+                'cnh_number' => '12345678901',
+                'vehicle' => [
+                    'plate' => 'BRA2E19',
+                    'capacity' => 1500.5,
+                ],
+            ],
+        ];
+
+        // Action
+        $response = $this->postJson('/v1/auth/signup', $payload);
+
+        // Assert
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors([
+                'golog_driver.cpf',
+                'golog_driver.cnh_expiration',
+                'golog_driver.cost_per_hour',
+                'golog_driver.vehicle.renavam',
+                'golog_driver.vehicle.model',
+                'golog_driver.vehicle.number_axles',
+                'golog_driver.vehicle.type_fuel',
+                'golog_driver.vehicle.cost_per_kilometer',
+            ]);
     }
 
     public function test_should_upload_document_and_verify_user_when_rg_is_authentic(): void

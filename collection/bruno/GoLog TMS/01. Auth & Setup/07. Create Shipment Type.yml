@@ -1,0 +1,30 @@
+info:
+  name: Create Shipment Type
+  type: http
+  seq: 7
+
+http:
+  method: POST
+  url: "{{golog_base_url}}/shipment-type"
+  headers:
+    - name: Accept
+      value: application/json
+    - name: Content-Type
+      value: application/json
+  auth:
+    type: bearer
+    token: "{{golog_token}}"
+  body:
+    type: json
+    data: |
+      {
+        "name": "Carga Agricola Perecivel",
+        "description": "Produtos do campo de alta perecibilidade e frescor",
+        "care": "Manipular com cuidado e respeitar prazo maximo de entrega"
+      }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

@@ -1,0 +1,44 @@
+info:
+  name: Create Company (Partner)
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: "{{golog_base_url}}/company"
+  headers:
+    - name: Accept
+      value: application/json
+    - name: Content-Type
+      value: application/json
+  auth:
+    type: bearer
+    token: "{{golog_token}}"
+  body:
+    type: json
+    data: |
+      {
+        "legalName": "Hortifruti Fazenda Verde LTDA",
+        "isCliente": true,
+        "phoneNumber": "(11)987654321",
+        "email": "contato@fazendaverde.com",
+        "cnpjCpf": "12345678000195",
+        "addressId": "{{golog_address_id}}"
+      }
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        if (res.getStatus() === 200) {
+          const body = res.getBody();
+          if (body.id) {
+            bru.setEnvVar('golog_partner_company_id', body.id, { persist: true });
+          }
+        }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

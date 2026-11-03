@@ -1,0 +1,32 @@
+info:
+  name: Create Demand Type
+  type: http
+  seq: 3
+
+http:
+  method: POST
+  url: "{{golog_base_url}}/demand-type"
+  headers:
+    - name: Accept
+      value: application/json
+    - name: Content-Type
+      value: application/json
+  auth:
+    type: bearer
+    token: "{{golog_token}}"
+  body:
+    type: json
+    data: |
+      {
+        "code": "PESO_KG",
+        "name": "Capacidade de Carga em KG",
+        "unit": "KG",
+        "description": "Unidade de peso padrão para cargas agrícolas",
+        "companyId": "{{golog_company_id}}"
+      }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

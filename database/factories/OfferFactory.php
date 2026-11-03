@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use Cultiva\Models\Category\Category;
 use Cultiva\Models\Offer\Enums\OfferStatus;
 use Cultiva\Models\Offer\Offer;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -17,7 +18,7 @@ class OfferFactory extends Factory
     {
         return [
             'producer_id' => ProducerFactory::new(),
-            'category_id' => CategoryFactory::new(),
+            'category_id' => $this->faker->randomElement(Category::pluck('id')->toArray()),
             'source_product_id' => (string) $this->faker->unique()->numberBetween(1, 999999),
             'product_name' => $this->faker->words(2, true),
             'unit_price' => $this->faker->randomFloat(2, 1, 9999),

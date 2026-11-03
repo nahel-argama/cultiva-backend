@@ -110,7 +110,7 @@ class PurchaseIndexTest extends TestCase
                     'state' => $address->state,
                 ],
             ])
-            ->assertJsonPath('data.0.category', ['id' => $category->id, 'name' => $category->name])
+            ->assertJsonPath('data.0.category', ['id' => $category->id, 'name' => $category->name instanceof \BackedEnum ? $category->name->value : (string) $category->name])
             ->assertJsonPath('data.0.product_name', 'Tomate comprado')
             ->assertJsonPath('data.0.quantity', 2)
             ->assertJsonPath('data.0.unit_price', '13.00')

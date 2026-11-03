@@ -9,6 +9,7 @@ use Cultiva\Models\Delivery\Enums\CnhCategory;
 use Cultiva\Models\Producer\Enums\ActivitySegment;
 use Cultiva\Models\Retailer\Enums\BusinessType;
 use Cultiva\Models\CargoType\Enums\CargoType;
+use Cultiva\Models\Category\Enums\Category;
 use Tests\TestCase;
 
 class HasEnumLabelTest extends TestCase
@@ -18,6 +19,7 @@ class HasEnumLabelTest extends TestCase
         $this->assertSame('Produtor', ProfileType::PRODUCER->getLabel());
         $this->assertSame('Varejista', ProfileType::RETAILER->getLabel());
         $this->assertSame('Entregador', ProfileType::DELIVERY->getLabel());
+        $this->assertSame('Motorista GoLog', ProfileType::GOLOG_DRIVER->getLabel());
     }
 
     public function test_should_return_options_for_all_signup_enums(): void
@@ -27,6 +29,7 @@ class HasEnumLabelTest extends TestCase
             'producer' => 'Produtor',
             'retailer' => 'Varejista',
             'delivery' => 'Entregador',
+            'golog_driver' => 'Motorista GoLog',
         ], $profileTypes);
 
         $activitySegments = ActivitySegment::options();
@@ -47,5 +50,14 @@ class HasEnumLabelTest extends TestCase
             'climate_controlled' => 'Climatizada',
             'refrigerated'       => 'Refrigerada',
         ], $cargoTypes);
+
+        $categories = Category::options();
+        $this->assertSame([
+            'Frutas' => 'Frutas',
+            'Legumes' => 'Legumes',
+            'Verduras' => 'Verduras',
+            'Tubérculos e raízes' => 'Tubérculos e raízes',
+            'Grãos e cereais' => 'Grãos e cereais',
+        ], $categories);
     }
 }

@@ -1,0 +1,49 @@
+info:
+  name: Create Shipment (Dropoff - Entrega)
+  type: http
+  seq: 4
+
+http:
+  method: POST
+  url: "{{golog_base_url}}/shipment"
+  headers:
+    - name: Accept
+      value: application/json
+    - name: Content-Type
+      value: application/json
+  auth:
+    type: bearer
+    token: "{{golog_token}}"
+  body:
+    type: json
+    data: |
+      {
+        "typeOperation": "ENTREGA",
+        "weight": 50.0,
+        "volume": 0.5,
+        "schedulind": "2026-11-02T14:00:00Z",
+        "status": "PENDENTE",
+        "userId": "{{golog_user_id}}",
+        "shipmentTypeId": "{{shipment_type_id}}",
+        "typeTransportId": "{{type_transport_id}}",
+        "addressId": "{{retailer_address_id}}",
+        "customerId": "{{retailer_company_id}}",
+        "operationOrigemId": "{{golog_pickup_shipment_id}}"
+      }
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        if (res.getStatus() === 200) {
+          const body = res.getBody();
+          if (body.id) {
+            bru.setEnvVar('golog_dropoff_shipment_id', body.id, { persist: true });
+          }
+        }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

@@ -1,0 +1,43 @@
+info:
+  name: Login
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{golog_base_url}}/login"
+  headers:
+    - name: Accept
+      value: application/json
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |
+      {
+        "email": "cultiva@cultiva.com",
+        "password": "Cultiva@123"
+      }
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        if (res.getStatus() === 200) {
+          const body = res.getBody();
+          if (body.token) {
+            bru.setEnvVar('golog_token', body.token, { persist: true });
+          }
+          if (body.companyId) {
+            bru.setEnvVar('golog_company_id', body.companyId, { persist: true });
+          }
+          if (body.userId) {
+            bru.setEnvVar('golog_user_id', body.userId, { persist: true });
+          }
+        }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

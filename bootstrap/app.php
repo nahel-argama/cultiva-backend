@@ -3,6 +3,7 @@
 use Cultiva\Auth\Middleware\EnsureProfile;
 use Cultiva\Auth\Middleware\EnsureUserIsVerified;
 use Cultiva\Base\Exceptions\CultivaException;
+use Cultiva\Integrations\GoLog\Commands\PopulateTransportTypesCommand;
 use Cultiva\Models\Offer\Commands\PopulateProductImagesCommand;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -20,6 +21,7 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withCommands([
         PopulateProductImagesCommand::class,
+        PopulateTransportTypesCommand::class,
     ])
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->statefulApi();

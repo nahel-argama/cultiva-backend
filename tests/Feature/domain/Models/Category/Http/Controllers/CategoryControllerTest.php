@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\domain\Models\Category\Http\Controllers;
 
+use Cultiva\Models\Category\Enums\Category;
 use Database\Factories\ProducerFactory;
 use Database\Factories\RetailerFactory;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -24,11 +25,11 @@ class CategoryControllerTest extends TestCase
         // Assert
         $response->assertOk()->assertExactJson([
             'data' => [
-                ['id' => 1, 'name' => 'Frutas'],
-                ['id' => 2, 'name' => 'Legumes'],
-                ['id' => 3, 'name' => 'Verduras'],
-                ['id' => 4, 'name' => 'Tubérculos e raízes'],
-                ['id' => 5, 'name' => 'Grãos e cereais'],
+                ['id' => 1, 'name' => Category::FRUTAS->value],
+                ['id' => 2, 'name' => Category::LEGUMES->value],
+                ['id' => 3, 'name' => Category::VERDURAS->value],
+                ['id' => 4, 'name' => Category::TUBERCULOS_E_RAIZES->value],
+                ['id' => 5, 'name' => Category::GRAOS_E_CEREAIS->value],
             ],
         ]);
         $this->assertDatabaseCount('categories', 5);
