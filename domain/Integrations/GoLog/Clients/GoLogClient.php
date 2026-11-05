@@ -9,12 +9,16 @@ use Cultiva\Integrations\GoLog\Config;
 use Cultiva\Integrations\GoLog\DTO\GoLogAuthResponseDTO;
 use Cultiva\Integrations\GoLog\DTO\GoLogDriverResponseDTO;
 use Cultiva\Integrations\GoLog\DTO\GoLogEquipamentGroupResponseDTO;
+use Cultiva\Integrations\GoLog\DTO\GoLogInvoiceImportItemDTO;
+use Cultiva\Integrations\GoLog\DTO\GoLogInvoiceImportResponseDTO;
 use Cultiva\Integrations\GoLog\DTO\GoLogTractorResponseDTO;
 use Cultiva\Integrations\GoLog\DTO\GoLogTransportTypeResponseDTO;
 use Cultiva\Integrations\GoLog\DTO\GoLogUserResponseDTO;
+use Cultiva\Integrations\GoLog\DTO\GoLogWorkScheduleResponseDTO;
 use Cultiva\Integrations\GoLog\Enums\GoLogFuelType;
 use Cultiva\Integrations\GoLog\Enums\GoLogUserProfile;
 use Cultiva\Integrations\GoLog\Enums\GoLogVehicleStatus;
+use Cultiva\Integrations\GoLog\Enums\GoLogWorkScheduleStatus;
 use Illuminate\Http\Client\Factory as HttpFactory;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\Response;
@@ -66,7 +70,7 @@ class GoLogClient
 
         $data = $response->json();
 
-        Cache::put(self::CACHE_KEY, $data, 3000);
+        Cache::put(self::CACHE_KEY, $data, 60);
 
         return GoLogAuthResponseDTO::fromArray($data);
     }
@@ -116,7 +120,7 @@ class GoLogClient
             'email' => $email,
             'password' => $password,
             'cpf' => $cpf,
-            'User Profile' => $profile->value,
+            'userProfile' => $profile->value,
             'companyId' => $this->getCompanyId(),
         ];
 
@@ -159,6 +163,7 @@ class GoLogClient
             'model' => $model,
             'numberAxles' => $numberAxles,
             'maximumCapacity' => $maximumCapacity,
+            'typeFuel' => $typeFuel->value,
             'Type Fuel' => $typeFuel->value,
             'costPerKilometer' => $costPerKilometer,
             'status' => $status->value,
@@ -182,6 +187,57 @@ class GoLogClient
         $response = $this->post('equipament-group', $payload, 'Failed to create equipament group in GoLog');
 
         return GoLogEquipamentGroupResponseDTO::fromArray($response->json());
+    }
+
+    public function createWorkSchedule(
+        string $driverId,
+        string $equipamentGroupId,
+        string $scheduleDate,
+        int $startHour = 8,
+        int $startMinute = 0,
+        int $endHour = 18,
+        int $endMinute = 0,
+        GoLogWorkScheduleStatus $status = GoLogWorkScheduleStatus::ATIVO,
+    ): GoLogWorkScheduleResponseDTO {
+        $payload = [
+            'driverId' => $driverId,
+            'equipamentGroupId' => $equipamentGroupId,
+            'scheduleDate' => $scheduleDate,
+            'startWorkday' => [
+                'hour' => $startHour,
+                'minute' => $startMinute,
+                'second' => 0,
+                'nano' => 0,
+            ],
+            'endWorkday' => [
+                'hour' => $endHour,
+                'minute' => $endMinute,
+                'second' => 0,
+                'nano' => 0,
+            ],
+            'status' => $status->value,
+        ];
+
+        $response = $this->post('workSchedule', $payload, 'Failed to create work schedule in GoLog');
+
+        return GoLogWorkScheduleResponseDTO::fromArray($response->json());
+    }
+
+    /**
+     * @param array<int, GoLogInvoiceImportItemDTO|array<string, mixed>> $invoices
+     */
+    public function importInvoicesJson(array $invoices): GoLogInvoiceImportResponseDTO
+    {
+        $payload = array_map(
+            static fn(GoLogInvoiceImportItemDTO|array $item): array => $item instanceof GoLogInvoiceImportItemDTO ? $item->toArray() : $item,
+            $invoices
+        );
+
+        $response = $this->post('integration/invoices/json', [
+            'invoices' => $payload,
+        ], 'Failed to import invoices to GoLog');
+
+        return GoLogInvoiceImportResponseDTO::fromArray($response->json());
     }
 
     /**
