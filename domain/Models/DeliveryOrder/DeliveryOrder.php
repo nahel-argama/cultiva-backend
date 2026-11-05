@@ -11,6 +11,7 @@ use Database\Factories\DeliveryOrderFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Override;
 
 /**
@@ -36,6 +37,7 @@ use Override;
  * @property-read DeliveryAddress $pickupAddress
  * @property-read DeliveryAddress $dropoffAddress
  * @property-read DeliveryOrderStatus $statusRecord
+ * @property-read ?GoLogShipment $gologShipment
  */
 class DeliveryOrder extends Model
 {
@@ -132,5 +134,13 @@ class DeliveryOrder extends Model
     public function dropoffAddress(): BelongsTo
     {
         return $this->belongsTo(DeliveryAddress::class, 'dropoff_address_id');
+    }
+
+    /**
+     * @return HasOne<GoLogShipment, $this>
+     */
+    public function gologShipment(): HasOne
+    {
+        return $this->hasOne(GoLogShipment::class);
     }
 }

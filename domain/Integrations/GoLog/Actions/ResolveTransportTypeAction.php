@@ -9,26 +9,12 @@ use Cultiva\Models\Category\Enums\Category;
 
 final class ResolveTransportTypeAction
 {
-    /**
-     * Resolve GoLog transport type based on product category and optional shelf lifespan in days.
-     */
-    public function execute(Category $category, ?int $lifespanDays = null): GoLogTransportType
+    public function execute(Category $category): GoLogTransportType
     {
-        if (
-            $category === Category::VERDURAS
-            || $category === Category::FRUTAS
-            || ($lifespanDays !== null && $lifespanDays <= 7)
-        ) {
-            return GoLogTransportType::REFRIGERADO;
-        }
-
-        if (
-            $category === Category::LEGUMES
-            || ($lifespanDays !== null && $lifespanDays <= 15)
-        ) {
-            return GoLogTransportType::CLIMATIZADO;
-        }
-
-        return GoLogTransportType::CARGA_SECA;
+        return match ($category) {
+            Category::VERDURAS, Category::FRUTAS => GoLogTransportType::REFRIGERADO,
+            Category::LEGUMES => GoLogTransportType::CLIMATIZADO,
+            Category::TUBERCULOS_E_RAIZES, Category::GRAOS_E_CEREAIS => GoLogTransportType::CARGA_SECA,
+        };
     }
 }
