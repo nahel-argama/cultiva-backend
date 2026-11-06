@@ -54,4 +54,11 @@ class UserFactory extends Factory
             'profile_type' => ProfileType::DELIVERY,
         ]);
     }
+
+    public function gologDriver(): static
+    {
+        return $this->state(fn() => [
+            'profile_type' => ProfileType::GOLOG_DRIVER,
+        ]);
+    }
 }

@@ -1,10 +1,10 @@
 <?php
 
-namespace Cultiva\Models\Vehicle\DTOs;
+namespace Cultiva\Integrations\GoLog\DTO;
 
 use Cultiva\Integrations\GoLog\Enums\GoLogFuelType;
 
-final readonly class GoLogVehicleRegisterDTO
+final readonly class CreateGoLogVehicleDTO
 {
     public function __construct(
         public string $plate,
@@ -16,10 +16,7 @@ final readonly class GoLogVehicleRegisterDTO
         public float $costPerKilometer,
     ) {}
 
-    /**
-     * @param array<string, mixed> $data
-     */
-    public static function fromArray(array $data): self
+    public static function from(array $data): self
     {
         return new self(
             plate: $data['plate'],

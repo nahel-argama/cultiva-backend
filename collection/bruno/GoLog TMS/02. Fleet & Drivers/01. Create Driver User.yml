@@ -21,7 +21,8 @@ http:
         "name": "Rafael Santos Motorista",
         "email": "motorista.rafael@example.com",
         "password": "Password123!",
-        "cpf": "12345678901",
+        "cpf": "40374708029",
+        "userProfile": "DRIVER",
         "User Profile": "DRIVER",
         "companyId": "{{golog_company_id}}"
       }

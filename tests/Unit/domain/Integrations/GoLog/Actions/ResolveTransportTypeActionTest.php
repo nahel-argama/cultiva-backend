@@ -25,24 +25,21 @@ class ResolveTransportTypeActionTest extends TestCase
         $this->assertSame(GoLogTransportType::REFRIGERADO, $this->sut->execute(Category::FRUTAS));
     }
 
-    public function test_should_resolve_short_shelf_life_to_refrigerado_regardless_of_category(): void
-    {
-        $this->assertSame(GoLogTransportType::REFRIGERADO, $this->sut->execute(Category::GRAOS_E_CEREAIS, lifespanDays: 5));
-    }
-
     public function test_should_resolve_legumes_to_climatizado(): void
     {
         $this->assertSame(GoLogTransportType::CLIMATIZADO, $this->sut->execute(Category::LEGUMES));
     }
 
-    public function test_should_resolve_medium_shelf_life_to_climatizado(): void
-    {
-        $this->assertSame(GoLogTransportType::CLIMATIZADO, $this->sut->execute(Category::GRAOS_E_CEREAIS, lifespanDays: 12));
-    }
-
     public function test_should_resolve_graos_and_tuberculos_to_carga_seca(): void
     {
-        $this->assertSame(GoLogTransportType::CARGA_SECA, $this->sut->execute(Category::GRAOS_E_CEREAIS, lifespanDays: 60));
-        $this->assertSame(GoLogTransportType::CARGA_SECA, $this->sut->execute(Category::TUBERCULOS_E_RAIZES, lifespanDays: 30));
+        $this->assertSame(GoLogTransportType::CARGA_SECA, $this->sut->execute(Category::GRAOS_E_CEREAIS));
+        $this->assertSame(GoLogTransportType::CARGA_SECA, $this->sut->execute(Category::TUBERCULOS_E_RAIZES));
+    }
+
+    public function test_should_accept_only_category_parameter(): void
+    {
+        $reflector = new \ReflectionMethod(ResolveTransportTypeAction::class, 'execute');
+        $this->assertCount(1, $reflector->getParameters());
+        $this->assertSame('category', $reflector->getParameters()[0]->getName());
     }
 }

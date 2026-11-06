@@ -6,6 +6,7 @@ namespace Cultiva\Auth\Strategies\SignupStrategy;
 
 use Cultiva\Auth\Enums\ProfileType;
 use Cultiva\Auth\Strategies\SignupStrategy\Contracts\SignupStrategyInterface;
+use InvalidArgumentException;
 
 class SignupStrategyFactory
 {
@@ -13,7 +14,6 @@ class SignupStrategyFactory
         private readonly ProducerSignupStrategy $producerStrategy,
         private readonly RetailerSignupStrategy $retailerStrategy,
         private readonly DeliverySignupStrategy $deliveryStrategy,
-        private readonly GoLogDriverSignupStrategy $gologDriverStrategy,
     ) {}
 
     public function make(ProfileType $profileType): SignupStrategyInterface
@@ -22,7 +22,7 @@ class SignupStrategyFactory
             ProfileType::PRODUCER => $this->producerStrategy,
             ProfileType::RETAILER => $this->retailerStrategy,
             ProfileType::DELIVERY => $this->deliveryStrategy,
-            ProfileType::GOLOG_DRIVER => $this->gologDriverStrategy,
+            ProfileType::GOLOG_DRIVER => throw new InvalidArgumentException('GoLog drivers must sign up via GoLog onboarding endpoints.'),
         };
     }
 }

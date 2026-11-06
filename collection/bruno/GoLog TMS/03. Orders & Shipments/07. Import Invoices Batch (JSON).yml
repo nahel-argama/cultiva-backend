@@ -1,0 +1,54 @@
+info:
+  name: Import Invoices Batch (JSON)
+  type: http
+  seq: 7
+
+http:
+  method: POST
+  url: "{{golog_base_url}}/integration/invoices/json"
+  headers:
+    - name: Accept
+      value: application/json
+    - name: Content-Type
+      value: application/json
+  auth:
+    type: bearer
+    token: "{{golog_token}}"
+  body:
+    type: json
+    data: |
+      {
+        "invoices": [
+          {
+            "invoiceNumber": "DO-101",
+            "series": "1",
+            "accessKey": "NFE0000010120261103000001",
+            "typeOperation": "ENTREGA",
+            "weight": 15.5,
+            "volume": 0.08,
+            "value": 250.0,
+            "scheduledDate": "2026-11-04T12:00:00Z",
+            "notes": "[Frutas] Pedido #101 - Tomate Cereja",
+            "senderName": "Fazenda Vale Verde LTDA",
+            "senderDocument": "12345678000195",
+            "customerName": "Supermercado Central LTDA",
+            "customerDocument": "98765432000188",
+            "customerEmail": "compras@central.com",
+            "customerPhone": "(11)987654321",
+            "street": "Avenida Paulista",
+            "number": "1500",
+            "district": "Bela Vista",
+            "city": "Sao Paulo",
+            "state": "SP",
+            "cep": "01310100",
+            "latitude": "-23.561684",
+            "longitude": "-46.655981"
+          }
+        ]
+      }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
