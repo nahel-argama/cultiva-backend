@@ -11,8 +11,8 @@ use Override;
 /**
  * @property-read int $id
  * @property-read int $golog_driver_id
- * @property-read string $golog_tractor_id
- * @property-read string $golog_equipament_group_id
+ * @property-read ?string $golog_tractor_id
+ * @property-read ?string $golog_equipament_group_id
  * @property-read CarbonImmutable $created_at
  * @property-read ?CarbonImmutable $updated_at
  * @property-read ?GoLogDriver $gologDriver

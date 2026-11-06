@@ -10,8 +10,8 @@ final readonly class GoLogWorkScheduleResponseDTO
 {
     public function __construct(
         public string $id,
-        public ?string $scheduleDate = null,
-        public ?GoLogWorkScheduleStatus $status = null,
+        public string $scheduleDate,
+        public GoLogWorkScheduleStatus $status,
     ) {}
 
     /**
@@ -19,17 +19,10 @@ final readonly class GoLogWorkScheduleResponseDTO
      */
     public static function fromArray(array $data): self
     {
-        $status = null;
-        if (isset($data['status'])) {
-            $status = $data['status'] instanceof GoLogWorkScheduleStatus
-                ? $data['status']
-                : GoLogWorkScheduleStatus::tryFrom((string) $data['status']);
-        }
-
         return new self(
             id: $data['id'],
-            scheduleDate: $data['scheduleDate'] ?? null,
-            status: $status,
+            scheduleDate: $data['scheduleDate'],
+            status: GoLogWorkScheduleStatus::from($data['status']),
         );
     }
 }

@@ -8,6 +8,8 @@ use Cultiva\Integrations\GoLog\Clients\GoLogClient;
 use Cultiva\Integrations\GoLog\DTO\GoLogAuthResponseDTO;
 use Cultiva\Integrations\GoLog\DTO\GoLogDriverResponseDTO;
 use Cultiva\Integrations\GoLog\DTO\GoLogEquipamentGroupResponseDTO;
+use Cultiva\Integrations\GoLog\DTO\GoLogInvoiceImportItemDTO;
+use Cultiva\Integrations\GoLog\DTO\GoLogInvoiceImportResponseDTO;
 use Cultiva\Integrations\GoLog\DTO\GoLogTractorResponseDTO;
 use Cultiva\Integrations\GoLog\DTO\GoLogTransportTypeResponseDTO;
 use Cultiva\Integrations\GoLog\DTO\GoLogUserResponseDTO;
@@ -172,5 +174,110 @@ class GoLogClientTest extends TestCase
 
         $this->assertInstanceOf(GoLogEquipamentGroupResponseDTO::class, $groupDto);
         $this->assertSame('44444444-5555-6666-7777-888888888888', $groupDto->id);
+
+        Http::assertSent(function (\Illuminate\Http\Client\Request $request) {
+            return $request->url() === 'http://golog.test/user'
+                && $request['userProfile'] === 'DRIVER';
+        });
+
+        Http::assertSent(function (\Illuminate\Http\Client\Request $request) {
+            return $request->url() === 'http://golog.test/tractor'
+                && $request['typeFuel'] === 'DIESEL';
+        });
+    }
+
+    public function test_should_import_invoices_in_batch(): void
+    {
+        // Arrange
+        $loginFixture = require base_path('tests/Fixtures/Integrations/GoLog/login_success.php');
+        $importFixture = require base_path('tests/Fixtures/Integrations/GoLog/import_invoices_success.php');
+
+        Http::fake([
+            'http://golog.test/login' => Http::response($loginFixture, 200),
+            'http://golog.test/integration/invoices/json' => Http::response($importFixture, 200),
+        ]);
+
+        $sut = $this->app->make(GoLogClient::class);
+
+        $item = new GoLogInvoiceImportItemDTO(
+            invoiceNumber: 'DO-1',
+            series: '1',
+            accessKey: 'NFE00000001',
+            typeOperation: 'ENTREGA',
+            weight: 10.0,
+            volume: 0.05,
+            value: 120.0,
+            scheduledDate: '2026-11-04T12:00:00Z',
+            notes: '[Frutas] Pedido #1 - Maca',
+            senderName: 'Fazenda Santa Maria',
+            senderDocument: '12345678000195',
+            customerName: 'Hortifruti Bom Preco',
+            customerDocument: '98765432000188',
+            customerEmail: 'contato@bompreco.com',
+            customerPhone: '(11)987654321',
+            street: 'Avenida Paulista',
+            number: '1000',
+            district: 'Bela Vista',
+            city: 'Sao Paulo',
+            state: 'SP',
+            cep: '01310100',
+            latitude: '-23.561684',
+            longitude: '-46.655981',
+        );
+
+        // Action
+        $result = $sut->importInvoicesJson([$item]);
+
+        // Assert
+        $this->assertInstanceOf(GoLogInvoiceImportResponseDTO::class, $result);
+        $this->assertSame(2, $result->totalReceived);
+        $this->assertSame(2, $result->successCount);
+        $this->assertSame(0, $result->errorCount);
+        $this->assertCount(2, $result->createdShipmentIds);
+        $this->assertSame('s1111111-1111-1111-1111-111111111111', $result->createdShipmentIds[0]);
+
+        Http::assertSent(function ($request) {
+            return $request->url() === 'http://golog.test/integration/invoices/json'
+                && $request->method() === 'POST'
+                && isset($request->data()['invoices'][0]['invoiceNumber'])
+                && $request->data()['invoices'][0]['invoiceNumber'] === 'DO-1';
+        });
+    }
+
+    public function test_should_create_work_schedule(): void
+    {
+        // Arrange
+        $loginFixture = require base_path('tests/Fixtures/Integrations/GoLog/login_success.php');
+        $scheduleFixture = require base_path('tests/Fixtures/Integrations/GoLog/create_work_schedule_success.php');
+
+        Http::fake([
+            'http://golog.test/login' => Http::response($loginFixture, 200),
+            'http://golog.test/workSchedule' => Http::response($scheduleFixture, 200),
+        ]);
+
+        $sut = $this->app->make(GoLogClient::class);
+
+        // Action
+        $response = $sut->createWorkSchedule(
+            driverId: '22222222-3333-4444-5555-666666666666',
+            equipamentGroupId: '44444444-5555-6666-7777-888888888888',
+            scheduleDate: '2026-11-05',
+        );
+
+        // Assert
+        $this->assertInstanceOf(\Cultiva\Integrations\GoLog\DTO\GoLogWorkScheduleResponseDTO::class, $response);
+        $this->assertSame('55555555-5555-5555-5555-555555555555', $response->id);
+        $this->assertSame('2026-11-05', $response->scheduleDate);
+
+        Http::assertSent(function ($request) {
+            return $request->url() === 'http://golog.test/workSchedule'
+                && $request->method() === 'POST'
+                && $request['driverId'] === '22222222-3333-4444-5555-666666666666'
+                && $request['equipamentGroupId'] === '44444444-5555-6666-7777-888888888888'
+                && $request['scheduleDate'] === '2026-11-05'
+                && $request['status'] === 'ATIVO'
+                && $request['startWorkday']['hour'] === 8
+                && $request['endWorkday']['hour'] === 18;
+        });
     }
 }

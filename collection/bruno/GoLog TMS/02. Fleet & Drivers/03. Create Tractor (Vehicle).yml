@@ -23,6 +23,7 @@ http:
         "model": "Mercedes Sprinter",
         "numberAxles": 2,
         "maximumCapacity": 1500.0,
+        "typeFuel": "DIESEL",
         "Type Fuel": "DIESEL",
         "costPerKilometer": 2.50,
         "status": "ATIVO",

@@ -7,6 +7,7 @@ Route::group([
 ], function (): void {
     require __DIR__.'/api/auth.php';
     require __DIR__.'/api/consult.php';
+    require __DIR__.'/api/golog.php';
 
     Route::middleware(['auth:sanctum', 'ability:access', 'verified'])
         ->group(function (): void {

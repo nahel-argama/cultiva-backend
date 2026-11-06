@@ -18,7 +18,5 @@ interface SignupRuleBuilderInterface
 
     public function addDeliveryRules(): static;
 
-    public function addGoLogDriverRules(): static;
-
     public function getRules(): array;
 }

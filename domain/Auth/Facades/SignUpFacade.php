@@ -8,7 +8,6 @@ use Cultiva\Auth\DTO\SignUpDTO;
 use Cultiva\Auth\Strategies\SignupStrategy\SignupStrategyFactory;
 use Cultiva\Base\ValueObjects\Cep;
 use Cultiva\Integrations\Geo\Actions\SearchCepAction;
-use Cultiva\Integrations\Geo\DTO\GeoAddressDTO;
 use Cultiva\Models\Company\Actions\CreateCompanyAction;
 use Cultiva\Models\User\Actions\CreateUserAction;
 use Illuminate\Support\Facades\DB;

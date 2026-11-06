@@ -1,0 +1,39 @@
+info:
+  name: 05. Create Work Schedule
+  type: http
+  seq: 5
+
+http:
+  method: POST
+  url: "{{base_url}}/v1/golog/work-schedules"
+  headers:
+    - name: Accept
+      value: application/json
+    - name: Content-Type
+      value: application/json
+  auth:
+    type: bearer
+    token: "{{access_token}}"
+  body:
+    type: json
+    data: |
+      {
+        "schedule_date": "2026-11-10",
+        "start_time": "08:00",
+        "end_time": "18:00"
+      }
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        if (res.getStatus() === 201) {
+          const body = res.getBody();
+          bru.setEnvVar('golog_work_schedule_id', body.data.golog_work_schedule_id, { persist: true });
+        }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

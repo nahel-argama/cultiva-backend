@@ -5,7 +5,6 @@ namespace Cultiva\Auth\DTO;
 use Cultiva\Auth\Enums\ProfileType;
 use Cultiva\Models\Company\DTOs\CompanyRegisterDTO;
 use Cultiva\Models\Delivery\DTOs\DeliveryRegisterDTO;
-use Cultiva\Models\Delivery\DTOs\GoLogDriverRegisterDTO;
 use Cultiva\Models\Producer\DTOs\ProducerRegisterDTO;
 use Cultiva\Models\Retailer\DTOs\RetailerRegisterDTO;
 use Cultiva\Models\User\DTOs\UserRegisterDTO;
@@ -19,7 +18,6 @@ final class SignUpDTO
         public readonly ?ProducerRegisterDTO $producer = null,
         public readonly ?RetailerRegisterDTO $retailer = null,
         public readonly ?DeliveryRegisterDTO $delivery = null,
-        public readonly ?GoLogDriverRegisterDTO $gologDriver = null,
     ) {}
 
     public static function fromArray(array $data): self
@@ -33,7 +31,6 @@ final class SignUpDTO
             producer: $profileType === ProfileType::PRODUCER ? ProducerRegisterDTO::fromArray($data['producer'] ?? []) : null,
             retailer: $profileType === ProfileType::RETAILER ? RetailerRegisterDTO::fromArray($data['retailer'] ?? []) : null,
             delivery: $profileType === ProfileType::DELIVERY ? DeliveryRegisterDTO::fromArray($data['delivery'] ?? []) : null,
-            gologDriver: $profileType === ProfileType::GOLOG_DRIVER ? GoLogDriverRegisterDTO::fromArray($data['golog_driver'] ?? []) : null,
         );
     }
 }
