@@ -31,8 +31,8 @@ class DemoDataSeederTest extends TestCase
             ->pluck('retailers.id');
 
         $this->assertCount(25, $producerIds);
-        $this->assertCount(25, $retailerIds);
-        $this->assertSame(50, DB::table('users')->where('email', 'like', 'demo.%@cultiva.test')->count());
+        $this->assertCount(50, $retailerIds);
+        $this->assertSame(75, DB::table('users')->where('email', 'like', 'demo.%@cultiva.test')->count());
         $this->assertSame(200, DB::table('offers')->whereIn('producer_id', $producerIds)->count());
         $this->assertSame(250, DB::table('purchases')->whereIn('retailer_id', $retailerIds)->count());
         $this->assertSame(500, DB::table('wishlist_items')->whereIn('retailer_id', $retailerIds)->count());
@@ -50,11 +50,19 @@ class DemoDataSeederTest extends TestCase
             ->havingRaw('COUNT(*) = 10')
             ->get()
             ->count());
-        $this->assertSame(25, DB::table('wishlist_items')
+        $this->assertSame(50, DB::table('wishlist_items')->whereIn('retailer_id', $retailerIds)->distinct('retailer_id')->count('retailer_id'));
+        $this->assertSame([50, 42, 38, 34, 30, 28, 26, 24, 22, 19, 19, 19, 19, 19, 19, 19, 19, 18, 18, 18], DB::table('wishlist_items')
+            ->selectRaw('COUNT(*) as total')
+            ->whereIn('retailer_id', $retailerIds)
+            ->groupBy('source_product_id')
+            ->orderByDesc('total')
+            ->pluck('total')
+            ->all());
+        $this->assertSame(50, DB::table('wishlist_items')
             ->select('retailer_id')
             ->whereIn('retailer_id', $retailerIds)
             ->groupBy('retailer_id')
-            ->havingRaw('COUNT(*) = 20')
+            ->havingRaw('COUNT(*) = 10')
             ->get()
             ->count());
         $this->assertDatabaseHas('users', ['id' => $otherUser->id]);

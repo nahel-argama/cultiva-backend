@@ -30,6 +30,8 @@ class DemoDataSeeder extends Seeder
         'Grãos e cereais' => ['Feijão'],
     ];
 
+    private const WISHLIST_COUNTS = [50, 42, 38, 34, 30, 28, 26, 24, 22, 19, 19, 19, 19, 19, 19, 19, 19, 18, 18, 18];
+
     public function run(): void
     {
         if (app()->environment('production')) {
@@ -44,7 +46,7 @@ class DemoDataSeeder extends Seeder
             $retailers = $this->createRetailers();
             $offers = $this->createOffers($producers, $categories);
 
-            $this->createPurchases($retailers, $offers);
+            $this->createPurchases(array_slice($retailers, 0, 25), $offers);
             $this->createWishlistItems($retailers);
         });
     }
@@ -58,10 +60,12 @@ class DemoDataSeeder extends Seeder
         $producerIds = DB::table('producers')->whereIn('company_id', $companyIds)->pluck('id');
         $retailerIds = DB::table('retailers')->whereIn('company_id', $companyIds)->pluck('id');
 
-        DB::table('purchases')
+        $purchaseIds = DB::table('purchases')
             ->whereIn('producer_id', $producerIds)
             ->orWhereIn('retailer_id', $retailerIds)
-            ->delete();
+            ->pluck('id');
+        DB::table('delivery_orders')->whereIn('purchase_id', $purchaseIds)->delete();
+        DB::table('purchases')->whereIn('id', $purchaseIds)->delete();
         DB::table('offers')->whereIn('producer_id', $producerIds)->delete();
         DB::table('wishlist_items')->whereIn('retailer_id', $retailerIds)->delete();
         DB::table('producers')->whereIn('id', $producerIds)->delete();
@@ -93,7 +97,7 @@ class DemoDataSeeder extends Seeder
     {
         $retailers = [];
 
-        foreach (range(1, 25) as $number) {
+        foreach (range(1, 50) as $number) {
             $user = UserFactory::new()->retailer()->create([
                 'email' => sprintf('demo.retailer.%02d@cultiva.test', $number),
                 'password' => self::DEMO_PASSWORD,
@@ -164,15 +168,19 @@ class DemoDataSeeder extends Seeder
     private function createWishlistItems(array $retailers): void
     {
         $products = array_merge(...array_values(self::PRODUCTS));
+        $retailerOffset = 0;
 
-        foreach ($retailers as $retailerIndex => $retailer) {
-            foreach (range(1, 20) as $itemNumber) {
+        foreach ($products as $productIndex => $productName) {
+            foreach (range(0, self::WISHLIST_COUNTS[$productIndex] - 1) as $offset) {
+                $retailerIndex = ($retailerOffset + $offset) % count($retailers);
                 WishlistItemFactory::new()->create([
-                    'retailer_id' => $retailer->id,
-                    'source_product_id' => sprintf('demo-wishlist-%02d-%02d', $retailerIndex + 1, $itemNumber),
-                    'product_name' => $products[($retailerIndex + $itemNumber - 1) % count($products)],
+                    'retailer_id' => $retailers[$retailerIndex]->id,
+                    'source_product_id' => sprintf('demo-wishlist-product-%02d', $productIndex + 1),
+                    'product_name' => $productName,
                 ]);
             }
+
+            $retailerOffset += self::WISHLIST_COUNTS[$productIndex];
         }
     }
 }
