@@ -9,9 +9,9 @@ variables:
   - secret: true
     name: golog_token
   - name: golog_company_id
-    value: d9d7b435-c256-405b-877c-848f4a22e22a
+    value: 7f564f96-d90f-42cc-beb2-e37cf63a324d
   - name: golog_user_id
-    value: a7408c76-355f-4382-a3f7-25ff4c54ac54
+    value: e33d7339-1c9d-498d-af4e-51d68a3b8783
   - name: golog_driver_user_id
     value: ""
   - name: golog_driver_id
@@ -19,4 +19,6 @@ variables:
   - name: golog_equipament_id
     value: ""
   - name: golog_equipament_group_id
+    value: ""
+  - name: golog_work_schedule_id
     value: ""

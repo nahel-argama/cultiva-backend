@@ -3,7 +3,6 @@
 namespace Cultiva\Auth\Requests;
 
 use Cultiva\Auth\Builders\SignupRuleBuilder\Directors\DeliverySignupDirector;
-use Cultiva\Auth\Builders\SignupRuleBuilder\Directors\GoLogDriverSignupDirector;
 use Cultiva\Auth\Builders\SignupRuleBuilder\Directors\ProducerSignupDirector;
 use Cultiva\Auth\Builders\SignupRuleBuilder\Directors\RetailerSignupDirector;
 use Cultiva\Auth\Builders\SignupRuleBuilder\SignupRuleBuilder;
@@ -20,7 +19,6 @@ final class SignUpRequest extends FormRequest
             ProfileType::PRODUCER => (new ProducerSignupDirector($builder))->build(),
             ProfileType::RETAILER => (new RetailerSignupDirector($builder))->build(),
             ProfileType::DELIVERY => (new DeliverySignupDirector($builder))->build(),
-            ProfileType::GOLOG_DRIVER => (new GoLogDriverSignupDirector($builder))->build(),
             default => $builder->addUserRules()->getRules(),
         };
     }
