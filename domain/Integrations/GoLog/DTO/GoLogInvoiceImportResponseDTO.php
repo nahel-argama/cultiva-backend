@@ -25,11 +25,11 @@ final readonly class GoLogInvoiceImportResponseDTO
     public static function fromArray(array $data): self
     {
         return new self(
-            totalReceived: $data['totalReceived'] ?? 0,
-            successCount: $data['successCount'] ?? 0,
-            errorCount: $data['errorCount'] ?? 0,
-            createdShipmentIds: $data['createdShipmentIds'] ?? [],
-            errors: $data['errors'] ?? [],
+            totalReceived: $data['totalReceived'],
+            successCount: $data['successCount'],
+            errorCount: $data['errorCount'],
+            createdShipmentIds: $data['createdShipmentIds'],
+            errors: $data['errors'],
             processingTimeMs: $data['processingTimeMs'] ?? null,
         );
     }

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Cultiva\Models\DeliveryOrder;
 
 use Carbon\CarbonImmutable;
+use Cultiva\Integrations\GoLog\Enums\GoLogOperationType;
 use Cultiva\Integrations\GoLog\Enums\GoLogShipmentStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -14,6 +15,7 @@ use Override;
  * @property-read int $id
  * @property-read int $delivery_order_id
  * @property-read string $golog_shipment_id
+ * @property-read GoLogOperationType $type
  * @property-read GoLogShipmentStatus $status
  * @property-read CarbonImmutable $created_at
  * @property-read ?CarbonImmutable $updated_at
@@ -26,6 +28,7 @@ class GoLogShipment extends Model
     protected $fillable = [
         'delivery_order_id',
         'golog_shipment_id',
+        'type',
         'status',
     ];
 
@@ -34,6 +37,7 @@ class GoLogShipment extends Model
     {
         return [
             'delivery_order_id' => 'integer',
+            'type' => GoLogOperationType::class,
             'status' => GoLogShipmentStatus::class,
         ];
     }

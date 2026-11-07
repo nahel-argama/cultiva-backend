@@ -9,16 +9,18 @@ variables:
   - secret: true
     name: golog_token
   - name: golog_company_id
-    value: 7f564f96-d90f-42cc-beb2-e37cf63a324d
+    value: 5647b3d4-f42f-4905-a617-896afa8dccef
+  - name: golog_tenant_id
+    value: 5647b3d4-f42f-4905-a617-896afa8dccef
   - name: golog_user_id
     value: e33d7339-1c9d-498d-af4e-51d68a3b8783
   - name: golog_driver_user_id
-    value: ""
+    value: dcafc9b7-a266-4f59-8c16-ade055b9b5a4
   - name: golog_driver_id
-    value: ""
+    value: 7769e02b-87d9-475f-b400-6c4df77d14aa
   - name: golog_equipament_id
-    value: ""
+    value: c4bef783-d583-4c1f-9142-4bf6ee121596
   - name: golog_equipament_group_id
-    value: ""
+    value: 5c0fd084-b358-4aae-aed0-2282963c26ca
   - name: golog_work_schedule_id
-    value: ""
+    value: a6d6156e-39f8-4156-a208-d32e0a578def

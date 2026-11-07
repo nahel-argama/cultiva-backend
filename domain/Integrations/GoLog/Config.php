@@ -31,4 +31,11 @@ final class Config
     {
         return (int) $this->config->get('services.golog.timeout');
     }
+
+    public function getTenantId(): ?string
+    {
+        $tenantId = $this->config->get('services.golog.tenant_id');
+
+        return is_string($tenantId) && $tenantId !== '' ? $tenantId : null;
+    }
 }

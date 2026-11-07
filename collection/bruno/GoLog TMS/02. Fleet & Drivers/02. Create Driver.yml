@@ -19,8 +19,8 @@ http:
     data: |
       {
         "userId": "{{golog_driver_user_id}}",
-        "cnhNumber": "12345678901",
-        "cnhExpiration": "2028-12-31",
+        "cnhNumber": "74829163504",
+        "cnhExpiration": "31/12/2028",
         "costPerHour": 45.00
       }
 
@@ -28,9 +28,9 @@ runtime:
   scripts:
     - type: after-response
       code: |-
-        if (res.getStatus() === 200) {
+        if (res.getStatus() === 200 || res.getStatus() === 201) {
           const body = res.getBody();
-          if (body.id) {
+          if (body && body.id) {
             bru.setEnvVar('golog_driver_id', body.id, { persist: true });
           }
         }

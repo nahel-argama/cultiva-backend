@@ -4,6 +4,9 @@ info:
   seq: 2
 
 request:
+  headers:
+    - name: X-Tenant-Id
+      value: "{{golog_tenant_id}}"
   variables:
     - name: golog_base_url
       value: http://147.15.18.21:8081

@@ -28,7 +28,10 @@ runtime:
           if (body.token) {
             bru.setEnvVar('golog_token', body.token, { persist: true });
           }
-          if (body.companyId) {
+          const tenantId = bru.getEnvVar('golog_tenant_id');
+          if (tenantId) {
+            bru.setEnvVar('golog_company_id', tenantId, { persist: true });
+          } else if (body.companyId) {
             bru.setEnvVar('golog_company_id', body.companyId, { persist: true });
           }
           if (body.userId) {
