@@ -18,13 +18,13 @@ http:
     type: json
     data: |
       {
-        "plate": "BRA2E19",
-        "capacity": 1500.5,
-        "renavam": "12345678901",
-        "model": "Mercedes Sprinter",
+        "plate": "VRA8C55",
+        "capacity": 1800.0,
+        "renavam": "84920173654",
+        "model": "Iveco Daily 35-150",
         "number_axles": 2,
         "type_fuel": "DIESEL",
-        "cost_per_kilometer": 2.5
+        "cost_per_kilometer": 2.8
       }
 
 runtime:

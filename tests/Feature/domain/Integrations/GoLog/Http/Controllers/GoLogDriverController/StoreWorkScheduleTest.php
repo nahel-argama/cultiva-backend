@@ -43,11 +43,13 @@ final class StoreWorkScheduleTest extends TestCase
         ]);
 
         $loginFixture = require base_path('tests/Fixtures/Integrations/GoLog/login_success.php');
-        $scheduleFixture = require base_path('tests/Fixtures/Integrations/GoLog/create_work_schedule_success.php');
+        $schedulesFixture = require base_path('tests/Fixtures/Integrations/GoLog/list_work_schedules_success.php');
 
         Http::fake([
             'http://golog.test/login' => Http::response($loginFixture, 200),
-            'http://golog.test/workSchedule' => Http::response($scheduleFixture, 200),
+            'http://golog.test/workSchedule' => fn ($request) => $request->method() === 'POST'
+                ? Http::response('', 201)
+                : Http::response($schedulesFixture, 200),
         ]);
 
         Sanctum::actingAs($driver->company->user, ['access']);
@@ -68,13 +70,12 @@ final class StoreWorkScheduleTest extends TestCase
             ->assertJsonPath('data.is_provisioned', true);
 
         Http::assertSent(fn ($request): bool => $request->url() === 'http://golog.test/workSchedule'
+            && $request->method() === 'POST'
             && $request['driverId'] === '22222222-3333-4444-5555-666666666666'
             && $request['equipamentGroupId'] === '44444444-5555-6666-7777-888888888888'
             && $request['scheduleDate'] === '2026-11-10'
-            && $request['startWorkday']['hour'] === 8
-            && $request['startWorkday']['minute'] === 0
-            && $request['endWorkday']['hour'] === 18
-            && $request['endWorkday']['minute'] === 0);
+            && $request['startWorkday'] === '08:00:00'
+            && $request['endWorkday'] === '18:00:00');
 
         $driver->refresh();
         $this->assertSame('55555555-5555-5555-5555-555555555555', $driver->golog_work_schedule_id);

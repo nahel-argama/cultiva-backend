@@ -3,14 +3,17 @@
 namespace Cultiva\Models\DeliveryOrder;
 
 use Carbon\CarbonImmutable;
+use Cultiva\Integrations\GoLog\Enums\GoLogOperationType;
 use Cultiva\Models\DeliveryOrder\Enums\DeliveryOrderStatus as DeliveryOrderStatusEnum;
 use Cultiva\Models\DeliveryTrip\DeliveryTrip;
 use Cultiva\Models\DeliveryTrip\DeliveryTripStop;
 use Cultiva\Models\Purchase\Purchase;
 use Database\Factories\DeliveryOrderFactory;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Override;
 
@@ -38,6 +41,9 @@ use Override;
  * @property-read DeliveryAddress $dropoffAddress
  * @property-read DeliveryOrderStatus $statusRecord
  * @property-read ?GoLogShipment $gologShipment
+ * @property-read Collection<int, GoLogShipment> $gologShipments
+ * @property-read ?GoLogShipment $pickupShipment
+ * @property-read ?GoLogShipment $dropoffShipment
  */
 class DeliveryOrder extends Model
 {
@@ -142,5 +148,29 @@ class DeliveryOrder extends Model
     public function gologShipment(): HasOne
     {
         return $this->hasOne(GoLogShipment::class);
+    }
+
+    /**
+     * @return HasMany<GoLogShipment, $this>
+     */
+    public function gologShipments(): HasMany
+    {
+        return $this->hasMany(GoLogShipment::class);
+    }
+
+    /**
+     * @return HasOne<GoLogShipment, $this>
+     */
+    public function pickupShipment(): HasOne
+    {
+        return $this->hasOne(GoLogShipment::class)->where('type', GoLogOperationType::COLETA->value);
+    }
+
+    /**
+     * @return HasOne<GoLogShipment, $this>
+     */
+    public function dropoffShipment(): HasOne
+    {
+        return $this->hasOne(GoLogShipment::class)->where('type', GoLogOperationType::ENTREGA->value);
     }
 }

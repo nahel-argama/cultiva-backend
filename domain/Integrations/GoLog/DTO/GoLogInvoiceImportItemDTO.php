@@ -33,38 +33,6 @@ final readonly class GoLogInvoiceImportItemDTO
     ) {}
 
     /**
-     * @param array<string, mixed> $data
-     */
-    public static function fromArray(array $data): self
-    {
-        return new self(
-            invoiceNumber: $data['invoiceNumber'] ?? '',
-            series: $data['series'] ?? '1',
-            accessKey: $data['accessKey'] ?? '',
-            typeOperation: $data['typeOperation'] ?? 'ENTREGA',
-            weight: $data['weight'] ?? 1.0,
-            volume: $data['volume'] ?? 0.01,
-            value: $data['value'] ?? 1.0,
-            scheduledDate: $data['scheduledDate'] ?? '',
-            notes: $data['notes'] ?? '',
-            senderName: $data['senderName'] ?? '',
-            senderDocument: $data['senderDocument'] ?? '',
-            customerName: $data['customerName'] ?? '',
-            customerDocument: $data['customerDocument'] ?? '',
-            customerEmail: $data['customerEmail'] ?? '',
-            customerPhone: $data['customerPhone'] ?? '',
-            street: $data['street'] ?? '',
-            number: $data['number'] ?? '',
-            district: $data['district'] ?? '',
-            city: $data['city'] ?? '',
-            state: $data['state'] ?? '',
-            cep: $data['cep'] ?? '',
-            latitude: $data['latitude'] ?? '',
-            longitude: $data['longitude'] ?? '',
-        );
-    }
-
-    /**
      * @return array<string, mixed>
      */
     public function toArray(): array

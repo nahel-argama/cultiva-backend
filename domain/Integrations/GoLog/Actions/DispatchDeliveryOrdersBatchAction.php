@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace Cultiva\Integrations\GoLog\Actions;
 
+use Cultiva\Base\Exceptions\CultivaException;
 use Cultiva\Integrations\GoLog\Clients\GoLogClient;
+use Cultiva\Integrations\GoLog\DTO\DispatchBatchResultDTO;
 use Cultiva\Integrations\GoLog\DTO\GoLogInvoiceImportItemDTO;
+use Cultiva\Integrations\GoLog\Enums\GoLogOperationType;
 use Cultiva\Integrations\GoLog\Enums\GoLogShipmentStatus;
 use Cultiva\Models\DeliveryOrder\DeliveryOrder;
 use Cultiva\Models\DeliveryOrder\Enums\DeliveryOrderStatus;
@@ -19,118 +22,150 @@ class DispatchDeliveryOrdersBatchAction
         private readonly GoLogClient $goLogClient,
     ) {}
 
-    /**
-     * @return array{
-     *     total_orders: int,
-     *     batches_sent: int,
-     *     success_count: int,
-     *     error_count: int,
-     *     by_category: array<string, int>,
-     *     errors: array<int, string>
-     * }
-     */
-    public function execute(): array
+    public function execute(): DispatchBatchResultDTO
     {
         /** @var Collection<int, DeliveryOrder> $orders */
         $orders = DeliveryOrder::query()
             ->with([
                 'purchase.offer.category',
-                'purchase.producer.company',
+                'purchase.producer.company.user',
                 'purchase.retailer.company.user',
-                'dropoffAddress',
+                'pickupAddress' => fn ($query) => $query->selectRaw(
+                    'delivery_addresses.*, ST_X(coordinate::geometry) AS longitude, ST_Y(coordinate::geometry) AS latitude'
+                ),
+                'dropoffAddress' => fn ($query) => $query->selectRaw(
+                    'delivery_addresses.*, ST_X(coordinate::geometry) AS longitude, ST_Y(coordinate::geometry) AS latitude'
+                ),
             ])
             ->where('status', DeliveryOrderStatus::PENDING)
-            ->whereDoesntHave('gologShipment')
+            ->whereDoesntHave('gologShipments')
             ->orderBy('id')
             ->get();
 
         if ($orders->isEmpty()) {
-            return [
-                'total_orders' => 0,
-                'batches_sent' => 0,
-                'success_count' => 0,
-                'error_count' => 0,
-                'by_category' => [],
-                'errors' => [],
-            ];
+            return new DispatchBatchResultDTO(
+                totalOrders: 0,
+                batchesSent: 0,
+                shipmentsCreated: 0,
+                byCategory: [],
+            );
         }
 
-        $groupedOrders = $orders->groupBy(fn (DeliveryOrder $order): string => $order->purchase->offer->category->name->value);
+        $groupedOrders = $orders->groupBy(
+            fn (DeliveryOrder $order): string => $order->purchase->offer->category->name->value
+        );
 
-        $totalBatches = 0;
-        $totalSuccess = 0;
-        $totalErrors = 0;
-        $byCategorySummary = [];
-        $collectedErrors = [];
+        $batchesSent = 0;
+        $shipmentsCreated = 0;
+        $byCategory = [];
 
         foreach ($groupedOrders as $category => $groupOrders) {
-            $byCategorySummary[$category] = $groupOrders->count();
+            $categoryOrders = $groupOrders->values();
+            $byCategory[$category] = $categoryOrders->count();
+
             $invoices = [];
-
-            foreach ($groupOrders as $order) {
-                $invoices[] = $this->buildInvoiceItem($order, $category);
+            foreach ($categoryOrders as $order) {
+                $invoices[] = $this->buildColetaInvoiceItem($order, $category);
+                $invoices[] = $this->buildEntregaInvoiceItem($order, $category);
             }
 
-            $totalBatches++;
             $response = $this->goLogClient->importInvoicesJson($invoices);
+            $batchesSent++;
 
-            $totalSuccess += $response->successCount;
-            $totalErrors += $response->errorCount;
-
-            if (! empty($response->errors)) {
-                $collectedErrors = array_merge($collectedErrors, $response->errors);
+            if ($response->errorCount > 0) {
+                throw new CultivaException(
+                    502,
+                    "Failed to import category [{$category}] batch in GoLog: " . implode('; ', $response->errors)
+                );
             }
 
-            DB::transaction(function () use ($groupOrders, $response): void {
-                foreach ($groupOrders->values() as $index => $order) {
-                    $shipmentId = $response->createdShipmentIds[$index] ?? null;
-                    if ($shipmentId !== null) {
-                        GoLogShipment::query()->create([
-                            'delivery_order_id' => $order->id,
-                            'golog_shipment_id' => $shipmentId,
-                            'status' => GoLogShipmentStatus::PENDENTE,
-                        ]);
-                    }
+            DB::transaction(function () use ($categoryOrders, $response): void {
+                foreach ($categoryOrders as $index => $order) {
+                    $coletaShipmentId = $response->createdShipmentIds[$index * 2];
+                    $entregaShipmentId = $response->createdShipmentIds[$index * 2 + 1];
+
+                    GoLogShipment::query()->create([
+                        'delivery_order_id' => $order->id,
+                        'golog_shipment_id' => $coletaShipmentId,
+                        'type' => GoLogOperationType::COLETA,
+                        'status' => GoLogShipmentStatus::PENDENTE,
+                    ]);
+
+                    GoLogShipment::query()->create([
+                        'delivery_order_id' => $order->id,
+                        'golog_shipment_id' => $entregaShipmentId,
+                        'type' => GoLogOperationType::ENTREGA,
+                        'status' => GoLogShipmentStatus::PENDENTE,
+                    ]);
                 }
             });
+
+            $shipmentsCreated += $response->successCount;
         }
 
-        return [
-            'total_orders' => $orders->count(),
-            'batches_sent' => $totalBatches,
-            'success_count' => $totalSuccess,
-            'error_count' => $totalErrors,
-            'by_category' => $byCategorySummary,
-            'errors' => $collectedErrors,
-        ];
+        return new DispatchBatchResultDTO(
+            totalOrders: $orders->count(),
+            batchesSent: $batchesSent,
+            shipmentsCreated: $shipmentsCreated,
+            byCategory: $byCategory,
+        );
     }
 
-    private function buildInvoiceItem(DeliveryOrder $order, string $category): GoLogInvoiceImportItemDTO
+    private function buildColetaInvoiceItem(DeliveryOrder $order, string $category): GoLogInvoiceImportItemDTO
+    {
+        $purchase = $order->purchase;
+        $producer = $purchase->producer->company;
+        $pickup = $order->pickupAddress;
+
+        return new GoLogInvoiceImportItemDTO(
+            invoiceNumber: "DO-{$order->id}-COL",
+            series: '1',
+            accessKey: 'NFE' . str_pad((string) $order->id, 8, '0', STR_PAD_LEFT) . 'COL' . date('YmdHis'),
+            typeOperation: GoLogOperationType::COLETA->value,
+            weight: (float) $order->quantity,
+            volume: round($order->quantity * 0.005, 3),
+            value: (float) $purchase->total_price,
+            scheduledDate: now()->addDay()->utc()->toIso8601ZuluString(),
+            notes: "[{$category}] Coleta Pedido #{$purchase->id} - {$purchase->product_name}",
+            senderName: $producer->trade_name,
+            senderDocument: $producer->document_number,
+            customerName: $producer->trade_name,
+            customerDocument: $producer->document_number,
+            customerEmail: $producer->user?->email ?? '',
+            customerPhone: $producer->phone,
+            street: $pickup->street,
+            number: $pickup->number,
+            district: $pickup->neighborhood,
+            city: $pickup->city,
+            state: $pickup->state,
+            cep: $pickup->zip,
+            latitude: (string) $pickup->getAttribute('latitude'),
+            longitude: (string) $pickup->getAttribute('longitude'),
+        );
+    }
+
+    private function buildEntregaInvoiceItem(DeliveryOrder $order, string $category): GoLogInvoiceImportItemDTO
     {
         $purchase = $order->purchase;
         $producer = $purchase->producer->company;
         $retailer = $purchase->retailer->company;
         $dropoff = $order->dropoffAddress;
 
-        preg_match('/POINT\s*\(\s*([^\s]+)\s+([^\s]+)\s*\)/i', (string) $dropoff->coordinate, $matches);
-        $longitude = $matches[1] ?? '';
-        $latitude = $matches[2] ?? '';
-
         return new GoLogInvoiceImportItemDTO(
-            invoiceNumber: "DO-{$order->id}",
+            invoiceNumber: "DO-{$order->id}-ENT",
             series: '1',
-            accessKey: 'NFE' . str_pad((string) $order->id, 8, '0', STR_PAD_LEFT) . date('YmdHis'),
-            typeOperation: 'ENTREGA',
+            accessKey: 'NFE' . str_pad((string) $order->id, 8, '0', STR_PAD_LEFT) . 'ENT' . date('YmdHis'),
+            typeOperation: GoLogOperationType::ENTREGA->value,
             weight: (float) $order->quantity,
             volume: round($order->quantity * 0.005, 3),
             value: (float) $purchase->total_price,
-            scheduledDate: now()->addDay()->toIso8601String(),
-            notes: "[{$category}] Pedido #{$purchase->id} - {$purchase->product_name}",
+            scheduledDate: now()->addDay()->utc()->toIso8601ZuluString(),
+            notes: "[{$category}] Entrega Pedido #{$purchase->id} - {$purchase->product_name}",
             senderName: $producer->trade_name,
             senderDocument: $producer->document_number,
             customerName: $retailer->trade_name,
             customerDocument: $retailer->document_number,
-            customerEmail: $retailer->user->email,
+            customerEmail: $retailer->user?->email ?? '',
             customerPhone: $retailer->phone,
             street: $dropoff->street,
             number: $dropoff->number,
@@ -138,8 +173,8 @@ class DispatchDeliveryOrdersBatchAction
             city: $dropoff->city,
             state: $dropoff->state,
             cep: $dropoff->zip,
-            latitude: $latitude,
-            longitude: $longitude,
+            latitude: (string) $dropoff->getAttribute('latitude'),
+            longitude: (string) $dropoff->getAttribute('longitude'),
         );
     }
 }

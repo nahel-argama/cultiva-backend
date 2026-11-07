@@ -19,31 +19,21 @@ class DispatchDeliveryOrdersBatchCommand extends Command
 
         $result = $action->execute();
 
-        if ($result['total_orders'] === 0) {
+        if ($result->totalOrders === 0) {
             $this->info('No open delivery orders found to dispatch.');
 
             return self::SUCCESS;
         }
 
-        $this->info("Found {$result['total_orders']} open delivery order(s).");
+        $this->info("Found {$result->totalOrders} open delivery order(s).");
 
         $this->line('Breakdown by Category:');
-        foreach ($result['by_category'] as $category => $count) {
+        foreach ($result->byCategory as $category => $count) {
             $this->line("  - [{$category}]: {$count} order(s)");
         }
 
-        $this->info("Batches sent: {$result['batches_sent']}");
-        $this->info("Shipments created successfully: {$result['success_count']}");
-
-        if ($result['error_count'] > 0) {
-            $this->warn("Failed shipments: {$result['error_count']}");
-            foreach ($result['errors'] as $error) {
-                $this->error("  * {$error}");
-            }
-
-            return self::FAILURE;
-        }
-
+        $this->info("Batches sent: {$result->batchesSent}");
+        $this->info("Shipments created successfully: {$result->shipmentsCreated}");
         $this->info('Batch delivery orders successfully dispatched to GoLog TMS!');
 
         return self::SUCCESS;

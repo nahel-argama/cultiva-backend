@@ -16,22 +16,22 @@ http:
     data: |
       {
         "user": {
-          "name": "Rafael Santos Motorista",
-          "email": "rafael.golog@example.com",
+          "name": "Gabriel Vieira Entregas",
+          "email": "gabriel.vieira@cultiva.com",
           "password": "Password123!",
           "password_confirmation": "Password123!",
-          "cpf": "40374708029"
+          "cpf": "81639472096"
         },
         "company": {
-          "trade_name": "Santos Log Express",
-          "legal_name": "Santos Transportes LTDA",
-          "document_number": "12345678000195",
-          "phone": "11987654321",
+          "trade_name": "Vieira Cargo Sul",
+          "legal_name": "Vieira Transportes Rodoviarios LTDA",
+          "document_number": "63829147000109",
+          "phone": "47991234567",
           "address": {
             "zip": "89010025",
-            "number": "789",
-            "complement": "Galpão B",
-            "reference_point": "Próximo à rodovia"
+            "number": "410",
+            "complement": "Sala 2",
+            "reference_point": "Centro"
           }
         }
       }

@@ -14,6 +14,7 @@ use Cultiva\Integrations\GoLog\DTO\GoLogTractorResponseDTO;
 use Cultiva\Integrations\GoLog\DTO\GoLogTransportTypeResponseDTO;
 use Cultiva\Integrations\GoLog\DTO\GoLogUserResponseDTO;
 use Cultiva\Integrations\GoLog\Enums\GoLogFuelType;
+use Cultiva\Integrations\GoLog\Enums\GoLogRoutePriority;
 use Cultiva\Integrations\GoLog\Enums\GoLogUserProfile;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
@@ -181,6 +182,11 @@ class GoLogClientTest extends TestCase
         });
 
         Http::assertSent(function (\Illuminate\Http\Client\Request $request) {
+            return $request->url() === 'http://golog.test/driver'
+                && $request['cnhExpiration'] === '31/12/2028';
+        });
+
+        Http::assertSent(function (\Illuminate\Http\Client\Request $request) {
             return $request->url() === 'http://golog.test/tractor'
                 && $request['typeFuel'] === 'DIESEL';
         });
@@ -248,11 +254,13 @@ class GoLogClientTest extends TestCase
     {
         // Arrange
         $loginFixture = require base_path('tests/Fixtures/Integrations/GoLog/login_success.php');
-        $scheduleFixture = require base_path('tests/Fixtures/Integrations/GoLog/create_work_schedule_success.php');
+        $schedulesFixture = require base_path('tests/Fixtures/Integrations/GoLog/list_work_schedules_success.php');
 
         Http::fake([
             'http://golog.test/login' => Http::response($loginFixture, 200),
-            'http://golog.test/workSchedule' => Http::response($scheduleFixture, 200),
+            'http://golog.test/workSchedule' => fn (\Illuminate\Http\Client\Request $request) => $request->method() === 'POST'
+                ? Http::response('', 201)
+                : Http::response($schedulesFixture, 200),
         ]);
 
         $sut = $this->app->make(GoLogClient::class);
@@ -261,23 +269,104 @@ class GoLogClientTest extends TestCase
         $response = $sut->createWorkSchedule(
             driverId: '22222222-3333-4444-5555-666666666666',
             equipamentGroupId: '44444444-5555-6666-7777-888888888888',
-            scheduleDate: '2026-11-05',
+            scheduleDate: '2026-11-10',
         );
 
         // Assert
         $this->assertInstanceOf(\Cultiva\Integrations\GoLog\DTO\GoLogWorkScheduleResponseDTO::class, $response);
         $this->assertSame('55555555-5555-5555-5555-555555555555', $response->id);
-        $this->assertSame('2026-11-05', $response->scheduleDate);
+        $this->assertSame('2026-11-10', $response->scheduleDate);
 
         Http::assertSent(function ($request) {
             return $request->url() === 'http://golog.test/workSchedule'
                 && $request->method() === 'POST'
                 && $request['driverId'] === '22222222-3333-4444-5555-666666666666'
                 && $request['equipamentGroupId'] === '44444444-5555-6666-7777-888888888888'
-                && $request['scheduleDate'] === '2026-11-05'
+                && $request['scheduleDate'] === '2026-11-10'
                 && $request['status'] === 'ATIVO'
-                && $request['startWorkday']['hour'] === 8
-                && $request['endWorkday']['hour'] === 18;
+                && $request['startWorkday'] === '08:00:00'
+                && $request['endWorkday'] === '18:00:00';
+        });
+    }
+
+    public function test_should_send_tenant_header_and_override_company_id_when_tenant_is_configured(): void
+    {
+        // Arrange
+        config([
+            'services.golog.tenant_id' => 't1111111-2222-3333-4444-555555555555',
+        ]);
+
+        $loginFixture = require base_path('tests/Fixtures/Integrations/GoLog/login_success.php');
+        $userFixture = require base_path('tests/Fixtures/Integrations/GoLog/create_user_success.php');
+
+        Http::fake([
+            'http://golog.test/login' => Http::response($loginFixture, 200),
+            'http://golog.test/user' => Http::response($userFixture, 200),
+        ]);
+
+        $sut = $this->app->make(GoLogClient::class);
+
+        // Action
+        $companyId = $sut->getCompanyId();
+        $sut->createUser(
+            name: 'Lucas Ferreira Transporte',
+            email: 'lucas@cultiva.com',
+            password: 'Password123!',
+            cpf: '71428593004',
+        );
+
+        // Assert
+        $this->assertSame('t1111111-2222-3333-4444-555555555555', $companyId);
+
+        Http::assertSent(function (\Illuminate\Http\Client\Request $request) {
+            return $request->url() === 'http://golog.test/user'
+                && $request->hasHeader('X-Tenant-Id', 't1111111-2222-3333-4444-555555555555')
+                && $request['companyId'] === 't1111111-2222-3333-4444-555555555555';
+        });
+    }
+
+    public function test_should_optimize_routes(): void
+    {
+        // Arrange
+        config([
+            'services.golog.tenant_id' => 't1111111-2222-3333-4444-555555555555',
+        ]);
+
+        $loginFixture = require base_path('tests/Fixtures/Integrations/GoLog/login_success.php');
+        $optimizeFixture = require base_path('tests/Fixtures/Integrations/GoLog/optimize_routes_success.php');
+
+        Http::fake([
+            'http://golog.test/login' => Http::response($loginFixture, 200),
+            'http://golog.test/api-route-optimization' => Http::response($optimizeFixture, 200),
+        ]);
+
+        $sut = $this->app->make(GoLogClient::class);
+
+        $shipmentIds = [
+            's1111111-1111-1111-1111-111111111111',
+            's2222222-2222-2222-2222-222222222222',
+        ];
+        $workScheduleIds = [
+            'w1111111-1111-1111-1111-111111111111',
+        ];
+
+        // Action
+        $response = $sut->optimizeRoutes(
+            shipmentIds: $shipmentIds,
+            workScheduleIds: $workScheduleIds,
+            routePriority: GoLogRoutePriority::TEMPO,
+        );
+
+        // Assert
+        $this->assertSame($optimizeFixture, $response);
+
+        Http::assertSent(function (\Illuminate\Http\Client\Request $request) use ($shipmentIds, $workScheduleIds): bool {
+            return $request->url() === 'http://golog.test/api-route-optimization'
+                && $request->method() === 'POST'
+                && $request->hasHeader('X-Tenant-Id', 't1111111-2222-3333-4444-555555555555')
+                && $request['shipmentIds'] === $shipmentIds
+                && $request['workScheduleIds'] === $workScheduleIds
+                && $request['routePriority'] === 'TEMPO';
         });
     }
 }

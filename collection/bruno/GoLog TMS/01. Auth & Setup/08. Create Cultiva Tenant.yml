@@ -1,0 +1,57 @@
+info:
+  name: Create Cultiva Tenant
+  type: http
+  seq: 8
+
+http:
+  method: POST
+  url: "{{golog_base_url}}/tenants"
+  headers:
+    - name: Accept
+      value: application/json
+    - name: Content-Type
+      value: application/json
+  auth:
+    type: bearer
+    token: "{{golog_token}}"
+  body:
+    type: json
+    data: |
+      {
+        "legalName": "Cultiva Logistica Agricola",
+        "cnpjCpf": "91482736000107",
+        "phoneNumber": "(47)33221100",
+        "email": "logistica@cultiva.com",
+        "companyType": "TENANT_HEADQUARTER",
+        "cep": "89010025",
+        "street": "Rua Quinze de Novembro",
+        "number": "1000",
+        "district": "Centro",
+        "city": "Blumenau",
+        "state": "SC",
+        "complement": "Matriz Operacional",
+        "latitude": "-26.9187",
+        "longitude": "-49.0660",
+        "adminName": "Administrador Cultiva",
+        "adminEmail": "operacoes@cultiva.com",
+        "adminPassword": "Password123!",
+        "adminCpf": "61839274069"
+      }
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        if (res.getStatus() === 200 || res.getStatus() === 201) {
+          const body = res.getBody();
+          if (body && body.id) {
+            bru.setEnvVar('golog_tenant_id', body.id, { persist: true });
+            bru.setEnvVar('golog_company_id', body.id, { persist: true });
+          }
+        }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

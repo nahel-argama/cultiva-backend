@@ -45,4 +45,18 @@ class ConfigTest extends TestCase
         $this->assertSame('Secret123!', $config->getPassword());
         $this->assertSame(15, $config->getTimeout());
     }
+
+    public function test_should_return_configured_tenant_id_or_null_when_empty(): void
+    {
+        $configRepo = Mockery::mock(ConfigRepository::class, function (MockInterface $mock) {
+            $mock->shouldReceive('get')
+                ->with('services.golog.tenant_id')
+                ->andReturn('t0000000-0000-0000-0000-000000000001', '');
+        });
+
+        $sut = new Config($configRepo);
+
+        $this->assertSame('t0000000-0000-0000-0000-000000000001', $sut->getTenantId());
+        $this->assertNull($sut->getTenantId());
+    }
 }

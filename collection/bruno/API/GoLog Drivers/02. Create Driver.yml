@@ -11,17 +11,17 @@ http:
       value: application/json
     - name: Content-Type
       value: application/json
-  auth:
-    type: bearer
-    token: "{{access_token}}"
   body:
     type: json
     data: |
       {
-        "cnh_number": "12345678901",
-        "cnh_expiration": "2028-12-31",
-        "cost_per_hour": 45.0
+        "cnh_number": "41827395646",
+        "cnh_expiration": "2029-08-15",
+        "cost_per_hour": 48.0
       }
+  auth:
+    type: bearer
+    token: "{{access_token}}"
 
 runtime:
   scripts:

@@ -43,6 +43,7 @@ return [
         'base_url' => env('GOLOG_BASE_URL', 'http://147.15.18.21:8081'),
         'email' => env('GOLOG_EMAIL', 'admin@golog.com'),
         'password' => env('GOLOG_PASSWORD', 'Password123!'),
+        'tenant_id' => env('GOLOG_TENANT_ID'),
         'timeout' => env('GOLOG_TIMEOUT', 10),
     ],
 

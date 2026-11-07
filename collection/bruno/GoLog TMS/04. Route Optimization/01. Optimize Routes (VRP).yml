@@ -19,11 +19,17 @@ http:
     data: |
       {
         "shipmentIds": [
-          "{{golog_pickup_shipment_id}}",
-          "{{golog_dropoff_shipment_id}}"
+          "cada15a4-263a-4e7f-b4c7-7f7214fd2889",
+          "4afbc298-593f-4061-a1c8-3138b779c446",
+          "6cfea14a-403f-4a34-8c79-c48ac5a4ec08",
+          "2c7a2ad5-9ab7-4537-bd77-a1a661a75c85",
+          "4b0d4902-ae0f-4039-870c-72d545f7b244",
+          "47de297e-2c12-4412-954e-c7bbcce17310"
         ],
         "workScheduleIds": [
-          "{{golog_work_schedule_id}}"
+          "a6d6156e-39f8-4156-a208-d32e0a578def",
+          "0b71d952-5754-48ca-982f-ebf5dc53d0ae",
+          "3197e9b3-686a-41f0-8905-c60768db49be"
         ],
         "routePriority": "TEMPO"
       }

@@ -67,6 +67,9 @@ final class StoreDriverTest extends TestCase
             'golog_driver_id' => '22222222-3333-4444-5555-666666666666',
         ]);
 
+        Http::assertSent(fn ($request): bool => $request->url() === 'http://golog.test/driver'
+            && $request['cnhExpiration'] === '31/12/2028');
+
         $driver->refresh();
         $this->assertSame(GoLogDriverStep::TRACTOR, $driver->getStoppedStep());
     }

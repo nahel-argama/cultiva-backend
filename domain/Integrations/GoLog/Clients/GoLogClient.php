@@ -16,13 +16,16 @@ use Cultiva\Integrations\GoLog\DTO\GoLogTransportTypeResponseDTO;
 use Cultiva\Integrations\GoLog\DTO\GoLogUserResponseDTO;
 use Cultiva\Integrations\GoLog\DTO\GoLogWorkScheduleResponseDTO;
 use Cultiva\Integrations\GoLog\Enums\GoLogFuelType;
+use Cultiva\Integrations\GoLog\Enums\GoLogRoutePriority;
 use Cultiva\Integrations\GoLog\Enums\GoLogUserProfile;
 use Cultiva\Integrations\GoLog\Enums\GoLogVehicleStatus;
 use Cultiva\Integrations\GoLog\Enums\GoLogWorkScheduleStatus;
 use Illuminate\Http\Client\Factory as HttpFactory;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\Response;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 
 class GoLogClient
 {
@@ -51,6 +54,12 @@ class GoLogClient
 
     public function getCompanyId(): string
     {
+        $tenantId = $this->config->getTenantId();
+
+        if ($tenantId !== null) {
+            return $tenantId;
+        }
+
         return $this->getAuthSession()->companyId;
     }
 
@@ -138,7 +147,7 @@ class GoLogClient
         $payload = [
             'userId' => $userId,
             'cnhNumber' => $cnhNumber,
-            'cnhExpiration' => $cnhExpiration,
+            'cnhExpiration' => Carbon::createFromFormat('Y-m-d', $cnhExpiration)->format('d/m/Y'),
             'costPerHour' => $costPerHour,
         ];
 
@@ -203,33 +212,54 @@ class GoLogClient
             'driverId' => $driverId,
             'equipamentGroupId' => $equipamentGroupId,
             'scheduleDate' => $scheduleDate,
-            'startWorkday' => [
-                'hour' => $startHour,
-                'minute' => $startMinute,
-                'second' => 0,
-                'nano' => 0,
-            ],
-            'endWorkday' => [
-                'hour' => $endHour,
-                'minute' => $endMinute,
-                'second' => 0,
-                'nano' => 0,
-            ],
+            'startWorkday' => sprintf('%02d:%02d:00', $startHour, $startMinute),
+            'endWorkday' => sprintf('%02d:%02d:00', $endHour, $endMinute),
             'status' => $status->value,
         ];
 
         $response = $this->post('workSchedule', $payload, 'Failed to create work schedule in GoLog');
+        $data = $response->json();
 
-        return GoLogWorkScheduleResponseDTO::fromArray($response->json());
+        if (is_array($data) && isset($data['id'])) {
+            return GoLogWorkScheduleResponseDTO::fromArray($data);
+        }
+
+        return $this->findWorkSchedule($driverId, $scheduleDate);
+    }
+
+    private function findWorkSchedule(string $driverId, string $scheduleDate): GoLogWorkScheduleResponseDTO
+    {
+        $response = $this->authenticatedRequest()->get('workSchedule');
+
+        Log::info('GoLog API response', [
+            'endpoint' => 'workSchedule',
+            'status' => $response->status(),
+            'body' => $response->json() ?? $response->body(),
+        ]);
+
+        if (! $response->successful()) {
+            $this->throwFailedRequest('Failed to fetch work schedules from GoLog', $response);
+        }
+
+        /** @var array<int, array<string, mixed>> $schedules */
+        $schedules = $response->json();
+
+        foreach (array_reverse($schedules) as $schedule) {
+            if (($schedule['driver']['id'] ?? null) === $driverId && ($schedule['scheduleDate'] ?? null) === $scheduleDate) {
+                return GoLogWorkScheduleResponseDTO::fromArray($schedule);
+            }
+        }
+
+        throw new CultivaException(502, 'Created work schedule was not returned by GoLog.');
     }
 
     /**
-     * @param array<int, GoLogInvoiceImportItemDTO|array<string, mixed>> $invoices
+     * @param array<int, GoLogInvoiceImportItemDTO> $invoices
      */
     public function importInvoicesJson(array $invoices): GoLogInvoiceImportResponseDTO
     {
         $payload = array_map(
-            static fn(GoLogInvoiceImportItemDTO|array $item): array => $item instanceof GoLogInvoiceImportItemDTO ? $item->toArray() : $item,
+            static fn(GoLogInvoiceImportItemDTO $item): array => $item->toArray(),
             $invoices
         );
 
@@ -241,11 +271,35 @@ class GoLogClient
     }
 
     /**
+     * @param array<int, string> $shipmentIds
+     * @param array<int, string> $workScheduleIds
+     */
+    public function optimizeRoutes(
+        array $shipmentIds,
+        array $workScheduleIds,
+        GoLogRoutePriority $routePriority = GoLogRoutePriority::TEMPO,
+    ): string {
+        $response = $this->post('api-route-optimization', [
+            'shipmentIds' => $shipmentIds,
+            'workScheduleIds' => $workScheduleIds,
+            'routePriority' => $routePriority->value,
+        ], 'Failed to optimize routes in GoLog');
+
+        return $response->body();
+    }
+
+    /**
      * @param array<string, mixed> $payload
      */
     private function post(string $endpoint, array $payload, string $errorMessage): Response
     {
         $response = $this->authenticatedRequest()->post($endpoint, $payload);
+
+        Log::info('GoLog API response', [
+            'endpoint' => $endpoint,
+            'status' => $response->status(),
+            'body' => $response->json() ?? $response->body(),
+        ]);
 
         if (! $response->successful()) {
             $this->throwFailedRequest($errorMessage, $response);
@@ -256,10 +310,20 @@ class GoLogClient
 
     private function authenticatedRequest(): PendingRequest
     {
-        return $this->http->baseUrl($this->config->getBaseUrl())
+        $request = $this->http->baseUrl($this->config->getBaseUrl())
             ->timeout($this->config->getTimeout())
             ->acceptJson()
             ->withToken($this->getToken());
+
+        $tenantId = $this->config->getTenantId();
+
+        if ($tenantId !== null) {
+            $request = $request->withHeaders([
+                'X-Tenant-Id' => $tenantId,
+            ]);
+        }
+
+        return $request;
     }
 
     private function throwFailedRequest(string $message, Response $response): void

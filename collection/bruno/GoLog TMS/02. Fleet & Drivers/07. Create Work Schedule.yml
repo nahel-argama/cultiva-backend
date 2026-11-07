@@ -20,19 +20,9 @@ http:
       {
         "driverId": "{{golog_driver_id}}",
         "equipamentGroupId": "{{golog_equipament_group_id}}",
-        "scheduleDate": "2026-11-02",
-        "startWorkday": {
-          "hour": 8,
-          "minute": 0,
-          "second": 0,
-          "nano": 0
-        },
-        "endWorkday": {
-          "hour": 18,
-          "minute": 0,
-          "second": 0,
-          "nano": 0
-        },
+        "scheduleDate": "2026-11-10",
+        "startWorkday": "08:00:00",
+        "endWorkday": "18:00:00",
         "status": "ATIVO"
       }
 
@@ -40,7 +30,7 @@ runtime:
   scripts:
     - type: after-response
       code: |-
-        if (res.getStatus() === 200) {
+        if (res.getStatus() === 200 || res.getStatus() === 201) {
           const body = res.getBody();
           if (body && body.id) {
             bru.setEnvVar('golog_work_schedule_id', body.id, { persist: true });
