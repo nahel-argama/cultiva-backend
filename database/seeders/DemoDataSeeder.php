@@ -20,7 +20,7 @@ use Illuminate\Support\Facades\DB;
 
 class DemoDataSeeder extends Seeder
 {
-    private const DEMO_PASSWORD = 'cultiva123';
+    private const DEMO_PASSWORD = 'teste@123';
 
     private const PRODUCTS = [
         'Frutas' => ['Abacate', 'Banana', 'Goiaba', 'Laranja', 'Limão', 'Mamão', 'Manga', 'Uva'],
@@ -53,8 +53,13 @@ class DemoDataSeeder extends Seeder
 
     private function removeExistingDemoData(): void
     {
+        $seedEmails = [
+            ...array_map(static fn (int $number): string => sprintf('produtor%d@gmail.com', $number), range(1, 25)),
+            ...array_map(static fn (int $number): string => sprintf('fornecedor%d@gmail.com', $number), range(1, 50)),
+        ];
         $userIds = DB::table('users')
             ->where('email', 'like', 'demo.%@cultiva.test')
+            ->orWhereIn('email', $seedEmails)
             ->pluck('id');
         $companyIds = DB::table('companies')->whereIn('user_id', $userIds)->pluck('id');
         $producerIds = DB::table('producers')->whereIn('company_id', $companyIds)->pluck('id');
@@ -81,7 +86,7 @@ class DemoDataSeeder extends Seeder
 
         foreach (range(1, 25) as $number) {
             $user = UserFactory::new()->create([
-                'email' => sprintf('demo.producer.%02d@cultiva.test', $number),
+                'email' => sprintf('produtor%d@gmail.com', $number),
                 'password' => self::DEMO_PASSWORD,
                 'profile_type' => ProfileType::PRODUCER,
             ]);
@@ -99,7 +104,7 @@ class DemoDataSeeder extends Seeder
 
         foreach (range(1, 50) as $number) {
             $user = UserFactory::new()->retailer()->create([
-                'email' => sprintf('demo.retailer.%02d@cultiva.test', $number),
+                'email' => sprintf('fornecedor%d@gmail.com', $number),
                 'password' => self::DEMO_PASSWORD,
             ]);
             $company = CompanyFactory::new()->create(['user_id' => $user->id]);
