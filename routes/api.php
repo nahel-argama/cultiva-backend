@@ -12,6 +12,7 @@ Route::group([
     Route::middleware(['auth:sanctum', 'ability:access', 'verified'])
         ->group(function (): void {
             require __DIR__.'/api/offers.php';
+            require __DIR__.'/api/harvest-forecasts.php';
             require __DIR__.'/api/purchases.php';
             require __DIR__.'/api/wishlist.php';
             require __DIR__.'/api/delivery.php';

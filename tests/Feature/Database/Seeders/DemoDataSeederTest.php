@@ -35,6 +35,11 @@ class DemoDataSeederTest extends TestCase
         $this->assertSame(25, DB::table('users')->where('email', 'like', 'produtor%@gmail.com')->count());
         $this->assertSame(50, DB::table('users')->where('email', 'like', 'fornecedor%@gmail.com')->count());
         $this->assertSame(200, DB::table('offers')->whereIn('producer_id', $producerIds)->count());
+        $this->assertSame(200, DB::table('harvest_forecasts')->whereIn('producer_id', $producerIds)->count());
+        $this->assertSame(200, DB::table('harvest_forecasts')
+            ->whereIn('producer_id', $producerIds)
+            ->whereDate('end_date', '>=', today())
+            ->count());
         $this->assertSame(250, DB::table('purchases')->whereIn('retailer_id', $retailerIds)->count());
         $this->assertSame(500, DB::table('wishlist_items')->whereIn('retailer_id', $retailerIds)->count());
         $this->assertSame(25, DB::table('purchases')->whereIn('producer_id', $producerIds)->distinct('producer_id')->count('producer_id'));

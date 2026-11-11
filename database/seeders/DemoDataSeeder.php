@@ -10,6 +10,7 @@ use Cultiva\Models\Producer\Producer;
 use Cultiva\Models\Purchase\Purchase;
 use Cultiva\Models\Retailer\Retailer;
 use Database\Factories\CompanyFactory;
+use Database\Factories\HarvestForecastFactory;
 use Database\Factories\OfferFactory;
 use Database\Factories\ProducerFactory;
 use Database\Factories\RetailerFactory;
@@ -45,6 +46,7 @@ class DemoDataSeeder extends Seeder
             $producers = $this->createProducers();
             $retailers = $this->createRetailers();
             $offers = $this->createOffers($producers, $categories);
+            $this->createHarvestForecasts($offers);
 
             $this->createPurchases(array_slice($retailers, 0, 25), $offers);
             $this->createWishlistItems($retailers);
@@ -141,6 +143,23 @@ class DemoDataSeeder extends Seeder
         }
 
         return $offers;
+    }
+
+    /** @param list<Offer> $offers */
+    private function createHarvestForecasts(array $offers): void
+    {
+        foreach ($offers as $index => $offer) {
+            $startDate = now()->addDays(7 + ($index % 45));
+
+            HarvestForecastFactory::new()->create([
+                'producer_id' => $offer->producer_id,
+                'source_product_id' => $offer->source_product_id,
+                'product_name' => $offer->product_name,
+                'quantity' => 100 + ($index % 5) * 50,
+                'start_date' => $startDate->toDateString(),
+                'end_date' => $startDate->copy()->addDays($index % 3 === 0 ? 14 : 0)->toDateString(),
+            ]);
+        }
     }
 
     /** @param list<Retailer> $retailers

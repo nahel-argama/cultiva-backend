@@ -1,0 +1,184 @@
+openapi: 3.1.0
+info:
+  title: Cultiva Harvest Forecast API
+  version: 1.0.0
+  description: Backend contract for producer harvest forecasts and buyer calendar queries.
+servers:
+  - url: /
+security:
+  - sanctum: []
+paths:
+  /v1/harvest-forecasts:
+    get:
+      operationId: listHarvestForecasts
+      summary: List future harvest forecasts visible to producers and buyers
+      parameters:
+        - name: source_product_id
+          in: query
+          schema: { type: string }
+        - name: date_from
+          in: query
+          schema: { type: string, format: date }
+        - name: date_to
+          in: query
+          schema: { type: string, format: date }
+        - name: page
+          in: query
+          schema: { type: integer, minimum: 1, default: 1 }
+        - name: per_page
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 100, default: 15 }
+      responses:
+        "200":
+          description: Paginated future forecasts, matching all supplied filters
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, links, meta]
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: "#/components/schemas/HarvestForecast" }
+                  links: { type: object }
+                  meta: { type: object }
+        "401": { description: Authentication required }
+        "403": { description: Profile cannot access this operation }
+        "422": { description: Invalid filters or pagination values }
+    post:
+      operationId: createHarvestForecast
+      summary: Publish a producer-confirmed forecast
+      description: Producer profile only. This does not create or modify a stock offer.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/HarvestForecastInput" }
+      responses:
+        "201":
+          description: Forecast created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/HarvestForecastResponse" }
+        "401": { description: Authentication required }
+        "403": { description: Producer profile required }
+        "422": { description: Invalid input or product not found }
+        "503": { description: Product Source unavailable }
+  /v1/harvest-forecasts/{forecast_id}:
+    parameters:
+      - name: forecast_id
+        in: path
+        required: true
+        schema: { type: integer, minimum: 1 }
+    patch:
+      operationId: updateHarvestForecast
+      summary: Update a forecast owned by the producer
+      description: Producer profile only; ownership is enforced.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/HarvestForecastPatch" }
+      responses:
+        "200":
+          description: Forecast updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/HarvestForecastResponse" }
+        "401": { description: Authentication required }
+        "403": { description: Producer profile required }
+        "404": { description: Forecast not found or not owned by caller }
+        "422": { description: Invalid input or product not found }
+        "503": { description: Product Source unavailable }
+    delete:
+      operationId: deleteHarvestForecast
+      summary: Remove a forecast owned by the producer
+      description: Producer profile only; ownership is enforced. No stock or offer is affected.
+      responses:
+        "204": { description: Forecast removed }
+        "401": { description: Authentication required }
+        "403": { description: Producer profile required }
+        "404": { description: Forecast not found or not owned by caller }
+  /v1/harvest-season-periods:
+    get:
+      operationId: listHarvestSeasonPeriods
+      summary: List general seasonal references for a product
+      description: Producer profile only. References are not published forecasts and are not location-specific.
+      parameters:
+        - name: source_product_id
+          in: query
+          required: true
+          schema: { type: string, minLength: 1 }
+      responses:
+        "200":
+          description: Zero or more reference periods for the product
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: "#/components/schemas/HarvestSeasonPeriod" }
+        "401": { description: Authentication required }
+        "403": { description: Producer profile required }
+        "422": { description: Product identifier missing or invalid }
+        "503": { description: Product Source unavailable }
+components:
+  securitySchemes:
+    sanctum:
+      type: http
+      scheme: bearer
+  schemas:
+    HarvestForecastInput:
+      type: object
+      required: [source_product_id, quantity, start_date, end_date]
+      properties:
+        source_product_id: { type: string, minLength: 1, maxLength: 255 }
+        quantity: { type: integer, minimum: 1 }
+        start_date: { type: string, format: date }
+        end_date: { type: string, format: date }
+      description: For a single-day forecast, start_date equals end_date. Quantity is total for the full interval.
+    HarvestForecastPatch:
+      type: object
+      minProperties: 1
+      properties:
+        source_product_id: { type: string, minLength: 1, maxLength: 255 }
+        quantity: { type: integer, minimum: 1 }
+        start_date: { type: string, format: date }
+        end_date: { type: string, format: date }
+    HarvestForecast:
+      type: object
+      required: [id, product, quantity, start_date, end_date, producer]
+      properties:
+        id: { type: integer }
+        product:
+          type: object
+          required: [source_product_id, name]
+          properties:
+            source_product_id: { type: string }
+            name: { type: string }
+        quantity: { type: integer, minimum: 1 }
+        start_date: { type: string, format: date }
+        end_date: { type: string, format: date }
+        producer:
+          type: object
+          required: [name, state]
+          properties:
+            name: { type: string }
+            state: { type: string, minLength: 2, maxLength: 2 }
+    HarvestForecastResponse:
+      type: object
+      required: [data]
+      properties:
+        data: { $ref: "#/components/schemas/HarvestForecast" }
+    HarvestSeasonPeriod:
+      type: object
+      required: [source_product_id, product_name, start_month, end_month, source]
+      properties:
+        source_product_id: { type: string }
+        product_name: { type: string }
+        start_month: { type: integer, minimum: 1, maximum: 12 }
+        end_month: { type: integer, minimum: 1, maximum: 12 }
+        source: { type: string }

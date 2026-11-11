@@ -4,6 +4,7 @@ namespace Cultiva\Models\Producer;
 
 use Carbon\CarbonImmutable;
 use Cultiva\Models\Company\Company;
+use Cultiva\Models\HarvestForecast\HarvestForecast;
 use Cultiva\Models\Offer\Offer;
 use Cultiva\Models\Producer\Enums\ActivitySegment;
 use Database\Factories\ProducerFactory;
@@ -55,5 +56,13 @@ class Producer extends Model
     public function offers(): HasMany
     {
         return $this->hasMany(Offer::class);
+    }
+
+    /**
+     * @return HasMany<HarvestForecast, $this>
+     */
+    public function harvestForecasts(): HasMany
+    {
+        return $this->hasMany(HarvestForecast::class);
     }
 }
