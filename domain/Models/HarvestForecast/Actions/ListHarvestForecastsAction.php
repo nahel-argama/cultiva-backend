@@ -13,6 +13,7 @@ final class ListHarvestForecastsAction
         return HarvestForecast::query()
             ->with('producer.company.address')
             ->whereDate('end_date', '>=', today())
+            ->when($data->producerId !== null, fn ($query) => $query->where('producer_id', $data->producerId))
             ->when($data->sourceProductId, fn ($query) => $query->where('source_product_id', $data->sourceProductId))
             ->when($data->dateFrom, function ($query) use ($data): void {
                 $query->whereDate('start_date', '<=', $data->dateTo)

@@ -11,7 +11,8 @@ paths:
   /v1/harvest-forecasts:
     get:
       operationId: listHarvestForecasts
-      summary: List future harvest forecasts visible to producers and buyers
+      summary: List future forecasts; producers see their own and buyers see all
+      description: Producer profile only receives forecasts owned by the authenticated producer. Retailer profile receives all future forecasts.
       parameters:
         - name: source_product_id
           in: query

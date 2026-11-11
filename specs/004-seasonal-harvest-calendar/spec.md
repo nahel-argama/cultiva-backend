@@ -39,6 +39,7 @@ Como comprador, quero consultar previsões de todos os produtores e filtrar por 
 2. **Given** filtros de produto e período, **When** o comprador aplica ambos, **Then** vê somente previsões do produto escolhido cujo intervalo se sobreponha ao período consultado.
 3. **Given** uma previsão dentro do período consultado, **When** o comprador consulta o resultado, **Then** vê produto, quantidade total estimada para a data ou período, produtor e estado.
 4. **Given** mais previsões que cabem em uma resposta, **When** o comprador navega pelos resultados, **Then** pode alcançar todas as correspondências sem receber itens fora dos filtros.
+5. **Given** previsões futuras de diferentes produtores, **When** um produtor consulta o calendário, **Then** vê somente as previsões cadastradas por ele.
 
 ### User Story 3 - Atualizar e expirar previsões (Priority: P2)
 
@@ -81,6 +82,7 @@ Como produtor, quero corrigir previsões publicadas; e como comprador, quero ver
 - **FR-010**: Previsões cujo período terminou MUST deixar de aparecer nas consultas de compradores.
 - **FR-011**: Previsões MUST permanecer separadas do estoque e das ofertas; criação, edição, consulta e remoção de previsão MUST NOT alterar disponibilidade para compra.
 - **FR-012**: Sistema MUST NOT gerar compras ou notificações a partir de previsões ou de interesse visual do comprador.
+- **FR-013**: Ao consultar o calendário, produtor MUST receber somente suas próprias previsões; comprador MUST continuar recebendo previsões de todos os produtores.
 
 ### Key Entities *(include if feature involves data)*
 
@@ -98,6 +100,7 @@ Como produtor, quero corrigir previsões publicadas; e como comprador, quero ver
 - **SC-003**: 100% das previsões com período encerrado ficam ausentes dos resultados de compradores.
 - **SC-004**: Criar, editar ou remover previsão não altera estoque nem disponibilidade de ofertas em nenhum cenário coberto.
 - **SC-005**: Nenhum produtor consegue modificar ou remover previsões pertencentes a outro produtor.
+- **SC-006**: 100% das consultas de produtores contêm somente previsões do próprio produtor, enquanto consultas de compradores mantêm visibilidade global.
 
 ## Assumptions
 

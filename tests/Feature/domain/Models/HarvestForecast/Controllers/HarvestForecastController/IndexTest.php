@@ -3,6 +3,7 @@
 namespace Tests\Feature\domain\Models\HarvestForecast\Controllers\HarvestForecastController;
 
 use Database\Factories\HarvestForecastFactory;
+use Database\Factories\ProducerFactory;
 use Database\Factories\RetailerFactory;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
@@ -75,6 +76,24 @@ class IndexTest extends TestCase
             ->assertJsonPath('meta.total', 2)
             ->assertJsonPath('meta.per_page', 1)
             ->assertJsonCount(1, 'data');
+    }
+
+    public function test_producer_should_only_see_own_forecasts(): void
+    {
+        // Arrange
+        $producer = ProducerFactory::new()->create();
+        $ownForecast = HarvestForecastFactory::new()->create(['producer_id' => $producer->id]);
+        $otherProducer = ProducerFactory::new()->create();
+        HarvestForecastFactory::new()->create(['producer_id' => $otherProducer->id]);
+        Sanctum::actingAs($producer->company->user, ['access']);
+
+        // Action
+        $response = $this->getJson('/v1/harvest-forecasts');
+
+        // Assert
+        $response->assertOk()
+            ->assertJsonPath('meta.total', 1)
+            ->assertJsonPath('data.0.id', $ownForecast->id);
     }
 
     public function test_should_reject_invalid_pagination(): void

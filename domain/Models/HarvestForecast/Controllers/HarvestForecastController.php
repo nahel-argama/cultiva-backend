@@ -39,6 +39,9 @@ final class HarvestForecastController extends Controller
         $filters = $request->validated();
         $filters['page'] = $request->integer('page', 1);
         $filters['per_page'] = $request->integer('per_page', 15);
+        if ($request->user()->isProducer()) {
+            $filters['producer_id'] = $request->user()->producer()->firstOrFail()->id;
+        }
         $dto = ListHarvestForecastsDTO::from($filters);
         $forecasts = $action->execute($dto);
 

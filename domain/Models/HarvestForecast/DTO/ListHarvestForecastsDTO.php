@@ -10,9 +10,10 @@ final readonly class ListHarvestForecastsDTO
         public ?string $dateTo,
         public int $page,
         public int $perPage,
+        public ?int $producerId,
     ) {}
 
-    /** @param array{source_product_id?: string, date_from?: string, date_to?: string, page: int, per_page: int} $data */
+    /** @param array{source_product_id?: string, date_from?: string, date_to?: string, page: int, per_page: int, producer_id?: int} $data */
     public static function from(array $data): self
     {
         return new self(
@@ -21,6 +22,7 @@ final readonly class ListHarvestForecastsDTO
             dateTo: $data['date_to'] ?? null,
             page: $data['page'],
             perPage: $data['per_page'],
+            producerId: $data['producer_id'] ?? null,
         );
     }
 }

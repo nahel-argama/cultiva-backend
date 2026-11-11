@@ -83,6 +83,8 @@
 - [X] T023 Run all backend tests with `docker compose exec php php artisan test`
 - [X] T024 Run quickstart validation with Feature tests and confirm the database safety test resolves the isolated `cultiva_test`, never development database `app`
 - [X] T025 Prepare frontend handoff with endpoint contracts, season suggestion behavior, filters, producer/state fields, and non-goals in `specs/004-seasonal-harvest-calendar/frontend-handoff.md`
+- [X] T026 [US2] Add producer-only visibility regression test in `tests/Feature/domain/Models/HarvestForecast/Controllers/HarvestForecastController/IndexTest.php`
+- [X] T027 [US2] Scope producer list to authenticated producer and add visible producer notice in the frontend calendar
 
 ## Dependencies & Execution Order
 

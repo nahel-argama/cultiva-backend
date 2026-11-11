@@ -32,6 +32,7 @@ Resposta usa paginação Laravel (`data`, `links`, `meta`). Cada item contém:
 ```
 
 Previsões com `end_date` anterior a hoje não aparecem. Não há filtro por estado.
+Produtores recebem somente as próprias previsões; compradores recebem previsões de todos os produtores.
 
 ### Consultar sugestão de safra — produtor
 
