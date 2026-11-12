@@ -10,6 +10,7 @@ final class StorePurchaseRequest extends FormRequest
     {
         return [
             'quantity' => ['required', 'integer', 'min:1'],
+            'expected_unit_price' => ['sometimes', 'numeric', 'min:0'],
         ];
     }
 }

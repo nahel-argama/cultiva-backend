@@ -32,6 +32,7 @@ class StoreTest extends TestCase
         // Action
         $response = $this->postJson('/v1/offers/'.$offer->id.'/purchase', [
             'quantity' => 30,
+            'expected_unit_price' => '10.00',
         ]);
 
         // Assert
@@ -61,6 +62,26 @@ class StoreTest extends TestCase
             'reserved_quantity' => 30,
             'status' => OfferStatus::ACTIVE->value,
         ]);
+    }
+
+    public function test_should_reject_changed_price_without_reserving_stock(): void
+    {
+        $retailer = RetailerFactory::new()->create();
+        $offer = OfferFactory::new()->create([
+            'unit_price' => '12.00',
+            'total_quantity' => 10,
+            'reserved_quantity' => 0,
+            'status' => OfferStatus::ACTIVE,
+        ]);
+        Sanctum::actingAs($retailer->company->user, ['access']);
+
+        $this->postJson('/v1/offers/'.$offer->id.'/purchase', [
+            'quantity' => 1,
+            'expected_unit_price' => '10.00',
+        ])->assertStatus(409);
+
+        $this->assertDatabaseCount('purchases', 0);
+        $this->assertDatabaseHas('offers', ['id' => $offer->id, 'reserved_quantity' => 0]);
     }
 
     public function test_should_inactivate_offer_when_purchase_consumes_remaining_quantity(): void

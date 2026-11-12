@@ -25,6 +25,10 @@ final class CreatePurchaseAction
                 throw new CultivaException(409, Lang::get('purchases.insufficient_stock'));
             }
 
+            if ($data->expectedUnitPrice !== null && (int) round($data->expectedUnitPrice * 100) !== (int) round($offer->unit_price * 100)) {
+                throw new CultivaException(409, 'O preço da oferta mudou. Revise o pedido antes de continuar.');
+            }
+
             $totalPrice = $this->calculateTotalPrice($offer->unit_price, $data->quantity);
             $reservedQuantity = $offer->reserved_quantity + $data->quantity;
 
