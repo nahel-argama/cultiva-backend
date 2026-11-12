@@ -7,6 +7,7 @@ use Cultiva\Models\Offer\Enums\OfferStatus;
 use Database\Factories\OfferFactory;
 use Database\Factories\ProducerFactory;
 use Database\Factories\RetailerFactory;
+use Database\Factories\WishlistItemFactory;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
@@ -177,4 +178,21 @@ class AvailableIndexTest extends TestCase
             ->assertJsonPath('data.1.distance_km', 11.29);
         $this->assertCount(2, $response->json('data'));
     }
+    public function test_should_prioritize_retailer_wishlist_before_distance_and_pagination(): void
+    {
+        $retailer = RetailerFactory::new()->create();
+        $retailer->company->address->update(['coordinate' => 'POINT(-49.0629788 -26.9244749)']);
+        $near = ProducerFactory::new()->create();
+        $near->company->address->update(['coordinate' => 'POINT(-49.0700000 -26.9300000)']);
+        $far = ProducerFactory::new()->create();
+        $far->company->address->update(['coordinate' => 'POINT(-49.1500000 -26.9900000)']);
+        $nearOffer = OfferFactory::new()->create(['producer_id' => $near->id, 'source_product_id' => 'near', 'status' => OfferStatus::ACTIVE, 'total_quantity' => 10, 'reserved_quantity' => 0]);
+        $farOffer = OfferFactory::new()->create(['producer_id' => $far->id, 'source_product_id' => 'wanted', 'status' => OfferStatus::ACTIVE, 'total_quantity' => 10, 'reserved_quantity' => 0]);
+        WishlistItemFactory::new()->create(['retailer_id' => $retailer->id, 'source_product_id' => 'wanted']);
+        Sanctum::actingAs($retailer->company->user, ['access']);
+
+        $this->getJson('/v1/offers?per_page=1')->assertOk()->assertJsonPath('data.0.id', $farOffer->id)->assertJsonPath('data.0.is_in_wishlist', true);
+        $this->getJson('/v1/offers?per_page=1&page=2')->assertOk()->assertJsonPath('data.0.id', $nearOffer->id)->assertJsonPath('data.0.is_in_wishlist', false);
+    }
+
 }

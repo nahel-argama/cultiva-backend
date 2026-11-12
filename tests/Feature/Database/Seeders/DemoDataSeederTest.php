@@ -27,14 +27,19 @@ class DemoDataSeederTest extends TestCase
         $retailerIds = DB::table('retailers')
             ->join('companies', 'companies.id', '=', 'retailers.company_id')
             ->join('users', 'users.id', '=', 'companies.user_id')
-            ->where('users.email', 'like', 'fornecedor%@gmail.com')
+            ->where('users.email', 'like', 'varejista%@gmail.com')
             ->pluck('retailers.id');
 
         $this->assertCount(25, $producerIds);
         $this->assertCount(50, $retailerIds);
         $this->assertSame(25, DB::table('users')->where('email', 'like', 'produtor%@gmail.com')->count());
-        $this->assertSame(50, DB::table('users')->where('email', 'like', 'fornecedor%@gmail.com')->count());
+        $this->assertSame(50, DB::table('users')->where('email', 'like', 'varejista%@gmail.com')->count());
         $this->assertSame(200, DB::table('offers')->whereIn('producer_id', $producerIds)->count());
+        $this->assertSame(0, DB::table('offers')->whereIn('producer_id', $producerIds)
+            ->whereNotExists(fn ($query) => $query->selectRaw('1')->from('wishlist_items')
+                ->whereColumn('wishlist_items.source_product_id', 'offers.source_product_id')
+                ->whereColumn('wishlist_items.product_name', 'offers.product_name'))
+            ->count());
         $this->assertSame(200, DB::table('harvest_forecasts')->whereIn('producer_id', $producerIds)->count());
         $this->assertSame(200, DB::table('harvest_forecasts')
             ->whereIn('producer_id', $producerIds)

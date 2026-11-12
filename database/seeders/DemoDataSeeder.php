@@ -27,8 +27,31 @@ class DemoDataSeeder extends Seeder
         'Frutas' => ['Abacate', 'Banana', 'Goiaba', 'Laranja', 'Limão', 'Mamão', 'Manga', 'Uva'],
         'Legumes' => ['Abóbora', 'Berinjela', 'Brócolis', 'Cebola', 'Cenoura', 'Pepino', 'Tomate'],
         'Verduras' => ['Alface', 'Couve'],
-        'Tubérculos e raízes' => ['Batata-doce', 'Mandioca'],
+        'Tubérculos e raízes' => ['Batata Doce', 'Mandioca'],
         'Grãos e cereais' => ['Feijão'],
+    ];
+
+    private const PRODUCT_IDS = [
+        'Abacate' => '116',
+        'Banana' => '642',
+        'Goiaba' => '84',
+        'Laranja' => '188',
+        'Limão' => '405',
+        'Mamão' => '492',
+        'Manga' => '75',
+        'Uva' => '241',
+        'Abóbora' => '136',
+        'Berinjela' => '58',
+        'Brócolis' => '100',
+        'Cebola' => '151',
+        'Cenoura' => '94',
+        'Pepino' => '60',
+        'Tomate' => '238',
+        'Alface' => '46',
+        'Couve' => '88',
+        'Batata Doce' => '99',
+        'Mandioca' => '71',
+        'Feijão' => '9',
     ];
 
     private const WISHLIST_COUNTS = [50, 42, 38, 34, 30, 28, 26, 24, 22, 19, 19, 19, 19, 19, 19, 19, 19, 18, 18, 18];
@@ -57,7 +80,7 @@ class DemoDataSeeder extends Seeder
     {
         $seedEmails = [
             ...array_map(static fn (int $number): string => sprintf('produtor%d@gmail.com', $number), range(1, 25)),
-            ...array_map(static fn (int $number): string => sprintf('fornecedor%d@gmail.com', $number), range(1, 50)),
+            ...array_map(static fn (int $number): string => sprintf('varejista%d@gmail.com', $number), range(1, 50)),
         ];
         $userIds = DB::table('users')
             ->where('email', 'like', 'demo.%@cultiva.test')
@@ -106,7 +129,7 @@ class DemoDataSeeder extends Seeder
 
         foreach (range(1, 50) as $number) {
             $user = UserFactory::new()->retailer()->create([
-                'email' => sprintf('fornecedor%d@gmail.com', $number),
+                'email' => sprintf('varejista%d@gmail.com', $number),
                 'password' => self::DEMO_PASSWORD,
             ]);
             $company = CompanyFactory::new()->create(['user_id' => $user->id]);
@@ -132,7 +155,7 @@ class DemoDataSeeder extends Seeder
                 $offers[] = OfferFactory::new()->create([
                     'producer_id' => $producer->id,
                     'category_id' => $categories[$categoryName],
-                    'source_product_id' => sprintf('demo-%02d-%02d', $producerIndex + 1, $offerNumber),
+                    'source_product_id' => self::PRODUCT_IDS[$productName],
                     'product_name' => $productName,
                     'total_quantity' => 100,
                     'reserved_quantity' => 0,
@@ -199,7 +222,7 @@ class DemoDataSeeder extends Seeder
                 $retailerIndex = ($retailerOffset + $offset) % count($retailers);
                 WishlistItemFactory::new()->create([
                     'retailer_id' => $retailers[$retailerIndex]->id,
-                    'source_product_id' => sprintf('demo-wishlist-product-%02d', $productIndex + 1),
+                    'source_product_id' => self::PRODUCT_IDS[$productName],
                     'product_name' => $productName,
                 ]);
             }
