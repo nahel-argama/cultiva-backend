@@ -16,6 +16,8 @@ use Cultiva\Models\Offer\Resources\OfferResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Cultiva\Auth\Enums\ProfileType;
+use Illuminate\Support\Facades\DB;
 
 final class OfferController extends Controller
 {
@@ -58,6 +60,14 @@ final class OfferController extends Controller
         $user = $request->user();
 
         $result = $action->execute($user, $offer);
+        $result->load('producer.company.address');
+        if ($user->profile_type === ProfileType::RETAILER) {
+            $user->loadMissing('company.address');
+            $result->setAttribute('distance_km', DB::selectOne(
+                'SELECT ROUND((ST_Distance(?::geography, ?::geography) / 1000.0)::numeric, 2)::float AS distance_km',
+                [$user->company->address->coordinate, $result->producer->company->address->coordinate],
+            )->distance_km);
+        }
 
         return new OfferResource($result);
     }

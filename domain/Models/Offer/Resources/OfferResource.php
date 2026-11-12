@@ -14,6 +14,7 @@ final class OfferResource extends JsonResource
             'id' => $this->id,
             'source_product_id' => $this->source_product_id,
             'product_name' => $this->product_name,
+            'producer_name' => $this->when($this->relationLoaded('producer'), fn () => $this->producer->company->trade_name),
             'category' => new CategoryResource($this->category),
             'unit_price' => $this->unit_price,
             'total_quantity' => $this->total_quantity,
@@ -24,7 +25,7 @@ final class OfferResource extends JsonResource
             'harvest_date' => $this->harvest_date?->toDateString(),
             'lifespan_days' => $this->lifespan_days,
             'is_in_wishlist' => $this->whenHas('is_in_wishlist', fn (): bool => (bool) $this->is_in_wishlist),
-            'distance_km' => $this->whenHas('distance_km', fn (): float => (float) $this->distance_km),
+            'distance_km' => $this->whenHas('distance_km', fn (): ?float => $this->distance_km === null ? null : (float) $this->distance_km),
             'created_at' => $this->created_at->toISOString(),
             'updated_at' => $this->updated_at->toISOString(),
         ];

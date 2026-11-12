@@ -102,6 +102,8 @@ class ShowTest extends TestCase
         $response->assertOk()
             ->assertJsonPath('data.id', $offer->id)
             ->assertJsonPath('data.status', 'active')
+            ->assertJsonPath('data.producer_name', $offer->producer->company->trade_name)
+            ->assertJsonStructure(['data' => ['distance_km']])
             ->assertJsonPath('data.available_quantity', 10);
     }
 
