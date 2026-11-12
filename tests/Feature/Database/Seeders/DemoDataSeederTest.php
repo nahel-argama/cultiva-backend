@@ -36,6 +36,8 @@ class DemoDataSeederTest extends TestCase
         $this->assertSame(50, DB::table('users')->where('email', 'like', 'varejista%@gmail.com')->count());
         $this->assertSame(200, DB::table('offers')->whereIn('producer_id', $producerIds)->count());
         $this->assertSame(0, DB::table('offers')->whereIn('producer_id', $producerIds)
+            ->whereNotBetween('unit_price', [1, 20])->count());
+        $this->assertSame(0, DB::table('offers')->whereIn('producer_id', $producerIds)
             ->whereNotExists(fn ($query) => $query->selectRaw('1')->from('wishlist_items')
                 ->whereColumn('wishlist_items.source_product_id', 'offers.source_product_id')
                 ->whereColumn('wishlist_items.product_name', 'offers.product_name'))
@@ -46,6 +48,8 @@ class DemoDataSeederTest extends TestCase
             ->whereDate('end_date', '>=', today())
             ->count());
         $this->assertSame(250, DB::table('purchases')->whereIn('retailer_id', $retailerIds)->count());
+        $this->assertSame(0, DB::table('purchases')->whereIn('retailer_id', $retailerIds)
+            ->whereRaw('total_price != ROUND(unit_price * quantity * 1.05, 2)')->count());
         $this->assertSame(500, DB::table('wishlist_items')->whereIn('retailer_id', $retailerIds)->count());
         $this->assertSame(25, DB::table('purchases')->whereIn('producer_id', $producerIds)->distinct('producer_id')->count('producer_id'));
         $this->assertSame(25, DB::table('purchases')->whereIn('retailer_id', $retailerIds)->distinct('retailer_id')->count('retailer_id'));

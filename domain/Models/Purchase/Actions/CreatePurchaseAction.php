@@ -60,6 +60,8 @@ final class CreatePurchaseAction
     {
         $cents = (int) round($unitPrice * 100);
 
-        return ($cents * $quantity) / 100;
+        $subtotal = $cents * $quantity;
+
+        return ($subtotal + (int) round($subtotal * 0.05)) / 100;
     }
 }

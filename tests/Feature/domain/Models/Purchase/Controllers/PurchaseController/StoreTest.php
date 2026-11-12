@@ -46,7 +46,7 @@ class StoreTest extends TestCase
             ->assertJsonPath('data.product_name', 'Tomate Italiano')
             ->assertJsonPath('data.quantity', 30)
             ->assertJsonPath('data.unit_price', '10.00')
-            ->assertJsonPath('data.total_price', '300.00');
+            ->assertJsonPath('data.total_price', '315.00');
 
         $this->assertDatabaseHas('purchases', [
             'offer_id' => $offer->id,
@@ -54,7 +54,7 @@ class StoreTest extends TestCase
             'producer_id' => $offer->producer_id,
             'quantity' => 30,
             'unit_price' => '10.00',
-            'total_price' => '300.00',
+            'total_price' => '315.00',
         ]);
         $this->assertDatabaseHas('offers', [
             'id' => $offer->id,
@@ -83,7 +83,7 @@ class StoreTest extends TestCase
         // Assert
         $response->assertCreated()
             ->assertJsonPath('data.quantity', 15)
-            ->assertJsonPath('data.total_price', '187.50');
+            ->assertJsonPath('data.total_price', '196.88');
         $this->assertDatabaseHas('offers', [
             'id' => $offer->id,
             'reserved_quantity' => 20,

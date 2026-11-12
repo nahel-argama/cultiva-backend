@@ -54,6 +54,29 @@ class DemoDataSeeder extends Seeder
         'Feijão' => '9',
     ];
 
+    private const PRODUCT_PRICES = [
+        'Abacate' => '4.75',
+        'Banana' => '5.00',
+        'Goiaba' => '6.50',
+        'Laranja' => '3.75',
+        'Limão' => '7.90',
+        'Mamão' => '6.50',
+        'Manga' => '3.90',
+        'Uva' => '10.00',
+        'Abóbora' => '3.00',
+        'Berinjela' => '4.20',
+        'Brócolis' => '8.00',
+        'Cebola' => '7.25',
+        'Cenoura' => '2.50',
+        'Pepino' => '4.00',
+        'Tomate' => '10.00',
+        'Alface' => '5.70',
+        'Couve' => '6.00',
+        'Batata Doce' => '4.00',
+        'Mandioca' => '4.50',
+        'Feijão' => '8.00',
+    ];
+
     private const WISHLIST_COUNTS = [50, 42, 38, 34, 30, 28, 26, 24, 22, 19, 19, 19, 19, 19, 19, 19, 19, 18, 18, 18];
 
     public function run(): void
@@ -157,6 +180,7 @@ class DemoDataSeeder extends Seeder
                     'category_id' => $categories[$categoryName],
                     'source_product_id' => self::PRODUCT_IDS[$productName],
                     'product_name' => $productName,
+                    'unit_price' => self::PRODUCT_PRICES[$productName],
                     'total_quantity' => 100,
                     'reserved_quantity' => 0,
                     'status' => OfferStatus::ACTIVE,
@@ -195,6 +219,8 @@ class DemoDataSeeder extends Seeder
                 $offer = $offers[($retailerIndex * 10 + $purchaseIndex) % count($offers)];
                 $quantity = 1 + (($retailerIndex + $purchaseIndex) % 5);
 
+                $subtotalCents = (int) round((float) $offer->unit_price * 100) * $quantity;
+
                 Purchase::query()->create([
                     'offer_id' => $offer->id,
                     'retailer_id' => $retailer->id,
@@ -203,7 +229,7 @@ class DemoDataSeeder extends Seeder
                     'product_name' => $offer->product_name,
                     'quantity' => $quantity,
                     'unit_price' => $offer->unit_price,
-                    'total_price' => round((float) $offer->unit_price * $quantity, 2),
+                    'total_price' => ($subtotalCents + (int) round($subtotalCents * 0.05)) / 100,
                 ]);
 
                 $offer->increment('reserved_quantity', $quantity);
