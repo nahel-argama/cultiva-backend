@@ -4,11 +4,14 @@ namespace Tests\Feature\domain\Models\Offer\Controllers\OfferController;
 
 use Cultiva\Models\Category\Category;
 use Cultiva\Models\Category\Enums\Category as CategoryEnum;
+use Cultiva\Models\Offer\Offer;
 use Database\Factories\ProducerFactory;
 use Database\Factories\RetailerFactory;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
 use Laravel\Sanctum\Sanctum;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
@@ -66,6 +69,66 @@ class StoreTest extends TestCase
             'harvest_date' => $harvestDate,
             'lifespan_days' => 7,
         ]);
+    }
+
+    public function test_offer_images_are_independent_and_visible_to_retailers(): void
+    {
+        Storage::fake('public');
+        config(['services.product_source.base_url' => 'http://product-source.test/api']);
+        $fixture = require base_path('tests/Fixtures/Integrations/ProductSource/product_success.php');
+        Http::fake(['http://product-source.test/api/products/0002' => Http::response($fixture, 200)]);
+        $producer = ProducerFactory::new()->create();
+        Sanctum::actingAs($producer->company->user, ['access']);
+        $payload = [
+            'source_product_id' => '0002',
+            'category_id' => Category::query()->firstOrFail()->id,
+            'unit_price' => '12.50',
+            'total_quantity' => 20,
+            'harvest_date' => now()->addDays(5)->format('Y-m-d'),
+            'lifespan_days' => 7,
+        ];
+
+        $withImage = $this->postJson('/v1/offers', $payload + ['image' => UploadedFile::fake()->image('tomate.jpg')]);
+        $withImage->assertCreated();
+        $path = Offer::findOrFail($withImage->json('data.id'))->image_path;
+        Storage::disk('public')->assertExists($path);
+        $this->assertSame(Storage::disk('public')->url($path), $withImage->json('data.image_url'));
+
+        $otherImage = $this->postJson('/v1/offers', $payload + ['image' => UploadedFile::fake()->image('outro.jpg')]);
+        $otherImage->assertCreated();
+        $this->assertNotSame($withImage->json('data.image_url'), $otherImage->json('data.image_url'));
+
+        $withoutImage = $this->postJson('/v1/offers', $payload);
+        $withoutImage->assertCreated()->assertJsonPath('data.image_url', null);
+
+        $retailer = RetailerFactory::new()->create();
+        Sanctum::actingAs($retailer->company->user, ['access']);
+        $offers = collect($this->getJson('/v1/offers')->assertOk()->json('data'))->keyBy('id');
+        $this->assertSame(Storage::disk('public')->url($path), $offers[$withImage->json('data.id')]['image_url']);
+        $this->assertSame($otherImage->json('data.image_url'), $offers[$otherImage->json('data.id')]['image_url']);
+        $this->assertNull($offers[$withoutImage->json('data.id')]['image_url']);
+    }
+
+    public function test_offer_image_must_be_a_supported_image_under_five_megabytes(): void
+    {
+        Http::fake();
+        $producer = ProducerFactory::new()->create();
+        Sanctum::actingAs($producer->company->user, ['access']);
+        $payload = [
+            'source_product_id' => '2',
+            'category_id' => 1,
+            'unit_price' => '12.50',
+            'total_quantity' => 10,
+            'harvest_date' => now()->addDays(2)->format('Y-m-d'),
+            'lifespan_days' => 5,
+        ];
+
+        $this->postJson('/v1/offers', $payload + ['image' => UploadedFile::fake()->create('file.pdf', 10, 'application/pdf')])
+            ->assertUnprocessable()->assertJsonValidationErrors('image');
+        $this->postJson('/v1/offers', $payload + ['image' => UploadedFile::fake()->image('large.jpg')->size(5121)])
+            ->assertUnprocessable()->assertJsonValidationErrors('image');
+        $this->assertDatabaseCount('offers', 0);
+        Http::assertNothingSent();
     }
 
     public function test_should_ignore_client_status_and_unfillable_attributes(): void

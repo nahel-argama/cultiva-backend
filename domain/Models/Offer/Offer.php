@@ -49,6 +49,7 @@ class Offer extends Model
         'status',
         'harvest_date',
         'lifespan_days',
+        'image_path',
     ];
 
     #[Override]

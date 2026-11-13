@@ -1,0 +1,218 @@
+# Imagens das ofertas de demonstração
+
+Imagens obtidas no Wikimedia Commons, redimensionadas e convertidas para JPEG. Consulte cada página para informações completas sobre autoria e licença.
+
+- `1-1.jpg`: [File:Avocado Hass - single and halved.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Avocado%20Hass%20-%20single%20and%20halved.jpg) — Ivar Leidus; CC BY-SA 4.0.
+- `1-2.jpg`: [File:An aubergine-eggplant-brinjal plant with a hanging fruit..jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/An%20aubergine-eggplant-brinjal%20plant%20with%20a%20hanging%20fruit..jpg) — Azreey; CC BY-SA 4.0.
+- `1-3.jpg`: [File:Lactuca sativa 'Ashbrook'.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Lactuca%20sativa%20%27Ashbrook%27.jpg) — DeFacto; CC BY-SA 4.0.
+- `1-4.jpg`: [File:Freshly harvested cassava roots in a yellow basin.png](https://commons.wikimedia.org/wiki/Special:Redirect/file/Freshly%20harvested%20cassava%20roots%20in%20a%20yellow%20basin.png) — Lebu Ayiga; CC BY-SA 4.0.
+- `1-5.jpg`: [File:1.1.Beans.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/1.1.Beans.jpg) — Hajia Hijjah; CC BY-SA 4.0.
+- `1-6.jpg`: [File:Papaya - longitudinal section.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Papaya%20-%20longitudinal%20section.jpg) — Ivar Leidus; CC BY-SA 4.0.
+- `1-7.jpg`: [File:Fresh Vegetable Produce (Unsplash).jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Fresh%20Vegetable%20Produce%20%28Unsplash%29.jpg) — Sven Scheuermeier sveninho; CC0.
+- `1-8.jpg`: [File:A collard leaf.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/A%20collard%20leaf.jpg) — Kaweesaesther; CC BY-SA 4.0.
+- `2-1.jpg`: [File:Musoke Deo MDK-MUSO African Cassava harvest.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Musoke%20Deo%20MDK-MUSO%20African%20Cassava%20harvest.jpg) — MDK-MUSO; CC BY-SA 4.0.
+- `2-2.jpg`: [File:Broad beans.JPG](https://commons.wikimedia.org/wiki/Special:Redirect/file/Broad%20beans.JPG) — Miansari66; Public domain.
+- `2-3.jpg`: [File:Oranges - whole-halved-segment.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Oranges%20-%20whole-halved-segment.jpg) — Ivar Leidus; CC BY-SA 4.0.
+- `2-4.jpg`: [File:Carrots at Bakin Dogo market Kaduna 02.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Carrots%20at%20Bakin%20Dogo%20market%20Kaduna%2002.jpg) — Weyham; CC BY-SA 4.0.
+- `2-5.jpg`: [File:Boerkool.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Boerkool.jpg) — Ossewa; CC BY 3.0.
+- `2-6.jpg`: [File:20171027-AMS-LSC-1375 (37358389354).jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/20171027-AMS-LSC-1375%20%2837358389354%29.jpg) — U.S. Department of Agriculture; Public domain.
+- `2-7.jpg`: [File:Fagioli Monachella Nera.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Fagioli%20Monachella%20Nera.jpg) — Marranchelli; CC BY-SA 4.0.
+- `2-8.jpg`: [File:Avocado fruit at monday market.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Avocado%20fruit%20at%20monday%20market.jpg) — Dorcas Atule; CC BY-SA 4.0.
+- `3-1.jpg`: [File:Moscow, Paveletskaya Plaza Mar.2025 - vegetables 02.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Moscow%2C%20Paveletskaya%20Plaza%20Mar.2025%20-%20vegetables%2002.jpg) — Retired electrician; CC0.
+- `3-2.jpg`: [File:Cabbage White in a kaleyard, Norwick - geograph.org.uk - 1474158.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Cabbage%20White%20in%20a%20kaleyard%2C%20Norwick%20-%20geograph.org.uk%20-%201474158.jpg) — Mike Pennington; CC BY-SA 2.0.
+- `3-3.jpg`: [File:20171027-AMS-LSC-1212 (38068332301).jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/20171027-AMS-LSC-1212%20%2838068332301%29.jpg) — U.S. Department of Agriculture; Public domain.
+- `3-4.jpg`: [File:Farin wake1.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Farin%20wake1.jpg) — Hauwa'u Sani G; CC0.
+- `3-5.jpg`: [File:Mango Mangifera indica fruit by Raju Kasambe DSCN2626 12.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Mango%20Mangifera%20indica%20fruit%20by%20Raju%20Kasambe%20DSCN2626%2012.jpg) — Dr. Raju Kasambe; CC BY-SA 4.0.
+- `3-6.jpg`: [File:Pumpkins in the vegetable garden at Sissinghurst Castle - geograph.org.uk - 5120658.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Pumpkins%20in%20the%20vegetable%20garden%20at%20Sissinghurst%20Castle%20-%20geograph.org.uk%20-%205120658.jpg) — Marathon; CC BY-SA 2.0.
+- `3-7.jpg`: [File:Lactuca sativa 'Lollo Bionda'.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Lactuca%20sativa%20%27Lollo%20Bionda%27.jpg) — DeFacto; CC BY-SA 4.0.
+- `3-8.jpg`: [File:Nahaufnahme von Cassavawurzeln auf dem Feld nach der Ernte.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Nahaufnahme%20von%20Cassavawurzeln%20auf%20dem%20Feld%20nach%20der%20Ernte.jpg) — Myrmux; CC BY-SA 4.0.
+- `4-1.jpg`: [File:Favas (2).JPG](https://commons.wikimedia.org/wiki/Special:Redirect/file/Favas%20%282%29.JPG) — Rodrigo.Argenton; CC BY-SA 3.0.
+- `4-2.jpg`: [File:Lime - whole and halved.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Lime%20-%20whole%20and%20halved.jpg) — Ivar Leidus; CC BY-SA 4.0.
+- `4-3.jpg`: [File:Greek yoghurt cucumbers garlic.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Greek%20yoghurt%20cucumbers%20garlic.jpg) — Nikodem Nijaki; CC BY-SA 3.0.
+- `4-4.jpg`: [File:2018-06-18 (109) Lactuca sativa (garden lettuce) at Bichlhäusl in Frankenfels, Austria.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/2018-06-18%20%28109%29%20Lactuca%20sativa%20%28garden%20lettuce%29%20at%20Bichlh%C3%A4usl%20in%20Frankenfels%2C%20Austria.jpg) — GT1976; CC BY-SA 4.0.
+- `4-5.jpg`: [File:Cassava roots for peeling.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Cassava%20roots%20for%20peeling.jpg) — Denis kasozi; CC BY-SA 4.0.
+- `4-6.jpg`: [File:Hạt đậu đen.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/H%E1%BA%A1t%20%C4%91%E1%BA%ADu%20%C4%91en.jpg) — Lê Huỳnh Bộ; CC BY-SA 4.0.
+- `4-7.jpg`: [File:Bunch of bananas on sale.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Bunch%20of%20bananas%20on%20sale.jpg) — Wilfredor; CC0.
+- `4-8.jpg`: [File:Harvested vegetables(Onions).jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Harvested%20vegetables%28Onions%29.jpg) — Pascal Kings; CC BY 4.0.
+- `5-1.jpg`: [File:Romaine lettuce.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Romaine%20lettuce.jpg) — Rainer Zenz; CC BY-SA 3.0.
+- `5-2.jpg`: [File:Cassava roots.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Cassava%20roots.jpg) — MEvalyn; CC BY-SA 4.0.
+- `5-3.jpg`: [File:Pierwsza wersja pieniądza (6419490967).jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Pierwsza%20wersja%20pieni%C4%85dza%20%286419490967%29.jpg) — mik Krakow; CC BY-SA 2.0.
+- `5-4.jpg`: [File:Grapes, Dry Creek Valley-7705.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Grapes%2C%20Dry%20Creek%20Valley-7705.jpg) — Frank Schulenburg; CC BY-SA 4.0.
+- `5-5.jpg`: [File:Aubergine-Varianten.JPG](https://commons.wikimedia.org/wiki/Special:Redirect/file/Aubergine-Varianten.JPG) — Grey Geezer; CC BY-SA 3.0.
+- `5-6.jpg`: [File:Choux verts en vrac.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Choux%20verts%20en%20vrac.jpg) — Thomon; CC BY-SA 4.0.
+- `5-7.jpg`: [File:2 Obst und Gemüse in Gleno 2017-12-16.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/2%20Obst%20und%20Gem%C3%BCse%20in%20Gleno%202017-12-16.jpg) — José Fernando Real; CC BY-SA 4.0.
+- `5-8.jpg`: [File:Vegetable seeds.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Vegetable%20seeds.jpg) — Oregon State University; CC BY-SA 2.0.
+- `6-1.jpg`: [File:Papaya (Carica papaya) Lasiodiplodia fruit rot (39219698451).jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Papaya%20%28Carica%20papaya%29%20Lasiodiplodia%20fruit%20rot%20%2839219698451%29.jpg) — Scot Nelson from USA; CC0.
+- `6-2.jpg`: [File:Fresh red tomatoes.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Fresh%20red%20tomatoes.jpg) — Selimee; CC BY-SA 4.0.
+- `6-3.jpg`: [File:Collard greens in Galicia, Spain.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Collard%20greens%20in%20Galicia%2C%20Spain.jpg) — el Buho nº30; CC BY-SA 2.0.
+- `6-4.jpg`: [File:5aday sweet potato.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/5aday%20sweet%20potato.jpg) — ; Public domain.
+- `6-5.jpg`: [File:2020-04-27 17 25 51 A mixture of Goya Blackeye Peas, Small Red Beans, Butter Beans and Chick Peas in the Franklin Farm section of Oak Hill, Fairfax County, Virginia.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/2020-04-27%2017%2025%2051%20A%20mixture%20of%20Goya%20Blackeye%20Peas%2C%20Small%20Red%20Beans%2C%20Butter%20Beans%20and%20Chick%20Peas%20in%20the%20Franklin%20Farm%20section%20of%20Oak%20Hill%2C%20Fairfax%20County%2C%20Virginia.jpg) — Famartin; CC BY-SA 4.0.
+- `6-6.jpg`: [File:Goiaba vermelha.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Goiaba%20vermelha.jpg) — Rodrigo.Argenton; CC BY-SA 4.0.
+- `6-7.jpg`: [File:Carrots at Bakin Dogo market Kaduna 03.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Carrots%20at%20Bakin%20Dogo%20market%20Kaduna%2003.jpg) — Weyham; CC BY-SA 4.0.
+- `6-8.jpg`: [File:2018-06-01 (129) Lactuca sativa (garden lettuce) Nature at Bichlhäusl in Frankenfels, Austria.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/2018-06-01%20%28129%29%20Lactuca%20sativa%20%28garden%20lettuce%29%20Nature%20at%20Bichlh%C3%A4usl%20in%20Frankenfels%2C%20Austria.jpg) — GT1976; CC BY-SA 4.0.
+- `7-1.jpg`: [File:A Large Sweet Potato.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/A%20Large%20Sweet%20Potato.jpg) — Gogerr; CC BY-SA 4.0.
+- `7-2.jpg`: [File:Alubia del obispo or caparron beans 1.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Alubia%20del%20obispo%20or%20caparron%20beans%201.jpg) — Downtowngal; CC BY-SA 4.0.
+- `7-3.jpg`: [File:PikiWiki Israel 536 avocado אבוקדו.JPG](https://commons.wikimedia.org/wiki/Special:Redirect/file/PikiWiki%20Israel%20536%20avocado%20%D7%90%D7%91%D7%95%D7%A7%D7%93%D7%95.JPG) — איה זמיר; CC BY 2.5.
+- `7-4.jpg`: [File:-2018-10-06 Broccoli, Trimingham (1).JPG](https://commons.wikimedia.org/wiki/Special:Redirect/file/-2018-10-06%20Broccoli%2C%20Trimingham%20%281%29.JPG) — Kolforn (Kolforn)
+I'd appreciate if you could mail me (Kolforn@gmail.com) if you want to use this picture out of the Wikimedia project scope.
+
+
+
+ This file is licensed under the Creative Commons Attribution-Share Alike 4.0 International license.
+You are free:
+to share – to copy, distribute and transmit the work
+to remix – to adapt the work
+Under the following conditions:
+attribution – You must give appropriate credit, provide a link to the license, and indicate if changes were made. You may do so in any reasonable manner, but not in any way that suggests the licensor endorses you or your use.
+share alike – If you remix, transform, or build upon the material, you must distribute your contributions under the same or compatible license as the original.https://creativecommons.org/licenses/by-sa/4.0CC BY-SA 4.0 Creative Commons Attribution-Share Alike 4.0 truetrue; CC BY-SA 4.0.
+- `7-5.jpg`: [File:Iceberg lettuce in SB.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Iceberg%20lettuce%20in%20SB.jpg) — en:User:Geographer; CC BY 1.0.
+- `7-6.jpg`: [File:Imyubati( cassava).jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Imyubati%28%20cassava%29.jpg) — NathanRUZO; CC0.
+- `7-7.jpg`: [File:Alubia del obispo or caparron beans 2.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Alubia%20del%20obispo%20or%20caparron%20beans%202.jpg) — Downtowngal; CC BY-SA 4.0.
+- `7-8.jpg`: [File:330Carica papaya seeds 01.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/330Carica%20papaya%20seeds%2001.jpg) — Judgefloro; CC0.
+- `8-1.jpg`: [File:Pumpkin vegetable.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Pumpkin%20vegetable.jpg) — Leon Brooks; Public domain.
+- `8-2.jpg`: [File:Lactuca sativa var. (2).jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Lactuca%20sativa%20var.%20%282%29.jpg) — Prenn; CC BY-SA 3.0.
+- `8-3.jpg`: [File:Cassava Tapioca Alappuzha 2021.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Cassava%20Tapioca%20Alappuzha%202021.jpg) — Vis M; CC BY-SA 4.0.
+- `8-4.jpg`: [File:Beans and onion (260921335).jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Beans%20and%20onion%20%28260921335%29.jpg) — Rosino; CC BY-SA 2.0.
+- `8-5.jpg`: [File:Ambersweet oranges.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Ambersweet%20oranges.jpg) — ; Public domain.
+- `8-6.jpg`: [File:Cucumber plants.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Cucumber%20plants.jpg) — Pascal Kings; CC BY 4.0.
+- `8-7.jpg`: [File:Collard greens.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Collard%20greens.jpg) — Kevin L. Bardon~enwikibooks at English Wikibooks; CC BY-SA 2.5.
+- `8-8.jpg`: [File:Agricultura familiar fornece alimentos a 669 escolas da rede pública do DF (52418455752).jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Agricultura%20familiar%20fornece%20alimentos%20a%20669%20escolas%20da%20rede%20p%C3%BAblica%20do%20DF%20%2852418455752%29.jpg) — Agência Brasília from Brasília, Brasil; CC BY 2.0.
+- `9-1.jpg`: [File:Chitra Rajma.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Chitra%20Rajma.jpg) — Sanjay Acharya; CC BY-SA 4.0.
+- `9-2.jpg`: [File:Perfect bananas .jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Perfect%20bananas%20.jpg) — BananaQueens; CC BY-SA 4.0.
+- `9-3.jpg`: [File:Harvested vegetables(Onions) 2.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Harvested%20vegetables%28Onions%29%202.jpg) — Pascal Kings; CC BY 4.0.
+- `9-4.jpg`: [File:Collard-Greens-Bundle.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Collard-Greens-Bundle.jpg) — Evan-Amos; Public domain.
+- `9-5.jpg`: [File:Bataatteja C IMG 1161.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Bataatteja%20C%20IMG%201161.jpg) — Anneli Salo; CC BY-SA 3.0.
+- `9-6.jpg`: [File:DarkRedKidney.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/DarkRedKidney.jpg) — ; Public domain.
+- `9-7.jpg`: [File:Mango Mangifera indica fruit by Raju Kasambe DSCN2626 08.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Mango%20Mangifera%20indica%20fruit%20by%20Raju%20Kasambe%20DSCN2626%2008.jpg) — Dr. Raju Kasambe; CC BY-SA 4.0.
+- `9-8.jpg`: [File:Aubergine-2025 01.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Aubergine-2025%2001.jpg) — Cheikh cherif; CC BY-SA 4.0.
+- `10-1.jpg`: [File:Collards in container.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Collards%20in%20container.jpg) — Downtowngal (talk) (Uploads); Public domain.
+- `10-2.jpg`: [File:Batata doce-ipomoea batatas.JPG](https://commons.wikimedia.org/wiki/Special:Redirect/file/Batata%20doce-ipomoea%20batatas.JPG) — Lglm 1990; CC BY-SA 3.0.
+- `10-3.jpg`: [File:Kidney beans (Phaseolus vulgaris) marketed Baubau.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Kidney%20beans%20%28Phaseolus%20vulgaris%29%20marketed%20Baubau.jpg) — David E Mead; CC0.
+- `10-4.jpg`: [File:Lime-Whole-Split.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Lime-Whole-Split.jpg) — Evan-Amos; CC0.
+- `10-5.jpg`: [File:Fresh Tomatoes (167092897).jpeg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Fresh%20Tomatoes%20%28167092897%29.jpeg) — Ph Oto Design; CC BY 3.0.
+- `10-6.jpg`: [File:HK food green long leaf vegetable Indian lettuce 油麥菜 Lactuca sativa November 2022 Px3 02.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/HK%20food%20green%20long%20leaf%20vegetable%20Indian%20lettuce%20%E6%B2%B9%E9%BA%A5%E8%8F%9C%20Lactuca%20sativa%20November%202022%20Px3%2002.jpg) — MoRntashamL GOLD; CC BY-SA 4.0.
+- `10-7.jpg`: [File:Cassava on being got from the garden.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Cassava%20on%20being%20got%20from%20the%20garden.jpg) — MEvalyn; CC BY-SA 4.0.
+- `10-8.jpg`: [File:Kidney beans 2.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Kidney%20beans%202.jpg) — Tiia Monto; CC BY-SA 4.0.
+- `11-1.jpg`: [File:Guava pink fruit.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Guava%20pink%20fruit.jpg) — Ivar Leidus; CC BY-SA 4.0.
+- `11-2.jpg`: [File:Carrots at Bakin Dogo market Kaduna 01.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Carrots%20at%20Bakin%20Dogo%20market%20Kaduna%2001.jpg) — Weyham; CC BY-SA 4.0.
+- `11-3.jpg`: [File:HK food green long leaf vegetable Indian lettuce 油麥菜 Lactuca sativa November 2022 Px3 01.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/HK%20food%20green%20long%20leaf%20vegetable%20Indian%20lettuce%20%E6%B2%B9%E9%BA%A5%E8%8F%9C%20Lactuca%20sativa%20November%202022%20Px3%2001.jpg) — MoRntashamL GOLD; CC BY-SA 4.0.
+- `11-4.jpg`: [File:Female-working-extracting-moisture-from-cassava-roots.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Female-working-extracting-moisture-from-cassava-roots.jpg) — ; CC0.
+- `11-5.jpg`: [File:Kidney beans.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Kidney%20beans.jpg) — Sanjay Acharya; CC BY-SA 3.0.
+- `11-6.jpg`: [File:Javier shows part of the grape harvest in his Lysekil vineyard 1 - cropped.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Javier%20shows%20part%20of%20the%20grape%20harvest%20in%20his%20Lysekil%20vineyard%201%20-%20cropped.jpg) — W.carter; CC0.
+- `11-7.jpg`: [File:Broccoli - a cabbage family.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Broccoli%20-%20a%20cabbage%20family.jpg) — Muralikrishna m; CC BY 4.0.
+- `11-8.jpg`: [File:Collards.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Collards.jpg) — SaletteAndrews; CC BY-SA 3.0.
+- `12-1.jpg`: [File:Manihot esculenta, Cassava root - Flickr - Dick Culbert.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Manihot%20esculenta%2C%20Cassava%20root%20-%20Flickr%20-%20Dick%20Culbert.jpg) — Dick Culbert from Gibsons, B.C., Canada; CC BY 2.0.
+- `12-2.jpg`: [File:MADESSOU.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/MADESSOU.jpg) — Imoini22; CC BY-SA 4.0.
+- `12-3.jpg`: [File:330Carica papaya seeds 02.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/330Carica%20papaya%20seeds%2002.jpg) — Judgefloro; CC0.
+- `12-4.jpg`: [File:Pumpkin hokkaido vegetable.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Pumpkin%20hokkaido%20vegetable.jpg) — Unknown authorUnknown author; Public domain.
+- `12-5.jpg`: [File:Cols a Jesús Pobre.JPG](https://commons.wikimedia.org/wiki/Special:Redirect/file/Cols%20a%20Jes%C3%BAs%20Pobre.JPG) — Joanbanjo; CC BY-SA 3.0.
+- `12-6.jpg`: [File:Batata doce.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Batata%20doce.jpg) — Acscosta; CC BY-SA 3.0.
+- `12-7.jpg`: [File:Rajmah beans in Kullu district, Himachal Pradesh,1.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Rajmah%20beans%20in%20Kullu%20district%2C%20Himachal%20Pradesh%2C1.jpg) — Rajani Gairshail; CC BY-SA 4.0.
+- `12-8.jpg`: [File:Common guavas.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Common%20guavas.jpg) — Kaweesaesther; CC BY-SA 4.0.
+- `13-1.jpg`: [File:Cucumber-for-salad-001.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Cucumber-for-salad-001.jpg) — Caduser2003 at Malayalam Wikipedia; CC BY-SA 2.5.
+- `13-2.jpg`: [File:Couve-galega at Madeira Island 01.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Couve-galega%20at%20Madeira%20Island%2001.jpg) — Wilrooij; CC BY-SA 4.0.
+- `13-3.jpg`: [File:BatataDoceDSC2615.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/BatataDoceDSC2615.jpg) — CostaPPPR; CC BY-SA 4.0.
+- `13-4.jpg`: [File:Red Beans Photographed by Trisorn Triboon.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Red%20Beans%20Photographed%20by%20Trisorn%20Triboon.jpg) — Tris T7; CC BY 3.0.
+- `13-5.jpg`: [File:Avocado in Kota Kinabalu, Sabah.JPG](https://commons.wikimedia.org/wiki/Special:Redirect/file/Avocado%20in%20Kota%20Kinabalu%2C%20Sabah.JPG) — Kwek Mei Jiun; CC BY-SA 3.0.
+- `13-6.jpg`: [File:Harvested vegetables(Onions) 3.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Harvested%20vegetables%28Onions%29%203.jpg) — Pascal Kings; CC BY 4.0.
+- `13-7.jpg`: [File:Lettuce (зелена салата).jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Lettuce%20%28%D0%B7%D0%B5%D0%BB%D0%B5%D0%BD%D0%B0%20%D1%81%D0%B0%D0%BB%D0%B0%D1%82%D0%B0%29.jpg) — SA, The Green Ark, Bostanie; CC BY 4.0.
+- `13-8.jpg`: [File:Mandioca ou aipim.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Mandioca%20ou%20aipim.jpg) — Ashehp; CC0.
+- `14-1.jpg`: [File:Red Kidney Beans (49684142646).jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Red%20Kidney%20Beans%20%2849684142646%29.jpg) — Ajay Suresh from New York, NY, USA; CC BY 2.0.
+- `14-2.jpg`: [File:Mango fruit Maharashtra by Dr Raju Kasambe DSCN1616 (6).jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Mango%20fruit%20Maharashtra%20by%20Dr%20Raju%20Kasambe%20DSCN1616%20%286%29.jpg) — Dr. Raju Kasambe; CC BY-SA 4.0.
+- `14-3.jpg`: [File:Aubergine 3.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Aubergine%203.jpg) — Kalsoum17; CC BY-SA 4.0.
+- `14-4.jpg`: [File:Lettuce garden.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Lettuce%20garden.jpg) — Leungo Mokgwathi; CC BY-SA 4.0.
+- `14-5.jpg`: [File:Manihot esculenta dsc07325.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Manihot%20esculenta%20dsc07325.jpg) — David Monniaux; CC BY-SA 3.0.
+- `14-6.jpg`: [File:Red Speckled Kidney Beans.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Red%20Speckled%20Kidney%20Beans.jpg) — Sanjay Acharya; CC BY-SA 4.0.
+- `14-7.jpg`: [File:Orange-Fruit-Pieces.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Orange-Fruit-Pieces.jpg) — Evan-Amos; CC BY-SA 3.0.
+- `14-8.jpg`: [File:Fresh Picked Tomatoes From Connie S Garden (120857137).jpeg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Fresh%20Picked%20Tomatoes%20From%20Connie%20S%20Garden%20%28120857137%29.jpeg) — Rob Bertholf; CC BY 3.0.
+- `15-1.jpg`: [File:Lactuca sativa - Royal Botanical Garden, Madrid.JPG](https://commons.wikimedia.org/wiki/Special:Redirect/file/Lactuca%20sativa%20-%20Royal%20Botanical%20Garden%2C%20Madrid.JPG) — Daderot; Public domain.
+- `15-2.jpg`: [File:Manioc 20.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Manioc%2020.jpg) — Cissé kensky; CC0.
+- `15-3.jpg`: [File:Reniform kidney bean seeds.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Reniform%20kidney%20bean%20seeds.jpg) — JonRichfield; CC BY-SA 4.0.
+- `15-4.jpg`: [File:Fresh Banana and Coconut Fruit Stall.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Fresh%20Banana%20and%20Coconut%20Fruit%20Stall.jpg) — PAULIX04; CC BY-SA 4.0.
+- `15-5.jpg`: [File:Fresh Carrots.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Fresh%20Carrots.jpg) — Yerson Retamel; CC0.
+- `15-6.jpg`: [File:Couve-galega at Madeira Island 02.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Couve-galega%20at%20Madeira%20Island%2002.jpg) — Wilrooij; CC BY-SA 4.0.
+- `15-7.jpg`: [File:Bent sweet potato 2017 A.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Bent%20sweet%20potato%202017%20A.jpg) — Fructibus; CC0.
+- `15-8.jpg`: [File:Sa kidneybeans.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Sa%20kidneybeans.jpg) — Sanjay Acharya; CC BY-SA 3.0.
+- `16-1.jpg`: [File:Pinot Grigio-20201027-RM-114053.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Pinot%20Grigio-20201027-RM-114053.jpg) — Ermell; CC BY-SA 4.0.
+- `16-2.jpg`: [File:Broccoli CIMG3621.JPG](https://commons.wikimedia.org/wiki/Special:Redirect/file/Broccoli%20CIMG3621.JPG) — Motmel; CC BY-SA 3.0.
+- `16-3.jpg`: [File:Couve-galega at Madeira Island 03.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Couve-galega%20at%20Madeira%20Island%2003.jpg) — Wilrooij; CC BY-SA 4.0.
+- `16-4.jpg`: [File:Bhu Krishna.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Bhu%20Krishna.jpg) — Director ctcri; CC BY-SA 4.0.
+- `16-5.jpg`: [File:Wana wakena da a kecisa.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Wana%20wakena%20da%20a%20kecisa.jpg) — Yahaya alhaji umar; CC BY-SA 4.0.
+- `16-6.jpg`: [File:Lime CDC.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Lime%20CDC.jpg) — ; Public domain.
+- `16-7.jpg`: [File:Pumpkin J1.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Pumpkin%20J1.jpg) — Jamain; CC BY-SA 3.0.
+- `16-8.jpg`: [File:Lactuca sativa, Fryšták.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Lactuca%20sativa%2C%20Fry%C5%A1t%C3%A1k.jpg) — I would appreciate being notified if you use my work outside Wikimedia.
+Do not copy this image illegally by ignoring the terms of the license below, as it is not in the public domain. If you would like special permission to use, license, or purchase the image please contact me to negotiate terms.
+
+More of my work can be found in my personal gallery.; CC BY-SA 3.0.
+- `17-1.jpg`: [File:Boniatos Sweet potatoes.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Boniatos%20Sweet%20potatoes.jpg) — Juan Emilio Prades Bel; CC BY 4.0.
+- `17-2.jpg`: [File:White Beans at Bakin Dogo Market Kaduna North 01.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/White%20Beans%20at%20Bakin%20Dogo%20Market%20Kaduna%20North%2001.jpg) — JoabJacob; CC BY-SA 4.0.
+- `17-3.jpg`: [File:Guava - Psidium guajava fruit of Salem.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Guava%20-%20Psidium%20guajava%20fruit%20of%20Salem.jpg) — Thamizhpparithi Maari; CC BY-SA 4.0.
+- `17-4.jpg`: [File:Cucumber in the market.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Cucumber%20in%20the%20market.jpg) — Charlie.Smatt; CC BY-SA 4.0.
+- `17-5.jpg`: [File:Lactuca sativa 结球莴苣 包心生菜 Iceberg lettuce.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Lactuca%20sativa%20%E7%BB%93%E7%90%83%E8%8E%B4%E8%8B%A3%20%E5%8C%85%E5%BF%83%E7%94%9F%E8%8F%9C%20Iceberg%20lettuce.jpg) — 无情介壳虫; CC BY-SA 4.0.
+- `17-6.jpg`: [File:Extension du manioc. Yarisoa Rh. M O1.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Extension%20du%20manioc.%20Yarisoa%20Rh.%20M%20O1.jpg) — Yarisoa Rh; CC BY 4.0.
+- `17-7.jpg`: [File:White Beans at Bakin Dogo Market Kaduna North.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/White%20Beans%20at%20Bakin%20Dogo%20Market%20Kaduna%20North.jpg) — JoabJacob; CC BY-SA 4.0.
+- `17-8.jpg`: [File:Grapes Kerala.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Grapes%20Kerala.jpg) — Dr. Chinchu C.; CC BY-SA 4.0.
+- `18-1.jpg`: [File:Onions vegetable.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Onions%20vegetable.jpg) — Hajia Hijjah; CC BY-SA 4.0.
+- `18-2.jpg`: [File:Starr-090707-2391-Lactuca sativa-different varieties in vegetable garden-Olinda-Maui (24969044395).jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Starr-090707-2391-Lactuca%20sativa-different%20varieties%20in%20vegetable%20garden-Olinda-Maui%20%2824969044395%29.jpg) — Forest and Kim Starr; CC BY 3.0 us.
+- `18-3.jpg`: [File:Cassava 097.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Cassava%20097.jpg) — Amuzujoe; CC BY-SA 4.0.
+- `18-4.jpg`: [File:White beans.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/White%20beans.jpg) — Heather Kennedy from Atlanta, US; CC BY 2.0.
+- `18-5.jpg`: [File:Ripe papaya with seeds.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Ripe%20papaya%20with%20seeds.jpg) — OKJaguar; CC BY-SA 4.0.
+- `18-6.jpg`: [File:Aubergine violet de niague 09.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Aubergine%20violet%20de%20niague%2009.jpg) — 4MAPS; CC BY-SA 4.0.
+- `18-7.jpg`: [File:Couve-galega.JPG](https://commons.wikimedia.org/wiki/Special:Redirect/file/Couve-galega.JPG) — No machine-readable author provided. Manuel Anastácio assumed (based on copyright claims).; CC BY-SA 2.5.
+- `18-8.jpg`: [File:Boniatos.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Boniatos.jpg) — Juan Emilio Prades Bel; CC BY-SA 4.0.
+- `19-1.jpg`: [File:White beans2.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/White%20beans2.jpg) — Tiia Monto; CC BY-SA 3.0.
+- `19-2.jpg`: [File:Oranges Are Not The Only Fruit (40814468122).jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Oranges%20Are%20Not%20The%20Only%20Fruit%20%2840814468122%29.jpg) — Michael Gaylard from Horsham, UK; CC BY 2.0.
+- `19-3.jpg`: [File:Fresh Picked Tomatoes From Connie S Garden (120857151).jpeg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Fresh%20Picked%20Tomatoes%20From%20Connie%20S%20Garden%20%28120857151%29.jpeg) — Rob Bertholf; CC BY 3.0.
+- `19-4.jpg`: [File:D-Town Farm Sept 2011 06.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/D-Town%20Farm%20Sept%202011%2006.jpg) — Michael Barera; CC BY-SA 4.0.
+- `19-5.jpg`: [File:Cooked potatoes for sell.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Cooked%20potatoes%20for%20sell.jpg) — Noahalorwu; CC BY-SA 4.0.
+- `19-6.jpg`: [File:Pinto bean.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Pinto%20bean.jpg) — ; Public domain.
+- `19-7.jpg`: [File:Avocado-Fruit 52791-480x360 (4791934292).jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Avocado-Fruit%2052791-480x360%20%284791934292%29.jpg) — Emilian Robert Vicol from Com. Balanesti, Romania; CC BY 2.0.
+- `19-8.jpg`: [File:Carrots – neatly stacked.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Carrots%20%E2%80%93%20neatly%20stacked.jpg) — Mbigul; CC BY-SA 4.0.
+- `20-1.jpg`: [File:Huertas de Olarizu - Berza 01.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Huertas%20de%20Olarizu%20-%20Berza%2001.jpg) — Basotxerri; CC BY-SA 4.0.
+- `20-2.jpg`: [File:Curved sweet potato 2017 A1.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Curved%20sweet%20potato%202017%20A1.jpg) — Fructibus; CC0.
+- `20-3.jpg`: [File:Pinto beans 1.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Pinto%20beans%201.jpg) — Bean appreciator; CC0.
+- `20-4.jpg`: [File:Mango fruit Maharashtra by Dr Raju Kasambe DSCN1616 (2).jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Mango%20fruit%20Maharashtra%20by%20Dr%20Raju%20Kasambe%20DSCN1616%20%282%29.jpg) — Dr. Raju Kasambe; CC BY-SA 4.0.
+- `20-5.jpg`: [File:Broccoli geputzt und geschnitten.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Broccoli%20geputzt%20und%20geschnitten.jpg) — Burkhard Mücke; CC BY-SA 4.0.
+- `20-6.jpg`: [File:Salat-Lollo-Lactuca sativa-rechts-Salatmosaikvirus-Befall-Roswitha Ulrich.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Salat-Lollo-Lactuca%20sativa-rechts-Salatmosaikvirus-Befall-Roswitha%20Ulrich.jpg) — Roswitha Ulrich, Pflanzenschutzdienst Hessen.; CC BY-SA 4.0.
+- `20-7.jpg`: [File:Cassava Processing.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Cassava%20Processing.jpg) — OnyekeEjike; CC BY-SA 4.0.
+- `20-8.jpg`: [File:لوبیای چیتی.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/%D9%84%D9%88%D8%A8%DB%8C%D8%A7%DB%8C%20%DA%86%DB%8C%D8%AA%DB%8C.jpg) — Mostafameraji; CC BY-SA 4.0.
+- `21-1.jpg`: [File:Lime at monday market.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Lime%20at%20monday%20market.jpg) — Dorcas Atule; CC BY-SA 4.0.
+- `21-2.jpg`: [File:Pumpkin hokkaido.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Pumpkin%20hokkaido.jpg) — Unknown authorUnknown author; Public domain.
+- `21-3.jpg`: [File:Lactuca sativa结球莴苣 包心生菜 Iceberg lettuce1.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Lactuca%20sativa%E7%BB%93%E7%90%83%E8%8E%B4%E8%8B%A3%20%E5%8C%85%E5%BF%83%E7%94%9F%E8%8F%9C%20Iceberg%20lettuce1.jpg) — 无情介壳虫; CC BY-SA 4.0.
+- `21-4.jpg`: [File:Peeled cassava tube.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Peeled%20cassava%20tube.jpg) — Iwai-Dialax; CC BY 4.0.
+- `21-5.jpg`: [File:Coffee beans 4.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Coffee%20beans%204.jpg) — Kızıldeniz; CC BY-SA 4.0.
+- `21-6.jpg`: [File:Bunch of Banana at Badagry Market.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Bunch%20of%20Banana%20at%20Badagry%20Market.jpg) — Amboluwaseun; CC BY-SA 4.0.
+- `21-7.jpg`: [File:Cucumber fruit in illorin.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Cucumber%20fruit%20in%20illorin.jpg) — Eunice Ameh; CC0.
+- `21-8.jpg`: [File:Huesca (provincia) 1993 10.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Huesca%20%28provincia%29%201993%2010.jpg) — LBM1948; CC BY-SA 4.0.
+- `22-1.jpg`: [File:A woman peeling cassava,.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/A%20woman%20peeling%20cassava%2C.jpg) — Nubelbariloe; CC BY 4.0.
+- `22-2.jpg`: [File:Assorted dried beans, Blantyre market, Malawi.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Assorted%20dried%20beans%2C%20Blantyre%20market%2C%20Malawi.jpg) — Michaelphoya; CC BY-SA 4.0.
+- `22-3.jpg`: [File:Grapes, radish, DSCF2072.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Grapes%2C%20radish%2C%20DSCF2072.jpg) — Dana Payne; CC BY-SA 3.0.
+- `22-4.jpg`: [File:Indian Onion.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Indian%20Onion.jpg) — Jubair Bin Iqbal; CC BY-SA 4.0.
+- `22-5.jpg`: [File:Kale on a farm in Kenya.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Kale%20on%20a%20farm%20in%20Kenya.jpg) — McKay Savage from London, UK; CC BY 2.0.
+- `22-6.jpg`: [File:Four men harvesting red sweet potato at daytime.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Four%20men%20harvesting%20red%20sweet%20potato%20at%20daytime.jpg) — peakpx.com; CC BY-SA 1.0.
+- `22-7.jpg`: [File:Phaseolus vulgaris seeds.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Phaseolus%20vulgaris%20seeds.jpg) — Wilfredor; CC0.
+- `22-8.jpg`: [File:Limetten - Stadtmarkt Augsburg Juni 2015-8622.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Limetten%20-%20Stadtmarkt%20Augsburg%20Juni%202015-8622.jpg) — Hubertl; CC BY-SA 4.0.
+- `23-1.jpg`: [File:Aubergine violet à Bonoua.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Aubergine%20violet%20%C3%A0%20Bonoua.jpg) — Dadrik; CC BY-SA 4.0.
+- `23-2.jpg`: [File:Kaleyard, Norwick - geograph.org.uk - 976578.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Kaleyard%2C%20Norwick%20-%20geograph.org.uk%20-%20976578.jpg) — Mike Pennington; CC BY-SA 2.0.
+- `23-3.jpg`: [File:GD 廣東 Guangdong 中山 Zhongshan 沿江東二路 15 Yanjiang East 2nd Road 中山咀香園餅家 Zhongshan JuXiang Yuan Bakery September 2024 R12S 339.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/GD%20%E5%BB%A3%E6%9D%B1%20Guangdong%20%E4%B8%AD%E5%B1%B1%20Zhongshan%20%E6%B2%BF%E6%B1%9F%E6%9D%B1%E4%BA%8C%E8%B7%AF%2015%20Yanjiang%20East%202nd%20Road%20%E4%B8%AD%E5%B1%B1%E5%92%80%E9%A6%99%E5%9C%92%E9%A4%85%E5%AE%B6%20Zhongshan%20JuXiang%20Yuan%20Bakery%20September%202024%20R12S%20339.jpg) — LAHN wui Hoezhong; CC0.
+- `23-4.jpg`: [File:Popping beans (Phaseolus vulgaris).jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Popping%20beans%20%28Phaseolus%20vulgaris%29.jpg) — Crops for the Future; CC BY-SA 3.0.
+- `23-5.jpg`: [File:Guava bangalore.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Guava%20bangalore.jpg) — Photo by Rajesh Dangi; CC BY-SA 3.0.
+- `23-6.jpg`: [File:Moscow, Vkusvill Zatsepsky Val Mar.2025 - vegetables 01.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Moscow%2C%20Vkusvill%20Zatsepsky%20Val%20Mar.2025%20-%20vegetables%2001.jpg) — Retired electrician; CC0.
+- `23-7.jpg`: [File:Lettuce vegetable.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Lettuce%20vegetable.jpg) — Abike25; CC BY-SA 4.0.
+- `23-8.jpg`: [File:Racine de yucca (manioc).jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Racine%20de%20yucca%20%28manioc%29.jpg) — Evil Jess; CC BY 2.0.
+- `24-1.jpg`: [File:Bruine boon Noordhollandse Bruine (Phaseolus vulgaris).jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Bruine%20boon%20Noordhollandse%20Bruine%20%28Phaseolus%20vulgaris%29.jpg) — Rasbak; CC BY-SA 3.0.
+- `24-2.jpg`: [File:HK 將軍澳 TKO Montara LOHAS Park 日出康城商場 The Lohas Shopping Mall Fresh Supermarket products fruit Avocado January 2022 Px3.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/HK%20%E5%B0%87%E8%BB%8D%E6%BE%B3%20TKO%20Montara%20LOHAS%20Park%20%E6%97%A5%E5%87%BA%E5%BA%B7%E5%9F%8E%E5%95%86%E5%A0%B4%20The%20Lohas%20Shopping%20Mall%20Fresh%20Supermarket%20products%20fruit%20Avocado%20January%202022%20Px3.jpg) — OMSISAOTP Tzeto8; CC BY-SA 4.0.
+- `24-3.jpg`: [File:Controlled Farming Fresh Bio Carrot (164926863).jpeg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Controlled%20Farming%20Fresh%20Bio%20Carrot%20%28164926863%29.jpeg) — Markus Spiske Freeforcommercialuse Net; CC BY 3.0.
+- `24-4.jpg`: [File:Fresh lettuce from a farm at Limuru.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Fresh%20lettuce%20from%20a%20farm%20at%20Limuru.jpg) — Kristinabudiati; CC BY-SA 4.0.
+- `24-5.jpg`: [File:Cassava, a staple food in Uganda.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Cassava%2C%20a%20staple%20food%20in%20Uganda.jpg) — Tamdra; CC BY-SA 4.0.
+- `24-6.jpg`: [File:Phaseolus vulgaris white beans, witte boon.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Phaseolus%20vulgaris%20white%20beans%2C%20witte%20boon.jpg) — Rasbak; CC BY-SA 3.0.
+- `24-7.jpg`: [File:Carica papaya unripe fruit from Tirupur IMG 20180502 110248534.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Carica%20papaya%20unripe%20fruit%20from%20Tirupur%20IMG%2020180502%20110248534.jpg) — P Jeganathan; CC BY-SA 4.0.
+- `24-8.jpg`: [File:Broccoli3.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Broccoli3.jpg) — Tiia Monto; CC BY-SA 3.0.
+- `25-1.jpg`: [File:Starr-081031-0394-Lactuca sativa-lettuce bolting-Makawao-Maui (24559048979).jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Starr-081031-0394-Lactuca%20sativa-lettuce%20bolting-Makawao-Maui%20%2824559048979%29.jpg) — Forest and Kim Starr; CC BY 3.0 us.
+- `25-2.jpg`: [File:Freshly Harvested Cassavas on Cassava Leaves (leafy plate), Conveyed by a Young Man from Nigeria.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Freshly%20Harvested%20Cassavas%20on%20Cassava%20Leaves%20%28leafy%20plate%29%2C%20Conveyed%20by%20a%20Young%20Man%20from%20Nigeria.jpg) — Frankincense Diala; CC BY-SA 4.0.
+- `25-3.jpg`: [File:Ojo de Cabra beans.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Ojo%20de%20Cabra%20beans.jpg) — IndustriousFrog; CC0.
+- `25-4.jpg`: [File:Oranges (356298118).jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Oranges%20%28356298118%29.jpg) — Andrew Malone; CC BY 2.0.
+- `25-5.jpg`: [File:Cucurbita pepo pumpkin 17a.Autumn.WholeFoods.1440P.NW.WDC.14October2014.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Cucurbita%20pepo%20pumpkin%2017a.Autumn.WholeFoods.1440P.NW.WDC.14October2014.jpg) — Elvert Barnes; CC BY-SA 2.0.
+- `25-6.jpg`: [File:Ortigueira 1992 02.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Ortigueira%201992%2002.jpg) — LBM1948; CC BY-SA 4.0.
+- `25-7.jpg`: [File:Ipomoea batatasL ja01.jpg](https://commons.wikimedia.org/wiki/Special:Redirect/file/Ipomoea%20batatasL%20ja01.jpg) — miya (talk); CC BY-SA 4.0.
+- `25-8.jpg`: [File:Haricot Lingot de Castelnaudary.JPG](https://commons.wikimedia.org/wiki/Special:Redirect/file/Haricot%20Lingot%20de%20Castelnaudary.JPG) — Castelnaudary Tourisme; CC BY-SA 3.0.

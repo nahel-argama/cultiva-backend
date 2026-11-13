@@ -3,7 +3,6 @@
 namespace Cultiva\Models\Offer\Requests;
 
 use Cultiva\Models\Offer\Enums\OfferStatus;
-
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -26,6 +25,7 @@ final class StoreOfferRequest extends FormRequest
             'status' => [Rule::enum(OfferStatus::class)],
             'harvest_date' => ['required', 'date', 'date_format:Y-m-d', 'after_or_equal:today'],
             'lifespan_days' => ['required', 'integer', 'min:1'],
+            'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
         ];
     }
 }

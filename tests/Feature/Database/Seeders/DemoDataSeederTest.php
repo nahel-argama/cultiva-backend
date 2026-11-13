@@ -6,6 +6,7 @@ use Database\Factories\UserFactory;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class DemoDataSeederTest extends TestCase
@@ -14,6 +15,7 @@ class DemoDataSeederTest extends TestCase
 
     public function test_database_seeder_creates_repeatable_demo_data_without_touching_other_users(): void
     {
+        Storage::fake('public');
         $otherUser = UserFactory::new()->create();
 
         $this->seed(DatabaseSeeder::class);
@@ -35,6 +37,11 @@ class DemoDataSeederTest extends TestCase
         $this->assertSame(25, DB::table('users')->where('email', 'like', 'produtor%@gmail.com')->count());
         $this->assertSame(50, DB::table('users')->where('email', 'like', 'varejista%@gmail.com')->count());
         $this->assertSame(200, DB::table('offers')->whereIn('producer_id', $producerIds)->count());
+        $imagePaths = DB::table('offers')->whereIn('producer_id', $producerIds)->pluck('image_path');
+        $this->assertCount(200, $imagePaths->unique());
+        foreach ($imagePaths as $path) {
+            Storage::disk('public')->assertExists($path);
+        }
         $this->assertSame(0, DB::table('offers')->whereIn('producer_id', $producerIds)
             ->whereNotBetween('unit_price', [1, 20])->count());
         $this->assertSame(0, DB::table('offers')->whereIn('producer_id', $producerIds)
@@ -80,6 +87,9 @@ class DemoDataSeederTest extends TestCase
             ->havingRaw('COUNT(*) = 10')
             ->get()
             ->count());
+        foreach (DB::table('wishlist_items')->distinct()->pluck('source_product_id') as $productId) {
+            Storage::disk('public')->assertExists("products/{$productId}.jpg");
+        }
         $this->assertDatabaseHas('users', ['id' => $otherUser->id]);
     }
 }

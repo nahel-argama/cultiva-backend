@@ -18,6 +18,7 @@ use Database\Factories\UserFactory;
 use Database\Factories\WishlistItemFactory;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class DemoDataSeeder extends Seeder
 {
@@ -97,6 +98,17 @@ class DemoDataSeeder extends Seeder
             $this->createPurchases(array_slice($retailers, 0, 25), $offers);
             $this->createWishlistItems($retailers);
         });
+
+        foreach (self::PRODUCT_IDS as $productId) {
+            $path = "products/{$productId}.jpg";
+            if (! Storage::disk('public')->exists($path)) {
+                Storage::disk('public')->put($path, file_get_contents(database_path("seeders/images/{$path}")));
+            }
+        }
+
+        foreach (glob(database_path('seeders/images/demo-offers/*.jpg')) as $image) {
+            Storage::disk('public')->put('demo-offers/'.basename($image), file_get_contents($image));
+        }
     }
 
     private function removeExistingDemoData(): void
@@ -163,8 +175,8 @@ class DemoDataSeeder extends Seeder
     }
 
     /** @param list<Producer> $producers
-     *  @param array<string, int> $categories
-     *  @return list<Offer>
+     * @param  array<string, int>  $categories
+     * @return list<Offer>
      */
     private function createOffers(array $producers, array $categories): array
     {
@@ -180,6 +192,7 @@ class DemoDataSeeder extends Seeder
                     'category_id' => $categories[$categoryName],
                     'source_product_id' => self::PRODUCT_IDS[$productName],
                     'product_name' => $productName,
+                    'image_path' => 'demo-offers/'.($producerIndex + 1)."-{$offerNumber}.jpg",
                     'unit_price' => self::PRODUCT_PRICES[$productName],
                     'total_quantity' => 100,
                     'reserved_quantity' => 0,
@@ -210,7 +223,7 @@ class DemoDataSeeder extends Seeder
     }
 
     /** @param list<Retailer> $retailers
-     *  @param list<Offer> $offers
+     * @param  list<Offer>  $offers
      */
     private function createPurchases(array $retailers, array $offers): void
     {

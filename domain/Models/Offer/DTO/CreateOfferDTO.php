@@ -3,6 +3,7 @@
 namespace Cultiva\Models\Offer\DTO;
 
 use Cultiva\Models\Offer\Enums\OfferStatus;
+use Illuminate\Http\UploadedFile;
 
 final readonly class CreateOfferDTO
 {
@@ -14,6 +15,7 @@ final readonly class CreateOfferDTO
         public OfferStatus $status,
         public string $harvestDate,
         public int $lifespanDays,
+        public ?UploadedFile $image = null,
     ) {}
 
     public static function from(array $data): self
@@ -26,6 +28,7 @@ final readonly class CreateOfferDTO
             status: OfferStatus::from($data['status'] ?? OfferStatus::INACTIVE->value),
             harvestDate: $data['harvest_date'],
             lifespanDays: (int) $data['lifespan_days'],
+            image: $data['image'] ?? null,
         );
     }
 }

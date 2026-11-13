@@ -10,6 +10,9 @@ use Cultiva\Models\Offer\Enums\OfferStatus;
 use Cultiva\Models\Offer\Offer;
 use Cultiva\Models\Producer\Producer;
 use Illuminate\Support\Facades\Lang;
+use Illuminate\Support\Facades\Storage;
+use RuntimeException;
+use Throwable;
 
 final class CreateOfferAction
 {
@@ -25,16 +28,30 @@ final class CreateOfferAction
 
         $product = $this->getProduct->execute($data->sourceProductId);
 
-        return $producer->offers()->create([
-            'category_id' => $data->categoryId,
-            'source_product_id' => $product->id,
-            'product_name' => $product->name,
-            'unit_price' => $data->unitPrice,
-            'total_quantity' => $data->totalQuantity,
-            'reserved_quantity' => 0,
-            'status' => OfferStatus::ACTIVE,
-            'harvest_date' => $data->harvestDate,
-            'lifespan_days' => $data->lifespanDays,
-        ]);
+        $imagePath = $data->image?->store('offers', 'public');
+        if ($data->image !== null && $imagePath === false) {
+            throw new RuntimeException('Não foi possível salvar a imagem da oferta.');
+        }
+
+        try {
+            return $producer->offers()->create([
+                'category_id' => $data->categoryId,
+                'source_product_id' => $product->id,
+                'product_name' => $product->name,
+                'unit_price' => $data->unitPrice,
+                'total_quantity' => $data->totalQuantity,
+                'reserved_quantity' => 0,
+                'status' => OfferStatus::ACTIVE,
+                'harvest_date' => $data->harvestDate,
+                'lifespan_days' => $data->lifespanDays,
+                'image_path' => $imagePath,
+            ]);
+        } catch (Throwable $e) {
+            if ($imagePath) {
+                Storage::disk('public')->delete($imagePath);
+            }
+
+            throw $e;
+        }
     }
 }

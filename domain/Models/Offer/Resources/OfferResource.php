@@ -5,6 +5,7 @@ namespace Cultiva\Models\Offer\Resources;
 use Cultiva\Models\Category\Http\Resources\CategoryResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\Storage;
 
 final class OfferResource extends JsonResource
 {
@@ -14,6 +15,7 @@ final class OfferResource extends JsonResource
             'id' => $this->id,
             'source_product_id' => $this->source_product_id,
             'product_name' => $this->product_name,
+            'image_url' => $this->image_path ? Storage::disk('public')->url($this->image_path) : null,
             'producer_name' => $this->when($this->relationLoaded('producer'), fn () => $this->producer->company->trade_name),
             'category' => new CategoryResource($this->category),
             'unit_price' => $this->unit_price,
