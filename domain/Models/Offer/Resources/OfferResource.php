@@ -3,6 +3,8 @@
 namespace Cultiva\Models\Offer\Resources;
 
 use Cultiva\Models\Category\Http\Resources\CategoryResource;
+use Cultiva\Models\Offer\Actions\GetOfferImagesAction;
+use Cultiva\Models\Offer\DTO\OfferImageDTO;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Storage;
@@ -28,6 +30,10 @@ final class OfferResource extends JsonResource
             'lifespan_days' => $this->lifespan_days,
             'is_in_wishlist' => $this->whenHas('is_in_wishlist', fn (): bool => (bool) $this->is_in_wishlist),
             'distance_km' => $this->whenHas('distance_km', fn (): ?float => $this->distance_km === null ? null : (float) $this->distance_km),
+            'images' => array_map(
+                fn (OfferImageDTO $image): array => $image->toArray(),
+                app(GetOfferImagesAction::class)->execute($this->id)
+            ),
             'created_at' => $this->created_at->toISOString(),
             'updated_at' => $this->updated_at->toISOString(),
         ];

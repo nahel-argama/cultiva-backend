@@ -1,0 +1,194 @@
+openapi: 3.1.0
+info:
+  title: Cultiva Offer Images API
+  version: 1.0.0
+  description: Contrato da feature de imagens de ofertas sem persistência em banco.
+servers:
+  - url: /
+security:
+  - bearerAuth: []
+paths:
+  /v1/offers:
+    post:
+      operationId: createOfferWithImages
+      summary: Cria uma nova oferta, opcionalmente com até 3 imagens
+      tags: [Offers]
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - source_product_id
+                - category_id
+                - unit_price
+                - total_quantity
+                - harvest_date
+                - lifespan_days
+              properties:
+                source_product_id:
+                  type: string
+                category_id:
+                  type: integer
+                unit_price:
+                  type: string
+                total_quantity:
+                  type: integer
+                harvest_date:
+                  type: string
+                  format: date
+                lifespan_days:
+                  type: integer
+                images:
+                  type: array
+                  maxItems: 3
+                  items:
+                    type: string
+                    format: binary
+      responses:
+        "201":
+          description: Oferta criada com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OfferResponse"
+        "422":
+          $ref: "#/components/responses/ValidationFailed"
+
+  /v1/offers/{offer}/images:
+    post:
+      operationId: uploadOfferImages
+      summary: Envia novas imagens para uma oferta existente (máximo acumulado de 3)
+      tags: [Offer Images]
+      parameters:
+        - name: offer
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [images]
+              properties:
+                images:
+                  type: array
+                  minItems: 1
+                  maxItems: 3
+                  items:
+                    type: string
+                    format: binary
+      responses:
+        "200":
+          description: Imagens adicionadas com sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/OfferImage"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "422":
+          $ref: "#/components/responses/ValidationFailed"
+
+  /v1/offers/{offer}/images/{image}:
+    delete:
+      operationId: deleteOfferImage
+      summary: Remove uma imagem específica da oferta
+      tags: [Offer Images]
+      parameters:
+        - name: offer
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: image
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Imagem removida com sucesso
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+components:
+  schemas:
+    OfferImage:
+      type: object
+      required: [id, sequence, url]
+      properties:
+        id:
+          type: string
+          example: "img_1"
+        sequence:
+          type: integer
+          example: 1
+        url:
+          type: string
+          example: "http://localhost:8000/storage/product_images/1/1_img_1.jpg"
+
+    OfferResponse:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: object
+          required: [id, images]
+          properties:
+            id:
+              type: integer
+            images:
+              type: array
+              items:
+                $ref: "#/components/schemas/OfferImage"
+
+  responses:
+    Forbidden:
+      description: Usuário autenticado não tem permissão para alterar esta oferta
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [message]
+            properties:
+              message:
+                type: string
+                example: "This action is unauthorized."
+
+    NotFound:
+      description: Imagem ou oferta não encontrada
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [message]
+            properties:
+              message:
+                type: string
+                example: "Image not found."
+
+    ValidationFailed:
+      description: Erro de validação
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [message, errors]
+            properties:
+              message:
+                type: string
+              errors:
+                type: object

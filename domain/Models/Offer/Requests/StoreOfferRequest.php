@@ -26,6 +26,8 @@ final class StoreOfferRequest extends FormRequest
             'harvest_date' => ['required', 'date', 'date_format:Y-m-d', 'after_or_equal:today'],
             'lifespan_days' => ['required', 'integer', 'min:1'],
             'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+            'images' => ['array', 'max:3'],
+            'images.*' => ['image', 'max:5120'],
         ];
     }
 }

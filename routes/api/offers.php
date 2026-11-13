@@ -2,6 +2,7 @@
 
 use Cultiva\Models\Category\Http\Controllers\CategoryController;
 use Cultiva\Models\Offer\Controllers\OfferController;
+use Cultiva\Models\Offer\Controllers\OfferImageController;
 use Illuminate\Support\Facades\Route;
 
 Route::group([
@@ -23,4 +24,10 @@ Route::middleware('profile:producer')
         Route::patch('offers/{offer}', [OfferController::class, 'update'])
             ->whereNumber('offer')
             ->name('offers.update');
+        Route::post('offers/{offer}/images', [OfferImageController::class, 'store'])
+            ->whereNumber('offer')
+            ->name('offers.images.store');
+        Route::delete('offers/{offer}/images/{image}', [OfferImageController::class, 'destroy'])
+            ->whereNumber('offer')
+            ->name('offers.images.destroy');
     });
