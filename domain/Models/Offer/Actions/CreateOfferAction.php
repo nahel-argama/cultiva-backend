@@ -18,6 +18,7 @@ final class CreateOfferAction
 {
     public function __construct(
         private readonly GetProductAction $getProduct,
+        private readonly UploadOfferImagesAction $uploadOfferImages,
     ) {}
 
     public function execute(Producer $producer, CreateOfferDTO $data): Offer
@@ -34,7 +35,7 @@ final class CreateOfferAction
         }
 
         try {
-            return $producer->offers()->create([
+            $offer = $producer->offers()->create([
                 'category_id' => $data->categoryId,
                 'source_product_id' => $product->id,
                 'product_name' => $product->name,
@@ -46,6 +47,12 @@ final class CreateOfferAction
                 'lifespan_days' => $data->lifespanDays,
                 'image_path' => $imagePath,
             ]);
+
+            if (! empty($data->images)) {
+                $this->uploadOfferImages->execute($offer, $data->images);
+            }
+
+            return $offer;
         } catch (Throwable $e) {
             if ($imagePath) {
                 Storage::disk('public')->delete($imagePath);
