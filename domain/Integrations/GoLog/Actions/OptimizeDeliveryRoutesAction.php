@@ -23,7 +23,7 @@ class OptimizeDeliveryRoutesAction
         private readonly GoLogClient $goLogClient,
     ) {}
 
-    public function execute(?string $targetDate = null): OptimizeRoutesResultDTO
+    public function execute(): OptimizeRoutesResultDTO
     {
         /** @var Collection<int, GoLogShipment> $shipments */
         $shipments = GoLogShipment::query()
@@ -63,7 +63,7 @@ class OptimizeDeliveryRoutesAction
             );
         }
 
-        $scheduleDate = $targetDate ?? CarbonImmutable::now(self::SCHEDULE_TIMEZONE)->nextWeekday()->toDateString();
+        $scheduleDate = CarbonImmutable::now(self::SCHEDULE_TIMEZONE)->nextWeekday()->toDateString();
 
         $workScheduleIds = array_values(array_map(
             static fn (GoLogWorkScheduleResponseDTO $schedule): string => $schedule->id,

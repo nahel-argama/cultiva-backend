@@ -20,7 +20,7 @@ class OptimizeDeliveryRoutesCommandTest extends TestCase
             Mockery::mock(OptimizeDeliveryRoutesAction::class, function (MockInterface $mock): void {
                 $mock->shouldReceive('execute')
                     ->once()
-                    ->with(null)
+                    ->withNoArgs()
                     ->andReturn(new OptimizeRoutesResultDTO(
                         shipmentsOptimized: 0,
                         routesCount: 0,
@@ -48,7 +48,7 @@ class OptimizeDeliveryRoutesCommandTest extends TestCase
             Mockery::mock(OptimizeDeliveryRoutesAction::class, function (MockInterface $mock): void {
                 $mock->shouldReceive('execute')
                     ->once()
-                    ->with('2026-11-16')
+                    ->withNoArgs()
                     ->andReturn(new OptimizeRoutesResultDTO(
                         shipmentsOptimized: 4,
                         routesCount: 2,
@@ -71,7 +71,7 @@ class OptimizeDeliveryRoutesCommandTest extends TestCase
         );
 
         // Action & Assert
-        $this->artisan('delivery:optimize-routes', ['--date' => '2026-11-16'])
+        $this->artisan('delivery:optimize-routes')
             ->expectsOutput('Scanning pending GoLog shipments for route optimization...')
             ->expectsOutput('Routes created: 2')
             ->expectsOutput('Shipments optimized: 4')

@@ -20,6 +20,7 @@ class DispatchDeliveryOrdersBatchCommandTest extends TestCase
             Mockery::mock(DispatchDeliveryOrdersBatchAction::class, function (MockInterface $mock): void {
                 $mock->shouldReceive('execute')
                     ->once()
+                    ->withNoArgs()
                     ->andReturn(new DispatchBatchResultDTO(
                         totalOrders: 0,
                         batchesSent: 0,
@@ -44,6 +45,7 @@ class DispatchDeliveryOrdersBatchCommandTest extends TestCase
             Mockery::mock(DispatchDeliveryOrdersBatchAction::class, function (MockInterface $mock): void {
                 $mock->shouldReceive('execute')
                     ->once()
+                    ->withNoArgs()
                     ->andReturn(new DispatchBatchResultDTO(
                         totalOrders: 3,
                         batchesSent: 2,
