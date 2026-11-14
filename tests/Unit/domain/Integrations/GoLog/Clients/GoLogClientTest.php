@@ -260,6 +260,8 @@ class GoLogClientTest extends TestCase
             cep: '01310100',
             latitude: '-23.561684',
             longitude: '-46.655981',
+            typeTransportName: 'REFRIGERADO',
+            shipmentTypeName: 'Frutas',
         );
 
         // Action
@@ -276,8 +278,9 @@ class GoLogClientTest extends TestCase
         Http::assertSent(function ($request) {
             return $request->url() === 'http://golog.test/integration/invoices/json'
                 && $request->method() === 'POST'
-                && isset($request->data()['invoices'][0]['invoiceNumber'])
-                && $request->data()['invoices'][0]['invoiceNumber'] === 'DO-1';
+                && ($request->data()['invoices'][0]['invoiceNumber'] ?? null) === 'DO-1'
+                && ($request->data()['invoices'][0]['typeTransportName'] ?? null) === 'REFRIGERADO'
+                && ($request->data()['invoices'][0]['shipmentTypeName'] ?? null) === 'Frutas';
         });
     }
 

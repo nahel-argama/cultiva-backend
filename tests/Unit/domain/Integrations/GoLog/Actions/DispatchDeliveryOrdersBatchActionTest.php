@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Tests\Unit\domain\Integrations\GoLog\Actions;
 
+use Carbon\CarbonImmutable;
 use Cultiva\Base\Exceptions\CultivaException;
 use Cultiva\Integrations\GoLog\Actions\DispatchDeliveryOrdersBatchAction;
+use Cultiva\Integrations\GoLog\Actions\ResolveTransportTypeAction;
 use Cultiva\Integrations\GoLog\Clients\GoLogClient;
 use Cultiva\Integrations\GoLog\DTO\DispatchBatchResultDTO;
 use Cultiva\Integrations\GoLog\DTO\GoLogInvoiceImportResponseDTO;
@@ -31,6 +33,8 @@ class DispatchDeliveryOrdersBatchActionTest extends TestCase
     public function test_should_dispatch_one_batch_per_category_extract_postgis_coordinates_and_save_shipments(): void
     {
         // Arrange
+        CarbonImmutable::setTestNow(CarbonImmutable::parse('2026-11-13 20:00:00', 'America/Sao_Paulo'));
+
         $categoryFrutas = Category::query()->where('name', CategoryEnum::FRUTAS)->firstOrFail();
         $categoryVerduras = Category::query()->where('name', CategoryEnum::VERDURAS)->firstOrFail();
 
@@ -88,12 +92,17 @@ class DispatchDeliveryOrdersBatchActionTest extends TestCase
                     return count($invoices) === 4
                         && $invoices[0]->invoiceNumber === "DO-{$order1->id}-COL"
                         && $invoices[0]->typeOperation === 'COLETA'
+                        && $invoices[0]->typeTransportName === 'REFRIGERADO'
+                        && $invoices[0]->shipmentTypeName === 'Frutas'
+                        && $invoices[0]->scheduledDate === '2026-11-16T15:00:00Z'
                         && str_contains($invoices[0]->notes, '[Frutas]')
-                        && str_ends_with($invoices[0]->scheduledDate, 'Z')
                         && $invoices[0]->longitude === '-49.05555'
                         && $invoices[0]->latitude === '-26.92222'
                         && $invoices[1]->invoiceNumber === "DO-{$order1->id}-ENT"
                         && $invoices[1]->typeOperation === 'ENTREGA'
+                        && $invoices[1]->typeTransportName === 'REFRIGERADO'
+                        && $invoices[1]->shipmentTypeName === 'Frutas'
+                        && $invoices[1]->scheduledDate === '2026-11-16T18:00:00Z'
                         && $invoices[1]->longitude === '-49.06611'
                         && $invoices[1]->latitude === '-26.91944';
                 }))
@@ -115,6 +124,8 @@ class DispatchDeliveryOrdersBatchActionTest extends TestCase
                 ->with(Mockery::on(function (array $invoices): bool {
                     return count($invoices) === 2
                         && $invoices[0]->typeOperation === 'COLETA'
+                        && $invoices[0]->typeTransportName === 'REFRIGERADO'
+                        && $invoices[0]->shipmentTypeName === 'Verduras'
                         && $invoices[1]->typeOperation === 'ENTREGA'
                         && str_contains($invoices[0]->notes, '[Verduras]');
                 }))
@@ -130,10 +141,12 @@ class DispatchDeliveryOrdersBatchActionTest extends TestCase
                 ));
         });
 
-        $sut = new DispatchDeliveryOrdersBatchAction($clientMock);
+        $sut = new DispatchDeliveryOrdersBatchAction($clientMock, new ResolveTransportTypeAction());
 
         // Action
         $result = $sut->execute();
+
+        CarbonImmutable::setTestNow();
 
         // Assert
         $this->assertInstanceOf(DispatchBatchResultDTO::class, $result);
@@ -230,7 +243,7 @@ class DispatchDeliveryOrdersBatchActionTest extends TestCase
                 ));
         });
 
-        $sut = new DispatchDeliveryOrdersBatchAction($clientMock);
+        $sut = new DispatchDeliveryOrdersBatchAction($clientMock, new ResolveTransportTypeAction());
 
         // Action & Assert
         try {
@@ -263,7 +276,7 @@ class DispatchDeliveryOrdersBatchActionTest extends TestCase
             $mock->shouldNotReceive('importInvoicesJson');
         });
 
-        $sut = new DispatchDeliveryOrdersBatchAction($clientMock);
+        $sut = new DispatchDeliveryOrdersBatchAction($clientMock, new ResolveTransportTypeAction());
 
         // Action
         $result = $sut->execute();

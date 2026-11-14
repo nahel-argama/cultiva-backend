@@ -30,6 +30,8 @@ final readonly class GoLogInvoiceImportItemDTO
         public string $cep,
         public string $latitude,
         public string $longitude,
+        public ?string $typeTransportName = null,
+        public ?string $shipmentTypeName = null,
     ) {}
 
     /**
@@ -37,7 +39,7 @@ final readonly class GoLogInvoiceImportItemDTO
      */
     public function toArray(): array
     {
-        return [
+        return array_filter([
             'invoiceNumber' => $this->invoiceNumber,
             'series' => $this->series,
             'accessKey' => $this->accessKey,
@@ -61,6 +63,8 @@ final readonly class GoLogInvoiceImportItemDTO
             'cep' => $this->cep,
             'latitude' => $this->latitude,
             'longitude' => $this->longitude,
-        ];
+            'typeTransportName' => $this->typeTransportName,
+            'shipmentTypeName' => $this->shipmentTypeName,
+        ], static fn(mixed $value): bool => $value !== null);
     }
 }
