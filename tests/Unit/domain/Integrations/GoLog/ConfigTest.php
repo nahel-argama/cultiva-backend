@@ -59,4 +59,18 @@ class ConfigTest extends TestCase
         $this->assertSame('t0000000-0000-0000-0000-000000000001', $sut->getTenantId());
         $this->assertNull($sut->getTenantId());
     }
+
+    public function test_should_return_configured_webhook_secret_or_null_when_empty(): void
+    {
+        $configRepo = Mockery::mock(ConfigRepository::class, function (MockInterface $mock) {
+            $mock->shouldReceive('get')
+                ->with('services.golog.webhook_secret')
+                ->andReturn('super-strong-secret', '');
+        });
+
+        $sut = new Config($configRepo);
+
+        $this->assertSame('super-strong-secret', $sut->getWebhookSecret());
+        $this->assertNull($sut->getWebhookSecret());
+    }
 }
