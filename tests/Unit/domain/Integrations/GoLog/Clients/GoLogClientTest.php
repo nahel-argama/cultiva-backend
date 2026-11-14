@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\domain\Integrations\GoLog\Clients;
 
+use Cultiva\Base\Exceptions\CultivaException;
 use Cultiva\Integrations\GoLog\Clients\GoLogClient;
 use Cultiva\Integrations\GoLog\DTO\GoLogAuthResponseDTO;
 use Cultiva\Integrations\GoLog\DTO\GoLogDriverResponseDTO;
@@ -30,6 +31,7 @@ class GoLogClientTest extends TestCase
             'services.golog.base_url' => 'http://golog.test',
             'services.golog.email' => 'admin@golog.test',
             'services.golog.password' => 'secret123',
+            'services.golog.tenant_id' => null,
             'services.golog.timeout' => 5,
         ]);
     }
@@ -368,5 +370,74 @@ class GoLogClientTest extends TestCase
                 && $request['workScheduleIds'] === $workScheduleIds
                 && $request['routePriority'] === 'TEMPO';
         });
+    }
+
+    public function test_should_reauthenticate_and_retry_once_when_receiving_401(): void
+    {
+        // Arrange
+        $loginFixture = require base_path('tests/Fixtures/Integrations/GoLog/login_success.php');
+
+        Cache::put('golog_auth_session', [
+            'token' => 'expired-jwt-token',
+            'userId' => 'a0000000-0000-0000-0000-000000000001',
+            'userName' => 'Cultiva',
+            'userRole' => 'ADMIN',
+            'companyId' => 'c0000000-0000-0000-0000-000000000001',
+            'companyName' => 'Cultiva',
+            'companyType' => 'TENANT_HEADQUARTER',
+            'isMaster' => false,
+        ], 6600);
+
+        Http::fake([
+            'http://golog.test/login' => Http::response($loginFixture, 200),
+            'http://golog.test/type-transport' => Http::sequence()
+                ->push(['message' => 'Sessão ausente ou expirada'], 401)
+                ->push([['id' => '11111111-1111-1111-1111-111111111111', 'name' => 'REFRIGERADO']], 200),
+        ]);
+
+        $sut = $this->app->make(GoLogClient::class);
+
+        // Action
+        $types = $sut->getTransportTypes();
+
+        // Assert
+        $this->assertCount(1, $types);
+        $this->assertSame('REFRIGERADO', $types[0]->name);
+        Http::assertSentCount(3);
+        Http::assertSent(fn (\Illuminate\Http\Client\Request $request): bool => $request->url() === 'http://golog.test/type-transport'
+            && $request->hasHeader('Authorization', 'Bearer mock-golog-jwt-token'));
+    }
+
+    public function test_should_extract_standardized_error_message_when_request_fails(): void
+    {
+        // Arrange
+        $loginFixture = require base_path('tests/Fixtures/Integrations/GoLog/login_success.php');
+
+        Http::fake([
+            'http://golog.test/login' => Http::response($loginFixture, 200),
+            'http://golog.test/type-transport' => Http::response([
+                'status' => 400,
+                'message' => 'Placa inválida • RENAVAM deve conter exatamente 11 dígitos numéricos',
+                'errors' => [
+                    'Placa inválida',
+                    'RENAVAM deve conter exatamente 11 dígitos numéricos',
+                ],
+                'timestamp' => '2026-11-11T03:40:27Z',
+            ], 400),
+        ]);
+
+        $sut = $this->app->make(GoLogClient::class);
+
+        // Action & Assert
+        try {
+            $sut->createTransportType('INVALIDO', 'Desc', 'Care');
+            $this->fail('Expected CultivaException was not thrown.');
+        } catch (CultivaException $exception) {
+            $this->assertSame(400, $exception->getStatusCode());
+            $this->assertSame(
+                'Failed to create transport type in GoLog: Placa inválida • RENAVAM deve conter exatamente 11 dígitos numéricos',
+                $exception->getMessage()
+            );
+        }
     }
 }

@@ -31,6 +31,8 @@ class GoLogClient
 {
     private const string CACHE_KEY = 'golog_auth_session';
 
+    private const int TOKEN_CACHE_TTL_SECONDS = 6600;
+
     public function __construct(
         private readonly Config $config,
         private readonly HttpFactory $http,
@@ -79,7 +81,7 @@ class GoLogClient
 
         $data = $response->json();
 
-        Cache::put(self::CACHE_KEY, $data, 60);
+        Cache::put(self::CACHE_KEY, $data, self::TOKEN_CACHE_TTL_SECONDS);
 
         return GoLogAuthResponseDTO::fromArray($data);
     }
@@ -89,11 +91,7 @@ class GoLogClient
      */
     public function getTransportTypes(): array
     {
-        $response = $this->authenticatedRequest()->get('type-transport');
-
-        if (! $response->successful()) {
-            $this->throwFailedRequest('Failed to fetch transport types from GoLog', $response);
-        }
+        $response = $this->get('type-transport', [], 'Failed to fetch transport types from GoLog');
 
         /** @var array<int, array<string, mixed>> $items */
         $items = $response->json();
@@ -229,17 +227,7 @@ class GoLogClient
 
     private function findWorkSchedule(string $driverId, string $scheduleDate): GoLogWorkScheduleResponseDTO
     {
-        $response = $this->authenticatedRequest()->get('workSchedule');
-
-        Log::info('GoLog API response', [
-            'endpoint' => 'workSchedule',
-            'status' => $response->status(),
-            'body' => $response->json() ?? $response->body(),
-        ]);
-
-        if (! $response->successful()) {
-            $this->throwFailedRequest('Failed to fetch work schedules from GoLog', $response);
-        }
+        $response = $this->get('workSchedule', [], 'Failed to fetch work schedules from GoLog');
 
         /** @var array<int, array<string, mixed>> $schedules */
         $schedules = $response->json();
@@ -289,11 +277,43 @@ class GoLogClient
     }
 
     /**
+     * @param array<string, mixed> $query
+     */
+    private function get(string $endpoint, array $query, string $errorMessage): Response
+    {
+        return $this->sendAuthenticated('get', $endpoint, $query, $errorMessage);
+    }
+
+    /**
      * @param array<string, mixed> $payload
      */
     private function post(string $endpoint, array $payload, string $errorMessage): Response
     {
-        $response = $this->authenticatedRequest()->post($endpoint, $payload);
+        return $this->sendAuthenticated('post', $endpoint, $payload, $errorMessage);
+    }
+
+    /**
+     * @param array<string, mixed> $payload
+     */
+    private function patch(string $endpoint, array $payload, string $errorMessage): Response
+    {
+        return $this->sendAuthenticated('patch', $endpoint, $payload, $errorMessage);
+    }
+
+    /**
+     * @param array<string, mixed> $data
+     */
+    private function sendAuthenticated(string $method, string $endpoint, array $data, string $errorMessage): Response
+    {
+        /** @var Response $response */
+        $response = $this->authenticatedRequest()->{$method}($endpoint, $data);
+
+        if ($response->status() === 401) {
+            Cache::forget(self::CACHE_KEY);
+            $this->login();
+            /** @var Response $response */
+            $response = $this->authenticatedRequest()->{$method}($endpoint, $data);
+        }
 
         Log::info('GoLog API response', [
             'endpoint' => $endpoint,
@@ -326,11 +346,16 @@ class GoLogClient
         return $request;
     }
 
-    private function throwFailedRequest(string $message, Response $response): void
+    private function throwFailedRequest(string $message, Response $response): never
     {
+        $data = $response->json();
+        $detail = is_array($data) && is_string($data['message'] ?? null)
+            ? ": {$data['message']}"
+            : ' Response: ' . $response->body();
+
         throw new CultivaException(
             $response->status(),
-            "$message Response: " . $response->body()
+            $message . $detail
         );
     }
 }
