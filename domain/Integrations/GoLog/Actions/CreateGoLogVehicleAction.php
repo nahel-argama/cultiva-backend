@@ -33,11 +33,25 @@ class CreateGoLogVehicleAction
             maximumCapacity: $dto->capacity,
             typeFuel: $dto->typeFuel,
             costPerKilometer: $dto->costPerKilometer,
+            vehicleType: $dto->vehicleType,
+            cargoVolume: $dto->cargoVolume,
+            kmPerLiter: $dto->kmPerLiter,
         );
+
+        $equipamentGroupId = null;
+        if ($dto->vehicleType?->isRigid() === true) {
+            foreach ($this->goLogClient->listEquipamentGroups() as $group) {
+                if ($group->equipament1Id === $tractor->id) {
+                    $equipamentGroupId = $group->id;
+                    break;
+                }
+            }
+        }
 
         GoLogVehicle::query()->create([
             'golog_driver_id' => $driver->id,
             'golog_tractor_id' => $tractor->id,
+            'golog_equipament_group_id' => $equipamentGroupId,
         ]);
 
         return $driver->refresh()->load(['company', 'vehicle']);

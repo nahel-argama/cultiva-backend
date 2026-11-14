@@ -3,6 +3,7 @@
 namespace Cultiva\Integrations\GoLog\DTO;
 
 use Cultiva\Integrations\GoLog\Enums\GoLogFuelType;
+use Cultiva\Integrations\GoLog\Enums\GoLogVehicleType;
 
 final readonly class CreateGoLogVehicleDTO
 {
@@ -14,6 +15,9 @@ final readonly class CreateGoLogVehicleDTO
         public int $numberAxles,
         public GoLogFuelType $typeFuel,
         public float $costPerKilometer,
+        public ?GoLogVehicleType $vehicleType = null,
+        public ?float $cargoVolume = null,
+        public ?float $kmPerLiter = null,
     ) {}
 
     public static function from(array $data): self
@@ -26,6 +30,9 @@ final readonly class CreateGoLogVehicleDTO
             numberAxles: $data['number_axles'],
             typeFuel: GoLogFuelType::from($data['type_fuel']),
             costPerKilometer: $data['cost_per_kilometer'],
+            vehicleType: isset($data['vehicle_type']) ? GoLogVehicleType::from($data['vehicle_type']) : null,
+            cargoVolume: $data['cargo_volume'] ?? null,
+            kmPerLiter: $data['km_per_liter'] ?? null,
         );
     }
 }
