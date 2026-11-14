@@ -56,7 +56,6 @@ class OptimizeDeliveryRoutesActionTest extends TestCase
         $driver1 = GoLogDriverFactory::new()->create([
             'golog_user_id' => 'a1111111-1111-1111-1111-111111111111',
             'golog_driver_id' => 'b1111111-1111-1111-1111-111111111111',
-            'golog_work_schedule_id' => 'f1111111-1111-1111-1111-111111111111',
         ]);
         GoLogVehicleFactory::new()->create([
             'golog_driver_id' => $driver1->id,
@@ -67,7 +66,6 @@ class OptimizeDeliveryRoutesActionTest extends TestCase
         $driver2 = GoLogDriverFactory::new()->create([
             'golog_user_id' => 'a2222222-2222-2222-2222-222222222222',
             'golog_driver_id' => 'b2222222-2222-2222-2222-222222222222',
-            'golog_work_schedule_id' => 'f2222222-2222-2222-2222-222222222222',
         ]);
         GoLogVehicleFactory::new()->create([
             'golog_driver_id' => $driver2->id,
@@ -205,7 +203,6 @@ class OptimizeDeliveryRoutesActionTest extends TestCase
         $driver = GoLogDriverFactory::new()->create([
             'golog_user_id' => 'a1111111-1111-1111-1111-111111111111',
             'golog_driver_id' => 'd1111111-1111-1111-1111-111111111111',
-            'golog_work_schedule_id' => 'c1111111-1111-1111-1111-111111111111',
         ]);
         GoLogVehicleFactory::new()->create([
             'golog_driver_id' => $driver->id,

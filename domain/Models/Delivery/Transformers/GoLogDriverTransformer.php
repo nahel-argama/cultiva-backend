@@ -16,7 +16,6 @@ final class GoLogDriverTransformer
             'trade_name' => $gologDriver->company->trade_name,
             'golog_user_id' => $gologDriver->golog_user_id,
             'golog_driver_id' => $gologDriver->golog_driver_id,
-            'golog_work_schedule_id' => $gologDriver->golog_work_schedule_id,
             'stopped_step' => $gologDriver->getStoppedStep()->value,
             'is_provisioned' => $gologDriver->isProvisioned(),
             'vehicle' => $vehicle !== null ? [

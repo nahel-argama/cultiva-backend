@@ -17,7 +17,6 @@ use Override;
  * @property-read string $cpf
  * @property-read ?string $golog_user_id
  * @property-read ?string $golog_driver_id
- * @property-read ?string $golog_work_schedule_id
  * @property-read CarbonImmutable $created_at
  * @property-read ?CarbonImmutable $updated_at
  * @property-read ?Company $company
@@ -32,7 +31,6 @@ class GoLogDriver extends Model
         'cpf',
         'golog_user_id',
         'golog_driver_id',
-        'golog_work_schedule_id',
     ];
 
     #[Override]
@@ -60,10 +58,6 @@ class GoLogDriver extends Model
 
         if ($vehicle->golog_equipament_group_id === null) {
             return GoLogDriverStep::EQUIPAMENT_GROUP;
-        }
-
-        if ($this->golog_work_schedule_id === null) {
-            return GoLogDriverStep::WORK_SCHEDULE;
         }
 
         return GoLogDriverStep::COMPLETED;

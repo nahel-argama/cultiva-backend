@@ -28,13 +28,12 @@ final class StoreWorkScheduleTest extends TestCase
         ]);
     }
 
-    public function test_should_create_single_work_schedule_and_complete_provisioning(): void
+    public function test_should_create_work_schedule_for_provisioned_driver(): void
     {
         // Arrange
         $driver = GoLogDriverFactory::new()->create([
             'golog_user_id' => '11111111-2222-3333-4444-555555555555',
             'golog_driver_id' => '22222222-3333-4444-5555-666666666666',
-            'golog_work_schedule_id' => null,
         ]);
         GoLogVehicleFactory::new()->create([
             'golog_driver_id' => $driver->id,
@@ -43,7 +42,14 @@ final class StoreWorkScheduleTest extends TestCase
         ]);
 
         $loginFixture = require base_path('tests/Fixtures/Integrations/GoLog/login_success.php');
-        $schedulesFixture = require base_path('tests/Fixtures/Integrations/GoLog/list_work_schedules_success.php');
+        $schedulesFixture = json_decode((string) require base_path('tests/Fixtures/Integrations/GoLog/list_work_schedules_success.php'), true);
+        $schedulesFixture[] = [
+            ...$schedulesFixture[0],
+            'id' => '66666666-6666-6666-6666-666666666666',
+            'scheduleDate' => '2026-11-11',
+            'startWorkday' => '09:00:00',
+            'endWorkday' => '19:00:00',
+        ];
 
         Http::fake([
             'http://golog.test/login' => Http::response($loginFixture, 200),
@@ -65,7 +71,7 @@ final class StoreWorkScheduleTest extends TestCase
 
         // Assert
         $response->assertStatus(201)
-            ->assertJsonPath('data.golog_work_schedule_id', '55555555-5555-5555-5555-555555555555')
+            ->assertJsonMissingPath('data.golog_work_schedule_id')
             ->assertJsonPath('data.stopped_step', 'completed')
             ->assertJsonPath('data.is_provisioned', true);
 
@@ -78,20 +84,16 @@ final class StoreWorkScheduleTest extends TestCase
             && $request['endWorkday'] === '18:00:00');
 
         $driver->refresh();
-        $this->assertSame('55555555-5555-5555-5555-555555555555', $driver->golog_work_schedule_id);
         $this->assertSame(GoLogDriverStep::COMPLETED, $driver->getStoppedStep());
         $this->assertTrue($driver->isProvisioned());
     }
 
-    public function test_should_return_409_when_driver_already_has_a_work_schedule(): void
+    public function test_should_allow_creating_multiple_work_schedules_for_provisioned_driver(): void
     {
         // Arrange
-        Http::fake();
-
         $driver = GoLogDriverFactory::new()->create([
             'golog_user_id' => '11111111-2222-3333-4444-555555555555',
             'golog_driver_id' => '22222222-3333-4444-5555-666666666666',
-            'golog_work_schedule_id' => '55555555-5555-5555-5555-555555555555',
         ]);
         GoLogVehicleFactory::new()->create([
             'golog_driver_id' => $driver->id,
@@ -99,20 +101,48 @@ final class StoreWorkScheduleTest extends TestCase
             'golog_equipament_group_id' => '44444444-5555-6666-7777-888888888888',
         ]);
 
+        $loginFixture = require base_path('tests/Fixtures/Integrations/GoLog/login_success.php');
+        $schedulesFixture = json_decode((string) require base_path('tests/Fixtures/Integrations/GoLog/list_work_schedules_success.php'), true);
+        $schedulesFixture[] = [
+            ...$schedulesFixture[0],
+            'id' => '66666666-6666-6666-6666-666666666666',
+            'scheduleDate' => '2026-11-11',
+            'startWorkday' => '09:00:00',
+            'endWorkday' => '19:00:00',
+        ];
+
+        Http::fake([
+            'http://golog.test/login' => Http::response($loginFixture, 200),
+            'http://golog.test/workSchedule' => fn ($request) => $request->method() === 'POST'
+                ? Http::response('', 201)
+                : Http::response($schedulesFixture, 200),
+        ]);
+
         Sanctum::actingAs($driver->company->user, ['access']);
 
-        $payload = [
+        // Action
+        $firstResponse = $this->postJson('/v1/golog/work-schedules', [
             'schedule_date' => '2026-11-10',
             'start_time' => '08:00',
             'end_time' => '18:00',
-        ];
+        ]);
 
-        // Action
-        $response = $this->postJson('/v1/golog/work-schedules', $payload);
+        $secondResponse = $this->postJson('/v1/golog/work-schedules', [
+            'schedule_date' => '2026-11-11',
+            'start_time' => '09:00',
+            'end_time' => '19:00',
+        ]);
 
         // Assert
-        $response->assertStatus(409);
-        Http::assertNothingSent();
+        $firstResponse->assertStatus(201);
+        $secondResponse->assertStatus(201);
+
+        Http::assertSent(fn ($request): bool => $request->url() === 'http://golog.test/workSchedule'
+            && $request->method() === 'POST'
+            && $request['scheduleDate'] === '2026-11-10');
+        Http::assertSent(fn ($request): bool => $request->url() === 'http://golog.test/workSchedule'
+            && $request->method() === 'POST'
+            && $request['scheduleDate'] === '2026-11-11');
     }
 
     public function test_should_return_422_when_equipament_group_was_not_created_yet(): void

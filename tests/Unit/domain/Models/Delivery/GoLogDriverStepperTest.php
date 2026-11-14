@@ -77,27 +77,6 @@ class GoLogDriverStepperTest extends TestCase
         $this->assertFalse($driver->isProvisioned());
     }
 
-    public function test_should_return_work_schedule_step_when_group_is_present_without_schedule(): void
-    {
-        $driver = GoLogDriver::query()->create([
-            'company_id' => $this->company->id,
-            'cpf' => '40374708029',
-            'golog_user_id' => '11111111-1111-1111-1111-111111111111',
-            'golog_driver_id' => '22222222-2222-2222-2222-222222222222',
-        ]);
-
-        GoLogVehicle::query()->create([
-            'golog_driver_id' => $driver->id,
-            'golog_tractor_id' => '33333333-3333-3333-3333-333333333333',
-            'golog_equipament_group_id' => '44444444-4444-4444-4444-444444444444',
-        ]);
-
-        $driver->load('vehicle');
-
-        $this->assertSame(GoLogDriverStep::WORK_SCHEDULE, $driver->getStoppedStep());
-        $this->assertFalse($driver->isProvisioned());
-    }
-
     public function test_should_return_completed_when_all_golog_ids_are_present(): void
     {
         $driver = GoLogDriver::query()->create([
@@ -105,7 +84,6 @@ class GoLogDriverStepperTest extends TestCase
             'cpf' => '40374708029',
             'golog_user_id' => '11111111-1111-1111-1111-111111111111',
             'golog_driver_id' => '22222222-2222-2222-2222-222222222222',
-            'golog_work_schedule_id' => '55555555-5555-5555-5555-555555555555',
         ]);
 
         GoLogVehicle::query()->create([
