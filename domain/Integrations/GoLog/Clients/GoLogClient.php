@@ -61,13 +61,7 @@ class GoLogClient
 
     public function getCompanyId(): string
     {
-        $tenantId = $this->config->getTenantId();
-
-        if ($tenantId !== null) {
-            return $tenantId;
-        }
-
-        return $this->getAuthSession()->companyId;
+        return $this->config->getTenantId();
     }
 
     public function login(): GoLogAuthResponseDTO
@@ -425,20 +419,13 @@ class GoLogClient
 
     private function authenticatedRequest(): PendingRequest
     {
-        $request = $this->http->baseUrl($this->config->getBaseUrl())
+        return $this->http->baseUrl($this->config->getBaseUrl())
             ->timeout($this->config->getTimeout())
             ->acceptJson()
-            ->withToken($this->getToken());
-
-        $tenantId = $this->config->getTenantId();
-
-        if ($tenantId !== null) {
-            $request = $request->withHeaders([
-                'X-Tenant-Id' => $tenantId,
+            ->withToken($this->getToken())
+            ->withHeaders([
+                'X-Tenant-Id' => $this->config->getTenantId(),
             ]);
-        }
-
-        return $request;
     }
 
     private function throwFailedRequest(string $message, Response $response): never

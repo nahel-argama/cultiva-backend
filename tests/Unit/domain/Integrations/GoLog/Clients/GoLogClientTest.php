@@ -33,7 +33,7 @@ class GoLogClientTest extends TestCase
             'services.golog.base_url' => 'http://golog.test',
             'services.golog.email' => 'admin@golog.test',
             'services.golog.password' => 'secret123',
-            'services.golog.tenant_id' => null,
+            'services.golog.tenant_id' => 't1111111-2222-3333-4444-555555555555',
             'services.golog.timeout' => 5,
         ]);
     }
@@ -62,7 +62,7 @@ class GoLogClientTest extends TestCase
         $this->assertSame(GoLogUserProfile::ADMIN, $authDto->userRole);
         $this->assertSame('c0000000-0000-0000-0000-000000000001', $authDto->companyId);
         $this->assertSame('mock-golog-jwt-token', $token);
-        $this->assertSame('c0000000-0000-0000-0000-000000000001', $companyId);
+        $this->assertSame('t1111111-2222-3333-4444-555555555555', $companyId);
         $this->assertSame('mock-golog-jwt-token', $token2);
 
         Http::assertSentCount(1);
@@ -325,13 +325,9 @@ class GoLogClientTest extends TestCase
         });
     }
 
-    public function test_should_send_tenant_header_and_override_company_id_when_tenant_is_configured(): void
+    public function test_should_always_send_tenant_header_and_configured_company_id(): void
     {
         // Arrange
-        config([
-            'services.golog.tenant_id' => 't1111111-2222-3333-4444-555555555555',
-        ]);
-
         $loginFixture = require base_path('tests/Fixtures/Integrations/GoLog/login_success.php');
         $userFixture = require base_path('tests/Fixtures/Integrations/GoLog/create_user_success.php');
 
@@ -364,10 +360,6 @@ class GoLogClientTest extends TestCase
     public function test_should_optimize_routes(): void
     {
         // Arrange
-        config([
-            'services.golog.tenant_id' => 't1111111-2222-3333-4444-555555555555',
-        ]);
-
         $loginFixture = require base_path('tests/Fixtures/Integrations/GoLog/login_success.php');
         $optimizeFixture = require base_path('tests/Fixtures/Integrations/GoLog/optimize_routes_success.php');
 
@@ -512,8 +504,8 @@ class GoLogClientTest extends TestCase
 
         Http::fake([
             'http://golog.test/login' => Http::response($loginFixture, 200),
-            'http://golog.test/company/c0000000-0000-0000-0000-000000000001/webhook' => Http::response([], 200),
-            'http://golog.test/company/c0000000-0000-0000-0000-000000000001/webhook/test' => Http::response([
+            'http://golog.test/company/t1111111-2222-3333-4444-555555555555/webhook' => Http::response([], 200),
+            'http://golog.test/company/t1111111-2222-3333-4444-555555555555/webhook/test' => Http::response([
                 'success' => true,
                 'statusCode' => 200,
                 'responseBody' => '{"status":"accepted"}',
@@ -537,7 +529,7 @@ class GoLogClientTest extends TestCase
         $this->assertSame(200, $testResult->statusCode);
 
         Http::assertSent(function (\Illuminate\Http\Client\Request $request): bool {
-            return $request->url() === 'http://golog.test/company/c0000000-0000-0000-0000-000000000001/webhook'
+            return $request->url() === 'http://golog.test/company/t1111111-2222-3333-4444-555555555555/webhook'
                 && $request->method() === 'PATCH'
                 && $request['webhookUrl'] === 'https://example.ngrok.app/v1/golog/webhook'
                 && $request['webhookSecret'] === 'whsec_test_123'
@@ -545,7 +537,7 @@ class GoLogClientTest extends TestCase
         });
 
         Http::assertSent(function (\Illuminate\Http\Client\Request $request): bool {
-            return $request->url() === 'http://golog.test/company/c0000000-0000-0000-0000-000000000001/webhook/test'
+            return $request->url() === 'http://golog.test/company/t1111111-2222-3333-4444-555555555555/webhook/test'
                 && $request->method() === 'POST';
         });
     }
