@@ -504,4 +504,85 @@ class GoLogClientTest extends TestCase
             );
         }
     }
+
+    public function test_should_configure_and_test_webhook(): void
+    {
+        // Arrange
+        $loginFixture = require base_path('tests/Fixtures/Integrations/GoLog/login_success.php');
+
+        Http::fake([
+            'http://golog.test/login' => Http::response($loginFixture, 200),
+            'http://golog.test/company/c0000000-0000-0000-0000-000000000001/webhook' => Http::response([], 200),
+            'http://golog.test/company/c0000000-0000-0000-0000-000000000001/webhook/test' => Http::response([
+                'success' => true,
+                'statusCode' => 200,
+                'responseBody' => '{"status":"accepted"}',
+                'error' => null,
+            ], 200),
+        ]);
+
+        $sut = $this->app->make(GoLogClient::class);
+
+        // Action
+        $sut->configureWebhook(
+            webhookUrl: 'https://example.ngrok.app/v1/golog/webhook',
+            webhookSecret: 'whsec_test_123',
+            webhookActive: true,
+        );
+        $testResult = $sut->testWebhook();
+
+        // Assert
+        $this->assertInstanceOf(\Cultiva\Integrations\GoLog\DTO\GoLogWebhookTestResponseDTO::class, $testResult);
+        $this->assertTrue($testResult->success);
+        $this->assertSame(200, $testResult->statusCode);
+
+        Http::assertSent(function (\Illuminate\Http\Client\Request $request): bool {
+            return $request->url() === 'http://golog.test/company/c0000000-0000-0000-0000-000000000001/webhook'
+                && $request->method() === 'PATCH'
+                && $request['webhookUrl'] === 'https://example.ngrok.app/v1/golog/webhook'
+                && $request['webhookSecret'] === 'whsec_test_123'
+                && $request['webhookActive'] === true;
+        });
+
+        Http::assertSent(function (\Illuminate\Http\Client\Request $request): bool {
+            return $request->url() === 'http://golog.test/company/c0000000-0000-0000-0000-000000000001/webhook/test'
+                && $request->method() === 'POST';
+        });
+    }
+
+    public function test_should_list_shipments_by_status_and_get_single_shipment(): void
+    {
+        // Arrange
+        $loginFixture = require base_path('tests/Fixtures/Integrations/GoLog/login_success.php');
+
+        Http::fake([
+            'http://golog.test/login' => Http::response($loginFixture, 200),
+            'http://golog.test/shipment/list-by-status*' => Http::response([
+                'content' => [
+                    [
+                        'id' => 'ship-uuid-1',
+                        'typeOperation' => 'COLETA',
+                        'status' => 'PENDENTE',
+                    ],
+                ],
+            ], 200),
+            'http://golog.test/shipment/ship-uuid-1' => Http::response([
+                'id' => 'ship-uuid-1',
+                'typeOperation' => 'COLETA',
+                'status' => 'FINALIZADO',
+            ], 200),
+        ]);
+
+        $sut = $this->app->make(GoLogClient::class);
+
+        // Action
+        $list = $sut->listShipmentsByStatus(\Cultiva\Integrations\GoLog\Enums\GoLogShipmentStatus::PENDENTE);
+        $single = $sut->getShipment('ship-uuid-1');
+
+        // Assert
+        $this->assertCount(1, $list);
+        $this->assertSame('ship-uuid-1', $list[0]->id);
+        $this->assertSame(\Cultiva\Integrations\GoLog\Enums\GoLogShipmentStatus::PENDENTE, $list[0]->status);
+        $this->assertSame(\Cultiva\Integrations\GoLog\Enums\GoLogShipmentStatus::FINALIZADO, $single->status);
+    }
 }
