@@ -190,8 +190,37 @@ class GoLogClientTest extends TestCase
 
         Http::assertSent(function (\Illuminate\Http\Client\Request $request) {
             return $request->url() === 'http://golog.test/tractor'
-                && $request['typeFuel'] === 'DIESEL';
+                && $request['typeFuel'] === 'DIESEL'
+                && ! array_key_exists('Type Fuel', $request->data());
         });
+    }
+
+    public function test_should_list_equipament_groups(): void
+    {
+        // Arrange
+        $loginFixture = require base_path('tests/Fixtures/Integrations/GoLog/login_success.php');
+
+        Http::fake([
+            'http://golog.test/login' => Http::response($loginFixture, 200),
+            'http://golog.test/equipament-group' => Http::response([
+                [
+                    'id' => '44444444-5555-6666-7777-888888888888',
+                    'equipament1' => ['id' => '33333333-4444-5555-6666-777777777777'],
+                    'observation' => 'Conjunto automático',
+                ],
+            ], 200),
+        ]);
+
+        $sut = $this->app->make(GoLogClient::class);
+
+        // Action
+        $groups = $sut->listEquipamentGroups();
+
+        // Assert
+        $this->assertCount(1, $groups);
+        $this->assertInstanceOf(GoLogEquipamentGroupResponseDTO::class, $groups[0]);
+        $this->assertSame('44444444-5555-6666-7777-888888888888', $groups[0]->id);
+        $this->assertSame('33333333-4444-5555-6666-777777777777', $groups[0]->equipament1Id);
     }
 
     public function test_should_import_invoices_in_batch(): void

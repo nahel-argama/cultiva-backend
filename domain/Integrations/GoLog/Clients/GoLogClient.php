@@ -19,6 +19,7 @@ use Cultiva\Integrations\GoLog\Enums\GoLogFuelType;
 use Cultiva\Integrations\GoLog\Enums\GoLogRoutePriority;
 use Cultiva\Integrations\GoLog\Enums\GoLogUserProfile;
 use Cultiva\Integrations\GoLog\Enums\GoLogVehicleStatus;
+use Cultiva\Integrations\GoLog\Enums\GoLogVehicleType;
 use Cultiva\Integrations\GoLog\Enums\GoLogWorkScheduleStatus;
 use Illuminate\Http\Client\Factory as HttpFactory;
 use Illuminate\Http\Client\PendingRequest;
@@ -163,23 +164,45 @@ class GoLogClient
         GoLogFuelType $typeFuel,
         float $costPerKilometer,
         GoLogVehicleStatus $status = GoLogVehicleStatus::ATIVO,
+        ?GoLogVehicleType $vehicleType = null,
+        ?float $cargoVolume = null,
+        ?float $kmPerLiter = null,
     ): GoLogTractorResponseDTO {
-        $payload = [
+        $payload = array_filter([
             'plate' => $plate,
             'renavam' => $renavam,
             'model' => $model,
             'numberAxles' => $numberAxles,
             'maximumCapacity' => $maximumCapacity,
             'typeFuel' => $typeFuel->value,
-            'Type Fuel' => $typeFuel->value,
             'costPerKilometer' => $costPerKilometer,
             'status' => $status->value,
             'companyId' => $this->getCompanyId(),
-        ];
+            'vehicleType' => $vehicleType?->value,
+            'cargoVolume' => $cargoVolume,
+            'kmPerLiter' => $kmPerLiter,
+        ], static fn(mixed $value): bool => $value !== null);
 
         $response = $this->post('tractor', $payload, 'Failed to create tractor in GoLog');
 
         return GoLogTractorResponseDTO::fromArray($response->json());
+    }
+
+    /**
+     * @return array<int, GoLogEquipamentGroupResponseDTO>
+     */
+    public function listEquipamentGroups(): array
+    {
+        $response = $this->get('equipament-group', [], 'Failed to fetch equipament groups from GoLog');
+        $data = $response->json();
+
+        /** @var array<int, array<string, mixed>> $items */
+        $items = $data['content'] ?? $data;
+
+        return array_map(
+            static fn(array $item): GoLogEquipamentGroupResponseDTO => GoLogEquipamentGroupResponseDTO::fromArray($item),
+            $items
+        );
     }
 
     public function createEquipamentGroup(
