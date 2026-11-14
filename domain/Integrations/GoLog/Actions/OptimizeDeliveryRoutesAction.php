@@ -47,7 +47,6 @@ class OptimizeDeliveryRoutesAction
         $provisionedDriverIds = GoLogDriver::query()
             ->whereNotNull('golog_user_id')
             ->whereNotNull('golog_driver_id')
-            ->whereNotNull('golog_work_schedule_id')
             ->whereHas('vehicle', fn ($query) => $query
                 ->whereNotNull('golog_tractor_id')
                 ->whereNotNull('golog_equipament_group_id')

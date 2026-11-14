@@ -10,6 +10,5 @@ enum GoLogDriverStep: string
     case DRIVER = 'driver';
     case TRACTOR = 'tractor';
     case EQUIPAMENT_GROUP = 'equipament_group';
-    case WORK_SCHEDULE = 'work_schedule';
     case COMPLETED = 'completed';
 }

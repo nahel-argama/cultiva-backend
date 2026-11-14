@@ -123,8 +123,8 @@ final class StoreVehicleTest extends TestCase
         $response->assertStatus(201)
             ->assertJsonPath('data.vehicle.golog_tractor_id', '33333333-4444-5555-6666-777777777777')
             ->assertJsonPath('data.vehicle.golog_equipament_group_id', '44444444-5555-6666-7777-888888888888')
-            ->assertJsonPath('data.stopped_step', 'work_schedule')
-            ->assertJsonPath('data.is_provisioned', false);
+            ->assertJsonPath('data.stopped_step', 'completed')
+            ->assertJsonPath('data.is_provisioned', true);
 
         Http::assertSent(fn ($request): bool => $request->url() === 'http://golog.test/tractor'
             && $request['vehicleType'] === 'VUC'
@@ -140,7 +140,8 @@ final class StoreVehicleTest extends TestCase
         ]);
 
         $driver->refresh();
-        $this->assertSame(GoLogDriverStep::WORK_SCHEDULE, $driver->getStoppedStep());
+        $this->assertSame(GoLogDriverStep::COMPLETED, $driver->getStoppedStep());
+        $this->assertTrue($driver->isProvisioned());
     }
 
     public function test_should_not_create_vehicle_record_when_golog_tractor_request_fails(): void

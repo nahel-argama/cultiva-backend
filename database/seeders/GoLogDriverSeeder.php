@@ -14,8 +14,8 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Seeds the local database with real GoLog drivers, vehicles, equipment groups,
- * and work schedules provisioned under Cultiva's GoLog tenant
+ * Seeds the local database with real GoLog drivers, vehicles, and equipment groups
+ * provisioned under Cultiva's GoLog tenant
  * (GOLOG_TENANT_ID=5647b3d4-f42f-4905-a617-896afa8dccef).
  */
 class GoLogDriverSeeder extends Seeder
@@ -66,7 +66,6 @@ class GoLogDriverSeeder extends Seeder
                         'cpf' => $item['driver']['cpf'],
                         'golog_user_id' => $item['driver']['golog_user_id'],
                         'golog_driver_id' => $item['driver']['golog_driver_id'],
-                        'golog_work_schedule_id' => $item['driver']['golog_work_schedule_id'],
                     ],
                 );
 
@@ -115,7 +114,6 @@ class GoLogDriverSeeder extends Seeder
                     'cpf' => '52948173060',
                     'golog_user_id' => '5c3d2b39-c067-4c0c-900d-2675f6c819d0',
                     'golog_driver_id' => '7769e02b-87d9-475f-b400-6c4df77d14aa',
-                    'golog_work_schedule_id' => 'a6d6156e-39f8-4156-a208-d32e0a578def',
                 ],
                 'vehicle' => [
                     'golog_tractor_id' => 'c4bef783-d583-4c1f-9142-4bf6ee121596',
@@ -150,7 +148,6 @@ class GoLogDriverSeeder extends Seeder
                     'cpf' => '34729185005',
                     'golog_user_id' => 'ae047dbf-71a1-42c9-8962-4d81458dd76d',
                     'golog_driver_id' => 'bc936c40-f0c2-45a7-bb69-721a10888cd4',
-                    'golog_work_schedule_id' => '0b71d952-5754-48ca-982f-ebf5dc53d0ae',
                 ],
                 'vehicle' => [
                     'golog_tractor_id' => '52261194-1f73-4e3f-a4df-2bc6a9bf4f00',
@@ -185,7 +182,6 @@ class GoLogDriverSeeder extends Seeder
                     'cpf' => '28471936003',
                     'golog_user_id' => '0cd342e7-64bb-42a2-be08-82796ef61495',
                     'golog_driver_id' => '63a2dc1a-4362-453c-a753-20c42e30bb4a',
-                    'golog_work_schedule_id' => '3197e9b3-686a-41f0-8905-c60768db49be',
                 ],
                 'vehicle' => [
                     'golog_tractor_id' => 'a4fb1bf2-29f7-4aa5-ac93-1a24a6dec510',
