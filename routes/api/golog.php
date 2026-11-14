@@ -1,6 +1,7 @@
 <?php
 
 use Cultiva\Integrations\GoLog\Http\Controllers\GoLogDriverController;
+use Cultiva\Integrations\GoLog\Http\Controllers\GoLogWebhookController;
 use Illuminate\Support\Facades\Route;
 
 Route::group([
@@ -8,6 +9,7 @@ Route::group([
     'as' => 'golog.',
 ], function (): void {
     Route::post('users', [GoLogDriverController::class, 'storeUser'])->name('users.store');
+    Route::post('webhook', GoLogWebhookController::class)->name('webhook');
 
     Route::middleware(['auth:sanctum', 'ability:access'])
         ->group(function (): void {
