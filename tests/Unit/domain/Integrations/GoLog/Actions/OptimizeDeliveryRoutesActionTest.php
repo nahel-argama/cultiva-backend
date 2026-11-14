@@ -4,12 +4,17 @@ declare(strict_types=1);
 
 namespace Tests\Unit\domain\Integrations\GoLog\Actions;
 
+use Carbon\CarbonImmutable;
 use Cultiva\Base\Exceptions\CultivaException;
 use Cultiva\Integrations\GoLog\Actions\OptimizeDeliveryRoutesAction;
 use Cultiva\Integrations\GoLog\Clients\GoLogClient;
+use Cultiva\Integrations\GoLog\DTO\GoLogOptimizeRoutesResponseDTO;
+use Cultiva\Integrations\GoLog\DTO\GoLogSkippedShipmentDTO;
+use Cultiva\Integrations\GoLog\DTO\GoLogWorkScheduleResponseDTO;
 use Cultiva\Integrations\GoLog\DTO\OptimizeRoutesResultDTO;
 use Cultiva\Integrations\GoLog\Enums\GoLogRoutePriority;
 use Cultiva\Integrations\GoLog\Enums\GoLogShipmentStatus;
+use Cultiva\Integrations\GoLog\Enums\GoLogWorkScheduleStatus;
 use Cultiva\Models\DeliveryOrder\GoLogShipment;
 use Database\Factories\DeliveryOrderFactory;
 use Database\Factories\GoLogDriverFactory;
@@ -23,9 +28,11 @@ class OptimizeDeliveryRoutesActionTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_should_optimize_pending_shipments_with_provisioned_work_schedules_and_update_status(): void
+    public function test_should_optimize_pending_shipments_using_matching_active_work_schedules_and_keep_skipped_pending(): void
     {
         // Arrange
+        CarbonImmutable::setTestNow(CarbonImmutable::parse('2026-11-13 20:00:00', 'America/Sao_Paulo'));
+
         $order1 = DeliveryOrderFactory::new()->create();
         $order2 = DeliveryOrderFactory::new()->create();
         $order3 = DeliveryOrderFactory::new()->create();
@@ -49,7 +56,7 @@ class OptimizeDeliveryRoutesActionTest extends TestCase
         $driver1 = GoLogDriverFactory::new()->create([
             'golog_user_id' => 'a1111111-1111-1111-1111-111111111111',
             'golog_driver_id' => 'b1111111-1111-1111-1111-111111111111',
-            'golog_work_schedule_id' => 'c1111111-1111-1111-1111-111111111111',
+            'golog_work_schedule_id' => 'f1111111-1111-1111-1111-111111111111',
         ]);
         GoLogVehicleFactory::new()->create([
             'golog_driver_id' => $driver1->id,
@@ -60,7 +67,7 @@ class OptimizeDeliveryRoutesActionTest extends TestCase
         $driver2 = GoLogDriverFactory::new()->create([
             'golog_user_id' => 'a2222222-2222-2222-2222-222222222222',
             'golog_driver_id' => 'b2222222-2222-2222-2222-222222222222',
-            'golog_work_schedule_id' => 'c2222222-2222-2222-2222-222222222222',
+            'golog_work_schedule_id' => 'f2222222-2222-2222-2222-222222222222',
         ]);
         GoLogVehicleFactory::new()->create([
             'golog_driver_id' => $driver2->id,
@@ -68,19 +75,37 @@ class OptimizeDeliveryRoutesActionTest extends TestCase
             'golog_equipament_group_id' => 'e2222222-2222-2222-2222-222222222222',
         ]);
 
-        $incompleteDriver = GoLogDriverFactory::new()->create([
-            'golog_user_id' => 'a3333333-3333-3333-3333-333333333333',
-            'golog_driver_id' => 'b3333333-3333-3333-3333-333333333333',
-            'golog_work_schedule_id' => 'c3333333-3333-3333-3333-333333333333',
-        ]);
-        GoLogVehicleFactory::new()->create([
-            'golog_driver_id' => $incompleteDriver->id,
-            'golog_tractor_id' => 'd3333333-3333-3333-3333-333333333333',
-            'golog_equipament_group_id' => null,
-        ]);
-
         // Expects
         $clientMock = Mockery::mock(GoLogClient::class, function (MockInterface $mock): void {
+            $mock->shouldReceive('listActiveWorkSchedules')
+                ->once()
+                ->andReturn([
+                    new GoLogWorkScheduleResponseDTO(
+                        id: 'c1111111-1111-1111-1111-111111111111',
+                        scheduleDate: '2026-11-16',
+                        status: GoLogWorkScheduleStatus::ATIVO,
+                        driverId: 'b1111111-1111-1111-1111-111111111111',
+                    ),
+                    new GoLogWorkScheduleResponseDTO(
+                        id: 'c2222222-2222-2222-2222-222222222222',
+                        scheduleDate: '2026-11-16',
+                        status: GoLogWorkScheduleStatus::ATIVO,
+                        driverId: 'b2222222-2222-2222-2222-222222222222',
+                    ),
+                    new GoLogWorkScheduleResponseDTO(
+                        id: 'other-day-schedule',
+                        scheduleDate: '2026-11-17',
+                        status: GoLogWorkScheduleStatus::ATIVO,
+                        driverId: 'b1111111-1111-1111-1111-111111111111',
+                    ),
+                    new GoLogWorkScheduleResponseDTO(
+                        id: 'other-tenant-or-unprovisioned',
+                        scheduleDate: '2026-11-16',
+                        status: GoLogWorkScheduleStatus::ATIVO,
+                        driverId: 'b9999999-9999-9999-9999-999999999999',
+                    ),
+                ]);
+
             $mock->shouldReceive('optimizeRoutes')
                 ->once()
                 ->with(
@@ -94,7 +119,20 @@ class OptimizeDeliveryRoutesActionTest extends TestCase
                     ],
                     GoLogRoutePriority::TEMPO,
                 )
-                ->andReturn('"Rotas otimizadas com sucesso"');
+                ->andReturn(new GoLogOptimizeRoutesResponseDTO(
+                    routesCount: 1,
+                    plannedShipments: 1,
+                    transportIds: ['t1111111-1111-1111-1111-111111111111'],
+                    skipped: [
+                        new GoLogSkippedShipmentDTO(
+                            shipmentIds: ['22222222-2222-2222-2222-222222222222'],
+                            label: '22222222-2222-2222-2222-222222222222',
+                            reasons: ['fora da janela de horário das escalas'],
+                        ),
+                    ],
+                    totalDistanceMeters: 12000,
+                    totalCost: 150.0,
+                ));
         });
 
         $sut = new OptimizeDeliveryRoutesAction($clientMock);
@@ -102,25 +140,16 @@ class OptimizeDeliveryRoutesActionTest extends TestCase
         // Action
         $result = $sut->execute();
 
+        CarbonImmutable::setTestNow();
+
         // Assert
         $this->assertInstanceOf(OptimizeRoutesResultDTO::class, $result);
-        $this->assertSame(2, $result->shipmentsOptimized);
+        $this->assertSame(1, $result->shipmentsOptimized);
+        $this->assertSame(1, $result->routesCount);
         $this->assertSame(2, $result->workSchedulesUsed);
-        $this->assertEqualsCanonicalizing(
-            [
-                '11111111-1111-1111-1111-111111111111',
-                '22222222-2222-2222-2222-222222222222',
-            ],
-            $result->shipmentIds,
-        );
-        $this->assertEqualsCanonicalizing(
-            [
-                'c1111111-1111-1111-1111-111111111111',
-                'c2222222-2222-2222-2222-222222222222',
-            ],
-            $result->workScheduleIds,
-        );
-        $this->assertSame('"Rotas otimizadas com sucesso"', $result->response);
+        $this->assertSame(['11111111-1111-1111-1111-111111111111'], $result->plannedShipmentIds);
+        $this->assertSame(['22222222-2222-2222-2222-222222222222'], $result->skippedShipmentIds);
+        $this->assertSame(['t1111111-1111-1111-1111-111111111111'], $result->transportIds);
 
         $this->assertDatabaseHas('golog_shipments', [
             'id' => $shipment1->id,
@@ -128,7 +157,7 @@ class OptimizeDeliveryRoutesActionTest extends TestCase
         ]);
         $this->assertDatabaseHas('golog_shipments', [
             'id' => $shipment2->id,
-            'status' => GoLogShipmentStatus::AGUARDANDO_INICIO->value,
+            'status' => GoLogShipmentStatus::PENDENTE->value,
         ]);
     }
 
@@ -144,6 +173,7 @@ class OptimizeDeliveryRoutesActionTest extends TestCase
 
         // Expects
         $clientMock = Mockery::mock(GoLogClient::class, function (MockInterface $mock): void {
+            $mock->shouldNotReceive('listActiveWorkSchedules');
             $mock->shouldNotReceive('optimizeRoutes');
         });
 
@@ -156,14 +186,15 @@ class OptimizeDeliveryRoutesActionTest extends TestCase
         $this->assertInstanceOf(OptimizeRoutesResultDTO::class, $result);
         $this->assertSame(0, $result->shipmentsOptimized);
         $this->assertSame(0, $result->workSchedulesUsed);
-        $this->assertSame([], $result->shipmentIds);
-        $this->assertSame([], $result->workScheduleIds);
-        $this->assertSame('', $result->response);
+        $this->assertSame([], $result->plannedShipmentIds);
+        $this->assertSame([], $result->skippedShipmentIds);
     }
 
-    public function test_should_throw_exception_when_pending_shipments_exist_without_provisioned_work_schedules(): void
+    public function test_should_throw_exception_when_pending_shipments_exist_without_active_work_schedules_for_target_date(): void
     {
         // Arrange
+        CarbonImmutable::setTestNow(CarbonImmutable::parse('2026-11-13 20:00:00', 'America/Sao_Paulo'));
+
         $order = DeliveryOrderFactory::new()->create();
         $shipment = GoLogShipment::query()->create([
             'delivery_order_id' => $order->id,
@@ -171,13 +202,22 @@ class OptimizeDeliveryRoutesActionTest extends TestCase
             'status' => GoLogShipmentStatus::PENDENTE,
         ]);
 
-        GoLogDriverFactory::new()->create([
+        $driver = GoLogDriverFactory::new()->create([
+            'golog_user_id' => 'a1111111-1111-1111-1111-111111111111',
             'golog_driver_id' => 'd1111111-1111-1111-1111-111111111111',
-            'golog_work_schedule_id' => null,
+            'golog_work_schedule_id' => 'c1111111-1111-1111-1111-111111111111',
+        ]);
+        GoLogVehicleFactory::new()->create([
+            'golog_driver_id' => $driver->id,
+            'golog_tractor_id' => 'b1111111-1111-1111-1111-111111111111',
+            'golog_equipament_group_id' => 'e1111111-1111-1111-1111-111111111111',
         ]);
 
         // Expects
         $clientMock = Mockery::mock(GoLogClient::class, function (MockInterface $mock): void {
+            $mock->shouldReceive('listActiveWorkSchedules')
+                ->once()
+                ->andReturn([]);
             $mock->shouldNotReceive('optimizeRoutes');
         });
 
@@ -189,6 +229,8 @@ class OptimizeDeliveryRoutesActionTest extends TestCase
             $this->fail('Expected CultivaException was not thrown.');
         } catch (CultivaException $exception) {
             $this->assertSame(422, $exception->getStatusCode());
+        } finally {
+            CarbonImmutable::setTestNow();
         }
 
         $this->assertDatabaseHas('golog_shipments', [

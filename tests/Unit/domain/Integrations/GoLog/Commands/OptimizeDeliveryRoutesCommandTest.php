@@ -20,12 +20,15 @@ class OptimizeDeliveryRoutesCommandTest extends TestCase
             Mockery::mock(OptimizeDeliveryRoutesAction::class, function (MockInterface $mock): void {
                 $mock->shouldReceive('execute')
                     ->once()
+                    ->with(null)
                     ->andReturn(new OptimizeRoutesResultDTO(
                         shipmentsOptimized: 0,
+                        routesCount: 0,
                         workSchedulesUsed: 0,
-                        shipmentIds: [],
+                        plannedShipmentIds: [],
+                        skippedShipmentIds: [],
+                        transportIds: [],
                         workScheduleIds: [],
-                        response: '',
                     ));
             })
         );
@@ -45,25 +48,34 @@ class OptimizeDeliveryRoutesCommandTest extends TestCase
             Mockery::mock(OptimizeDeliveryRoutesAction::class, function (MockInterface $mock): void {
                 $mock->shouldReceive('execute')
                     ->once()
+                    ->with('2026-11-16')
                     ->andReturn(new OptimizeRoutesResultDTO(
-                        shipmentsOptimized: 6,
+                        shipmentsOptimized: 4,
+                        routesCount: 2,
                         workSchedulesUsed: 3,
-                        shipmentIds: [
+                        plannedShipmentIds: [
                             '11111111-1111-1111-1111-111111111111',
                             '22222222-2222-2222-2222-222222222222',
+                        ],
+                        skippedShipmentIds: [
+                            '33333333-3333-3333-3333-333333333333',
+                        ],
+                        transportIds: [
+                            't1111111-1111-1111-1111-111111111111',
                         ],
                         workScheduleIds: [
                             'c1111111-1111-1111-1111-111111111111',
                         ],
-                        response: '"Rotas otimizadas com sucesso"',
                     ));
             })
         );
 
         // Action & Assert
-        $this->artisan('delivery:optimize-routes')
+        $this->artisan('delivery:optimize-routes', ['--date' => '2026-11-16'])
             ->expectsOutput('Scanning pending GoLog shipments for route optimization...')
-            ->expectsOutput('Shipments optimized: 6')
+            ->expectsOutput('Routes created: 2')
+            ->expectsOutput('Shipments optimized: 4')
+            ->expectsOutput('Shipments skipped (remained PENDENTE): 1')
             ->expectsOutput('Driver work schedules used: 3')
             ->expectsOutput('Routes optimized successfully in GoLog TMS!')
             ->assertSuccessful();

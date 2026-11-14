@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Cultiva\Integrations\GoLog\Actions;
 
+use Carbon\CarbonImmutable;
 use Cultiva\Base\Exceptions\CultivaException;
 use Cultiva\Integrations\GoLog\Clients\GoLogClient;
+use Cultiva\Integrations\GoLog\DTO\GoLogWorkScheduleResponseDTO;
 use Cultiva\Integrations\GoLog\DTO\OptimizeRoutesResultDTO;
 use Cultiva\Integrations\GoLog\Enums\GoLogRoutePriority;
 use Cultiva\Integrations\GoLog\Enums\GoLogShipmentStatus;
@@ -15,11 +17,13 @@ use Illuminate\Database\Eloquent\Collection;
 
 class OptimizeDeliveryRoutesAction
 {
+    private const string SCHEDULE_TIMEZONE = 'America/Sao_Paulo';
+
     public function __construct(
         private readonly GoLogClient $goLogClient,
     ) {}
 
-    public function execute(): OptimizeRoutesResultDTO
+    public function execute(?string $targetDate = null): OptimizeRoutesResultDTO
     {
         /** @var Collection<int, GoLogShipment> $shipments */
         $shipments = GoLogShipment::query()
@@ -30,15 +34,17 @@ class OptimizeDeliveryRoutesAction
         if ($shipments->isEmpty()) {
             return new OptimizeRoutesResultDTO(
                 shipmentsOptimized: 0,
+                routesCount: 0,
                 workSchedulesUsed: 0,
-                shipmentIds: [],
+                plannedShipmentIds: [],
+                skippedShipmentIds: [],
+                transportIds: [],
                 workScheduleIds: [],
-                response: '',
             );
         }
 
-        /** @var array<int, string> $workScheduleIds */
-        $workScheduleIds = GoLogDriver::query()
+        /** @var array<int, string> $provisionedDriverIds */
+        $provisionedDriverIds = GoLogDriver::query()
             ->whereNotNull('golog_user_id')
             ->whereNotNull('golog_driver_id')
             ->whereNotNull('golog_work_schedule_id')
@@ -47,43 +53,60 @@ class OptimizeDeliveryRoutesAction
                 ->whereNotNull('golog_equipament_group_id')
             )
             ->orderBy('id')
-            ->pluck('golog_work_schedule_id')
+            ->pluck('golog_driver_id')
             ->all();
 
-        $this->validateBusinessRules($workScheduleIds);
-
-        /** @var array<int, string> $shipmentIds */
-        $shipmentIds = $shipments->pluck('golog_shipment_id')->all();
-
-        $response = $this->goLogClient->optimizeRoutes(
-            shipmentIds: $shipmentIds,
-            workScheduleIds: $workScheduleIds,
-            routePriority: GoLogRoutePriority::TEMPO,
-        );
-
-        GoLogShipment::query()
-            ->whereIn('id', $shipments->pluck('id'))
-            ->update(['status' => GoLogShipmentStatus::AGUARDANDO_INICIO]);
-
-        return new OptimizeRoutesResultDTO(
-            shipmentsOptimized: $shipments->count(),
-            workSchedulesUsed: count($workScheduleIds),
-            shipmentIds: $shipmentIds,
-            workScheduleIds: $workScheduleIds,
-            response: $response,
-        );
-    }
-
-    /**
-     * @param array<int, string> $workScheduleIds
-     */
-    private function validateBusinessRules(array $workScheduleIds): void
-    {
-        if ($workScheduleIds === []) {
+        if ($provisionedDriverIds === []) {
             throw new CultivaException(
                 422,
                 'No provisioned GoLog drivers with active work schedules available for route optimization.'
             );
         }
+
+        $scheduleDate = $targetDate ?? CarbonImmutable::now(self::SCHEDULE_TIMEZONE)->nextWeekday()->toDateString();
+
+        $workScheduleIds = array_values(array_map(
+            static fn (GoLogWorkScheduleResponseDTO $schedule): string => $schedule->id,
+            array_filter(
+                $this->goLogClient->listActiveWorkSchedules(),
+                static fn (GoLogWorkScheduleResponseDTO $schedule): bool => $schedule->scheduleDate === $scheduleDate
+                    && in_array($schedule->driverId, $provisionedDriverIds, true)
+            )
+        ));
+
+        if ($workScheduleIds === []) {
+            throw new CultivaException(
+                422,
+                "No active GoLog work schedules found for date [{$scheduleDate}]."
+            );
+        }
+
+        /** @var array<int, string> $shipmentIds */
+        $shipmentIds = $shipments->pluck('golog_shipment_id')->all();
+
+        $apiResponse = $this->goLogClient->optimizeRoutes(
+            shipmentIds: $shipmentIds,
+            workScheduleIds: $workScheduleIds,
+            routePriority: GoLogRoutePriority::TEMPO,
+        );
+
+        $skippedShipmentIds = $apiResponse->skippedShipmentIds();
+        $plannedShipmentIds = array_values(array_diff($shipmentIds, $skippedShipmentIds));
+
+        if ($plannedShipmentIds !== []) {
+            GoLogShipment::query()
+                ->whereIn('golog_shipment_id', $plannedShipmentIds)
+                ->update(['status' => GoLogShipmentStatus::AGUARDANDO_INICIO]);
+        }
+
+        return new OptimizeRoutesResultDTO(
+            shipmentsOptimized: count($plannedShipmentIds),
+            routesCount: $apiResponse->routesCount,
+            workSchedulesUsed: count($workScheduleIds),
+            plannedShipmentIds: $plannedShipmentIds,
+            skippedShipmentIds: $skippedShipmentIds,
+            transportIds: $apiResponse->transportIds,
+            workScheduleIds: $workScheduleIds,
+        );
     }
 }
