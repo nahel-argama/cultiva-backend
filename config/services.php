@@ -41,10 +41,11 @@ return [
 
     'golog' => [
         'base_url' => env('GOLOG_BASE_URL', 'http://147.15.18.21:8081'),
-        'email' => env('GOLOG_EMAIL', 'admin@golog.com'),
+        'email' => env('GOLOG_EMAIL', 'cultiva@cultiva.com'),
         'password' => env('GOLOG_PASSWORD', 'Password123!'),
         'tenant_id' => env('GOLOG_TENANT_ID'),
-        'timeout' => env('GOLOG_TIMEOUT', 10),
+        'timeout' => env('GOLOG_TIMEOUT', 60),
+        'webhook_secret' => env('GOLOG_WEBHOOK_SECRET'),
     ],
 
 ];

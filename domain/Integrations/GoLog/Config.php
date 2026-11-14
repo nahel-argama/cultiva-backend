@@ -38,4 +38,11 @@ final class Config
 
         return is_string($tenantId) && $tenantId !== '' ? $tenantId : null;
     }
+
+    public function getWebhookSecret(): ?string
+    {
+        $secret = $this->config->get('services.golog.webhook_secret');
+
+        return is_string($secret) && $secret !== '' ? $secret : null;
+    }
 }
