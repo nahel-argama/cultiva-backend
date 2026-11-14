@@ -397,13 +397,6 @@ class GoLogClient
         /** @var Response $response */
         $response = $this->authenticatedRequest()->{$method}($endpoint, $data);
 
-        if ($response->status() === 401) {
-            Cache::forget(self::CACHE_KEY);
-            $this->login();
-            /** @var Response $response */
-            $response = $this->authenticatedRequest()->{$method}($endpoint, $data);
-        }
-
         Log::info('GoLog API response', [
             'endpoint' => $endpoint,
             'status' => $response->status(),

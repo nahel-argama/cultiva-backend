@@ -66,6 +66,12 @@ class GoLogClientTest extends TestCase
         $this->assertSame('mock-golog-jwt-token', $token2);
 
         Http::assertSentCount(1);
+
+        // When Redis cache entry expires / is removed, a new token is fetched via login
+        Cache::forget('golog_auth_session');
+        $refreshedToken = $sut->getToken();
+        $this->assertSame('mock-golog-jwt-token', $refreshedToken);
+        Http::assertSentCount(2);
     }
 
     public function test_should_get_transport_types(): void
@@ -428,11 +434,9 @@ class GoLogClientTest extends TestCase
         $this->assertSame('2026-11-10', $schedules[0]->scheduleDate);
     }
 
-    public function test_should_reauthenticate_and_retry_once_when_receiving_401(): void
+    public function test_should_throw_401_without_retrying_login_when_cached_token_is_rejected(): void
     {
         // Arrange
-        $loginFixture = require base_path('tests/Fixtures/Integrations/GoLog/login_success.php');
-
         Cache::put('golog_auth_session', [
             'token' => 'expired-jwt-token',
             'userId' => 'a0000000-0000-0000-0000-000000000001',
@@ -445,23 +449,21 @@ class GoLogClientTest extends TestCase
         ], 6600);
 
         Http::fake([
-            'http://golog.test/login' => Http::response($loginFixture, 200),
-            'http://golog.test/type-transport' => Http::sequence()
-                ->push(['message' => 'Sessão ausente ou expirada'], 401)
-                ->push([['id' => '11111111-1111-1111-1111-111111111111', 'name' => 'REFRIGERADO']], 200),
+            'http://golog.test/type-transport' => Http::response(['message' => 'Sessão ausente ou expirada'], 401),
         ]);
 
         $sut = $this->app->make(GoLogClient::class);
 
-        // Action
-        $types = $sut->getTransportTypes();
+        // Action & Assert
+        try {
+            $sut->getTransportTypes();
+            $this->fail('Expected CultivaException was not thrown.');
+        } catch (CultivaException $exception) {
+            $this->assertSame(401, $exception->getStatusCode());
+            $this->assertSame('Failed to fetch transport types from GoLog: Sessão ausente ou expirada', $exception->getMessage());
+        }
 
-        // Assert
-        $this->assertCount(1, $types);
-        $this->assertSame('REFRIGERADO', $types[0]->name);
-        Http::assertSentCount(3);
-        Http::assertSent(fn (\Illuminate\Http\Client\Request $request): bool => $request->url() === 'http://golog.test/type-transport'
-            && $request->hasHeader('Authorization', 'Bearer mock-golog-jwt-token'));
+        Http::assertSentCount(1);
     }
 
     public function test_should_extract_standardized_error_message_when_request_fails(): void
