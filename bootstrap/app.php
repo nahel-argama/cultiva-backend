@@ -3,9 +3,11 @@
 use Cultiva\Auth\Middleware\EnsureProfile;
 use Cultiva\Auth\Middleware\EnsureUserIsVerified;
 use Cultiva\Base\Exceptions\CultivaException;
+use Cultiva\Integrations\GoLog\Commands\ConfigureGoLogWebhookCommand;
 use Cultiva\Integrations\GoLog\Commands\DispatchDeliveryOrdersBatchCommand;
 use Cultiva\Integrations\GoLog\Commands\OptimizeDeliveryRoutesCommand;
 use Cultiva\Integrations\GoLog\Commands\PopulateTransportTypesCommand;
+use Cultiva\Integrations\GoLog\Commands\ReconcileGoLogShipmentsCommand;
 use Cultiva\Models\Offer\Commands\PopulateProductImagesCommand;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -26,6 +28,8 @@ return Application::configure(basePath: dirname(__DIR__))
         PopulateTransportTypesCommand::class,
         DispatchDeliveryOrdersBatchCommand::class,
         OptimizeDeliveryRoutesCommand::class,
+        ConfigureGoLogWebhookCommand::class,
+        ReconcileGoLogShipmentsCommand::class,
     ])
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->statefulApi();

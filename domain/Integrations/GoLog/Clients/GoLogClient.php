@@ -12,12 +12,15 @@ use Cultiva\Integrations\GoLog\DTO\GoLogEquipamentGroupResponseDTO;
 use Cultiva\Integrations\GoLog\DTO\GoLogInvoiceImportItemDTO;
 use Cultiva\Integrations\GoLog\DTO\GoLogInvoiceImportResponseDTO;
 use Cultiva\Integrations\GoLog\DTO\GoLogOptimizeRoutesResponseDTO;
+use Cultiva\Integrations\GoLog\DTO\GoLogShipmentStatusResponseDTO;
 use Cultiva\Integrations\GoLog\DTO\GoLogTractorResponseDTO;
 use Cultiva\Integrations\GoLog\DTO\GoLogTransportTypeResponseDTO;
 use Cultiva\Integrations\GoLog\DTO\GoLogUserResponseDTO;
+use Cultiva\Integrations\GoLog\DTO\GoLogWebhookTestResponseDTO;
 use Cultiva\Integrations\GoLog\DTO\GoLogWorkScheduleResponseDTO;
 use Cultiva\Integrations\GoLog\Enums\GoLogFuelType;
 use Cultiva\Integrations\GoLog\Enums\GoLogRoutePriority;
+use Cultiva\Integrations\GoLog\Enums\GoLogShipmentStatus;
 use Cultiva\Integrations\GoLog\Enums\GoLogUserProfile;
 use Cultiva\Integrations\GoLog\Enums\GoLogVehicleStatus;
 use Cultiva\Integrations\GoLog\Enums\GoLogVehicleType;
@@ -316,6 +319,56 @@ class GoLogClient
         ], 'Failed to optimize routes in GoLog');
 
         return GoLogOptimizeRoutesResponseDTO::fromArray($response->json());
+    }
+
+    public function configureWebhook(
+        string $webhookUrl,
+        string $webhookSecret,
+        bool $webhookActive = true,
+    ): void {
+        $companyId = $this->getCompanyId();
+
+        $this->patch("company/{$companyId}/webhook", [
+            'webhookUrl' => $webhookUrl,
+            'webhookSecret' => $webhookSecret,
+            'webhookActive' => $webhookActive,
+        ], 'Failed to configure webhook in GoLog');
+    }
+
+    public function testWebhook(): GoLogWebhookTestResponseDTO
+    {
+        $companyId = $this->getCompanyId();
+
+        $response = $this->post("company/{$companyId}/webhook/test", [], 'Failed to test webhook in GoLog');
+
+        return GoLogWebhookTestResponseDTO::from($response->json() ?? []);
+    }
+
+    /**
+     * @return array<int, GoLogShipmentStatusResponseDTO>
+     */
+    public function listShipmentsByStatus(GoLogShipmentStatus $status): array
+    {
+        $response = $this->get('shipment/list-by-status', [
+            'status' => $status->value,
+        ], 'Failed to list shipments by status in GoLog');
+
+        $data = $response->json();
+        $items = is_array($data) && array_is_list($data)
+            ? $data
+            : ($data['content'] ?? []);
+
+        return array_map(
+            static fn (array $item): GoLogShipmentStatusResponseDTO => GoLogShipmentStatusResponseDTO::from($item),
+            $items,
+        );
+    }
+
+    public function getShipment(string $shipmentId): GoLogShipmentStatusResponseDTO
+    {
+        $response = $this->get("shipment/{$shipmentId}", [], 'Failed to fetch shipment in GoLog');
+
+        return GoLogShipmentStatusResponseDTO::from($response->json());
     }
 
     /**
