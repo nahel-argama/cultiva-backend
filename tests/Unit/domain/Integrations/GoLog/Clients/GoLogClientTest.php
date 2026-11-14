@@ -11,9 +11,11 @@ use Cultiva\Integrations\GoLog\DTO\GoLogDriverResponseDTO;
 use Cultiva\Integrations\GoLog\DTO\GoLogEquipamentGroupResponseDTO;
 use Cultiva\Integrations\GoLog\DTO\GoLogInvoiceImportItemDTO;
 use Cultiva\Integrations\GoLog\DTO\GoLogInvoiceImportResponseDTO;
+use Cultiva\Integrations\GoLog\DTO\GoLogOptimizeRoutesResponseDTO;
 use Cultiva\Integrations\GoLog\DTO\GoLogTractorResponseDTO;
 use Cultiva\Integrations\GoLog\DTO\GoLogTransportTypeResponseDTO;
 use Cultiva\Integrations\GoLog\DTO\GoLogUserResponseDTO;
+use Cultiva\Integrations\GoLog\DTO\GoLogWorkScheduleResponseDTO;
 use Cultiva\Integrations\GoLog\Enums\GoLogFuelType;
 use Cultiva\Integrations\GoLog\Enums\GoLogRoutePriority;
 use Cultiva\Integrations\GoLog\Enums\GoLogUserProfile;
@@ -392,7 +394,13 @@ class GoLogClientTest extends TestCase
         );
 
         // Assert
-        $this->assertSame($optimizeFixture, $response);
+        $this->assertInstanceOf(GoLogOptimizeRoutesResponseDTO::class, $response);
+        $this->assertSame(1, $response->routesCount);
+        $this->assertSame(1, $response->plannedShipments);
+        $this->assertSame(['t1111111-1111-1111-1111-111111111111'], $response->transportIds);
+        $this->assertSame(['22222222-2222-2222-2222-222222222222'], $response->skippedShipmentIds());
+        $this->assertSame(248600, $response->totalDistanceMeters);
+        $this->assertSame(1230.5, $response->totalCost);
 
         Http::assertSent(function (\Illuminate\Http\Client\Request $request) use ($shipmentIds, $workScheduleIds): bool {
             return $request->url() === 'http://golog.test/api-route-optimization'
@@ -402,6 +410,30 @@ class GoLogClientTest extends TestCase
                 && $request['workScheduleIds'] === $workScheduleIds
                 && $request['routePriority'] === 'TEMPO';
         });
+    }
+
+    public function test_should_list_active_work_schedules(): void
+    {
+        // Arrange
+        $loginFixture = require base_path('tests/Fixtures/Integrations/GoLog/login_success.php');
+        $schedulesFixture = require base_path('tests/Fixtures/Integrations/GoLog/list_work_schedules_success.php');
+
+        Http::fake([
+            'http://golog.test/login' => Http::response($loginFixture, 200),
+            'http://golog.test/workSchedule/getByStatus?status=ATIVO' => Http::response($schedulesFixture, 200),
+        ]);
+
+        $sut = $this->app->make(GoLogClient::class);
+
+        // Action
+        $schedules = $sut->listActiveWorkSchedules();
+
+        // Assert
+        $this->assertCount(1, $schedules);
+        $this->assertInstanceOf(GoLogWorkScheduleResponseDTO::class, $schedules[0]);
+        $this->assertSame('55555555-5555-5555-5555-555555555555', $schedules[0]->id);
+        $this->assertSame('22222222-3333-4444-5555-666666666666', $schedules[0]->driverId);
+        $this->assertSame('2026-11-10', $schedules[0]->scheduleDate);
     }
 
     public function test_should_reauthenticate_and_retry_once_when_receiving_401(): void

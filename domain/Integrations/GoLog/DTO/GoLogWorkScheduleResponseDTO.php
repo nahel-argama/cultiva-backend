@@ -12,6 +12,7 @@ final readonly class GoLogWorkScheduleResponseDTO
         public string $id,
         public string $scheduleDate,
         public GoLogWorkScheduleStatus $status,
+        public ?string $driverId = null,
     ) {}
 
     /**
@@ -23,6 +24,7 @@ final readonly class GoLogWorkScheduleResponseDTO
             id: $data['id'],
             scheduleDate: $data['scheduleDate'],
             status: GoLogWorkScheduleStatus::from($data['status']),
+            driverId: $data['driver']['id'] ?? null,
         );
     }
 }

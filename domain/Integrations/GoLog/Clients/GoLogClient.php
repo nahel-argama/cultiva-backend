@@ -11,6 +11,7 @@ use Cultiva\Integrations\GoLog\DTO\GoLogDriverResponseDTO;
 use Cultiva\Integrations\GoLog\DTO\GoLogEquipamentGroupResponseDTO;
 use Cultiva\Integrations\GoLog\DTO\GoLogInvoiceImportItemDTO;
 use Cultiva\Integrations\GoLog\DTO\GoLogInvoiceImportResponseDTO;
+use Cultiva\Integrations\GoLog\DTO\GoLogOptimizeRoutesResponseDTO;
 use Cultiva\Integrations\GoLog\DTO\GoLogTractorResponseDTO;
 use Cultiva\Integrations\GoLog\DTO\GoLogTransportTypeResponseDTO;
 use Cultiva\Integrations\GoLog\DTO\GoLogUserResponseDTO;
@@ -248,6 +249,24 @@ class GoLogClient
         return $this->findWorkSchedule($driverId, $scheduleDate);
     }
 
+    /**
+     * @return array<int, GoLogWorkScheduleResponseDTO>
+     */
+    public function listActiveWorkSchedules(): array
+    {
+        $response = $this->get('workSchedule/getByStatus', ['status' => GoLogWorkScheduleStatus::ATIVO->value], 'Failed to fetch active work schedules from GoLog');
+
+        $data = $response->json();
+
+        /** @var array<int, array<string, mixed>> $schedules */
+        $schedules = $data['content'] ?? $data;
+
+        return array_map(
+            static fn(array $schedule): GoLogWorkScheduleResponseDTO => GoLogWorkScheduleResponseDTO::fromArray($schedule),
+            $schedules
+        );
+    }
+
     private function findWorkSchedule(string $driverId, string $scheduleDate): GoLogWorkScheduleResponseDTO
     {
         $response = $this->get('workSchedule', [], 'Failed to fetch work schedules from GoLog');
@@ -289,14 +308,14 @@ class GoLogClient
         array $shipmentIds,
         array $workScheduleIds,
         GoLogRoutePriority $routePriority = GoLogRoutePriority::TEMPO,
-    ): string {
+    ): GoLogOptimizeRoutesResponseDTO {
         $response = $this->post('api-route-optimization', [
             'shipmentIds' => $shipmentIds,
             'workScheduleIds' => $workScheduleIds,
             'routePriority' => $routePriority->value,
         ], 'Failed to optimize routes in GoLog');
 
-        return $response->body();
+        return GoLogOptimizeRoutesResponseDTO::fromArray($response->json());
     }
 
     /**
