@@ -26,7 +26,7 @@ class DispatchDeliveryOrdersBatchAction
         private readonly ResolveTransportTypeAction $resolveTransportType,
     ) {}
 
-    public function execute(?string $targetDate = null): DispatchBatchResultDTO
+    public function execute(): DispatchBatchResultDTO
     {
         /** @var Collection<int, DeliveryOrder> $orders */
         $orders = DeliveryOrder::query()
@@ -55,9 +55,7 @@ class DispatchDeliveryOrdersBatchAction
             );
         }
 
-        $scheduleDate = $targetDate !== null
-            ? CarbonImmutable::createFromFormat('Y-m-d', $targetDate, self::SCHEDULE_TIMEZONE)
-            : CarbonImmutable::now(self::SCHEDULE_TIMEZONE)->nextWeekday();
+        $scheduleDate = CarbonImmutable::now(self::SCHEDULE_TIMEZONE)->nextWeekday();
 
         $groupedOrders = $orders->groupBy(
             fn (DeliveryOrder $order): string => $order->purchase->offer->category->name->value

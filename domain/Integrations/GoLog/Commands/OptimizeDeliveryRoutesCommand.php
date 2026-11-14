@@ -9,7 +9,7 @@ use Illuminate\Console\Command;
 
 class OptimizeDeliveryRoutesCommand extends Command
 {
-    protected $signature = 'delivery:optimize-routes {--date= : Target weekday date (YYYY-MM-DD) to match active driver schedules}';
+    protected $signature = 'delivery:optimize-routes';
 
     protected $description = 'Optimize pending GoLog shipments using provisioned driver work schedules in GoLog TMS';
 
@@ -17,9 +17,7 @@ class OptimizeDeliveryRoutesCommand extends Command
     {
         $this->info('Scanning pending GoLog shipments for route optimization...');
 
-        /** @var ?string $date */
-        $date = $this->option('date');
-        $result = $action->execute($date);
+        $result = $action->execute();
 
         if ($result->shipmentsOptimized === 0 && $result->skippedShipmentIds === []) {
             $this->info('No pending GoLog shipments found to optimize.');

@@ -9,7 +9,7 @@ use Illuminate\Console\Command;
 
 class DispatchDeliveryOrdersBatchCommand extends Command
 {
-    protected $signature = 'delivery:dispatch-orders-batch {--date= : Target weekday date (YYYY-MM-DD) for scheduled deliveries}';
+    protected $signature = 'delivery:dispatch-orders-batch';
 
     protected $description = 'Dispatch pending delivery orders in batch to GoLog TMS grouped by category';
 
@@ -17,9 +17,7 @@ class DispatchDeliveryOrdersBatchCommand extends Command
     {
         $this->info('Scanning open delivery orders to aggregate and dispatch in batch...');
 
-        /** @var ?string $date */
-        $date = $this->option('date');
-        $result = $action->execute($date);
+        $result = $action->execute();
 
         if ($result->totalOrders === 0) {
             $this->info('No open delivery orders found to dispatch.');
