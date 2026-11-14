@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Cultiva\Integrations\GoLog\Jobs;
 
+use Cultiva\Integrations\GoLog\Actions\HandleGoLogWebhookAction;
+use Cultiva\Models\DeliveryOrder\GoLogWebhookEvent;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -18,5 +20,14 @@ class ProcessGoLogWebhookJob implements ShouldQueue
         public readonly int $webhookEventId,
     ) {}
 
-    public function handle(): void {}
+    public function handle(HandleGoLogWebhookAction $action): void
+    {
+        $event = GoLogWebhookEvent::find($this->webhookEventId);
+
+        if (! $event instanceof GoLogWebhookEvent || $event->processed_at !== null) {
+            return;
+        }
+
+        $action->execute($event);
+    }
 }
