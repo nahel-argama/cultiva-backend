@@ -20,26 +20,84 @@ final readonly class SyncGoLogShipmentStatusAction
         ?GoLogOperationType $operationType = null,
         ?CarbonImmutable $eventTimestamp = null,
     ): bool {
-        if ($shipment->status === $nextStatus) {
+        $resolvedTimestamp = $eventTimestamp ?? CarbonImmutable::now();
+
+        return DB::transaction(function () use ($shipment, $nextStatus, $operationType, $resolvedTimestamp): bool {
+            $lockedShipment = GoLogShipment::query()
+                ->whereKey($shipment->getKey())
+                ->lockForUpdate()
+                ->first();
+
+            if (! $lockedShipment instanceof GoLogShipment) {
+                return false;
+            }
+
+            $shipmentStatusChanged = $lockedShipment->status !== $nextStatus;
+            $resolvedOperation = $operationType ?? $lockedShipment->type;
+            $order = $lockedShipment->deliveryOrder()->lockForUpdate()->first();
+
+            if (! $shipmentStatusChanged && ! $this->shouldSyncOrderWhenShipmentUnchanged($order, $nextStatus, $resolvedOperation)) {
+                $this->refreshCallerShipment($shipment, $lockedShipment, $order);
+
+                return false;
+            }
+
+            if ($shipmentStatusChanged) {
+                $lockedShipment->update(['status' => $nextStatus]);
+            }
+
+            if ($order instanceof DeliveryOrder) {
+                $this->transitionDeliveryOrder($order, $nextStatus, $resolvedOperation, $resolvedTimestamp);
+            }
+
+            $this->refreshCallerShipment($shipment, $lockedShipment, $order);
+
+            return true;
+        });
+    }
+
+    private function refreshCallerShipment(
+        GoLogShipment $callerShipment,
+        GoLogShipment $lockedShipment,
+        ?DeliveryOrder $order,
+    ): void {
+        $callerShipment->setRawAttributes($lockedShipment->getAttributes(), true);
+        $callerShipment->setRelation('deliveryOrder', $order);
+    }
+
+    private function shouldSyncOrderWhenShipmentUnchanged(
+        ?DeliveryOrder $order,
+        GoLogShipmentStatus $status,
+        GoLogOperationType $operationType,
+    ): bool {
+        if (! $order instanceof DeliveryOrder) {
             return false;
         }
 
-        $resolvedOperation = $operationType ?? $shipment->type;
-        $resolvedTimestamp = $eventTimestamp ?? CarbonImmutable::now();
+        return match ($status) {
+            GoLogShipmentStatus::AGUARDANDO_INICIO => $order->status === DeliveryOrderStatus::PENDING,
+            GoLogShipmentStatus::INICIADO => in_array($order->status, [
+                DeliveryOrderStatus::PENDING,
+                DeliveryOrderStatus::ASSIGNED,
+            ], true),
+            GoLogShipmentStatus::FINALIZADO => $this->isOrderPendingFinalization($order, $operationType),
+            GoLogShipmentStatus::CANCELADO => ! in_array($order->status, [
+                DeliveryOrderStatus::DELIVERED,
+                DeliveryOrderStatus::CANCELLED,
+            ], true),
+            GoLogShipmentStatus::PENDENTE => false,
+        };
+    }
 
-        DB::transaction(function () use ($shipment, $nextStatus, $resolvedOperation, $resolvedTimestamp): void {
-            $shipment->update(['status' => $nextStatus]);
+    private function isOrderPendingFinalization(DeliveryOrder $order, GoLogOperationType $operationType): bool
+    {
+        if ($operationType === GoLogOperationType::COLETA) {
+            return $order->picked_up_at === null
+                || ! in_array($order->status, [DeliveryOrderStatus::IN_TRANSIT, DeliveryOrderStatus::DELIVERED], true);
+        }
 
-            $order = $shipment->deliveryOrder;
-
-            if (! $order instanceof DeliveryOrder) {
-                return;
-            }
-
-            $this->transitionDeliveryOrder($order, $nextStatus, $resolvedOperation, $resolvedTimestamp);
-        });
-
-        return true;
+        return $order->status !== DeliveryOrderStatus::DELIVERED
+            || $order->delivered_at === null;
     }
 
     private function transitionDeliveryOrder(

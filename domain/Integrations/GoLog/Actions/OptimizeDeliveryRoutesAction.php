@@ -12,6 +12,7 @@ use Cultiva\Integrations\GoLog\Enums\GoLogRoutePriority;
 use Cultiva\Integrations\GoLog\Enums\GoLogShipmentStatus;
 use Cultiva\Models\Delivery\GoLogDriver;
 use Cultiva\Models\DeliveryOrder\GoLogShipment;
+use Illuminate\Support\Facades\DB;
 
 class OptimizeDeliveryRoutesAction
 {
@@ -19,6 +20,7 @@ class OptimizeDeliveryRoutesAction
 
     public function __construct(
         private readonly GoLogClient $goLogClient,
+        private readonly SyncGoLogShipmentStatusAction $syncStatusAction = new SyncGoLogShipmentStatusAction,
     ) {}
 
     public function execute(): OptimizeRoutesResultDTO
@@ -153,9 +155,16 @@ class OptimizeDeliveryRoutesAction
             return;
         }
 
-        GoLogShipment::query()
-            ->whereIn('golog_shipment_id', $plannedShipmentIds)
-            ->update(['status' => GoLogShipmentStatus::AGUARDANDO_INICIO]);
+        DB::transaction(function () use ($plannedShipmentIds): void {
+            $shipments = GoLogShipment::with('deliveryOrder')
+                ->whereIn('golog_shipment_id', $plannedShipmentIds)
+                ->orderBy('id')
+                ->get();
+
+            foreach ($shipments as $shipment) {
+                $this->syncStatusAction->execute($shipment, GoLogShipmentStatus::AGUARDANDO_INICIO);
+            }
+        });
     }
 
     private function emptyResult(): OptimizeRoutesResultDTO
