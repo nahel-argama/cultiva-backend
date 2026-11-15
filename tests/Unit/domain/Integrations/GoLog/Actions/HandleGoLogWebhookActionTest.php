@@ -222,4 +222,46 @@ final class HandleGoLogWebhookActionTest extends TestCase
         $this->assertSame(DeliveryOrderStatus::DELIVERED, $freshAfterDropoff->status);
         $this->assertSame('2026-11-11T17:30:00+00:00', $freshAfterDropoff->delivered_at?->toIso8601String());
     }
+
+    public function test_should_handle_check_in_geofence_by_starting_shipment_and_transitioning_order_in_transit(): void
+    {
+        // Arrange
+        $order = DeliveryOrderFactory::new()->create([
+            'status' => DeliveryOrderStatus::ASSIGNED,
+        ]);
+
+        $coleta = GoLogShipment::create([
+            'delivery_order_id' => $order->id,
+            'golog_shipment_id' => 'coleta-uuid-geofence',
+            'type' => GoLogOperationType::COLETA,
+            'status' => GoLogShipmentStatus::AGUARDANDO_INICIO,
+        ]);
+
+        $geofenceEvent = GoLogWebhookEvent::create([
+            'delivery_id' => '55555555-5555-4555-8555-555555555551',
+            'event' => GoLogWebhookEventType::CHECK_IN_GEOFENCE,
+            'golog_shipment_id' => 'coleta-uuid-geofence',
+            'payload' => [
+                'event' => 'CHECK_IN_GEOFENCE',
+                'timestamp' => '2026-11-15T01:14:52Z',
+                'data' => [
+                    'eventType' => 'AUTO_CHECK_IN',
+                    'shipmentId' => 'coleta-uuid-geofence',
+                    'status' => 'CHEGOU',
+                    'timestamp' => '2026-11-15T01:14:51',
+                    'message' => 'Check-in automático efetuado.',
+                ],
+            ],
+        ]);
+
+        $sut = new HandleGoLogWebhookAction;
+
+        // Action
+        $sut->execute($geofenceEvent);
+
+        // Assert
+        $this->assertSame(GoLogShipmentStatus::INICIADO, $coleta->fresh()->status);
+        $this->assertSame(DeliveryOrderStatus::IN_TRANSIT, $order->fresh()->status);
+        $this->assertNotNull($geofenceEvent->fresh()->processed_at);
+    }
 }

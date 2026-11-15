@@ -40,18 +40,22 @@ final readonly class ReceiveGoLogWebhookAction
 
             /** @var array<string, mixed> $data */
             $data = is_array($payload['data'] ?? null) ? $payload['data'] : [];
-            $occurredAt = is_string($data['occurredAt'] ?? null)
-                ? CarbonImmutable::parse($data['occurredAt'])
+            $rawOccurredAt = $data['occurredAt'] ?? $data['timestamp'] ?? null;
+            $occurredAt = is_string($rawOccurredAt)
+                ? CarbonImmutable::parse($rawOccurredAt)
                 : null;
+            $description = is_string($data['description'] ?? null)
+                ? $data['description']
+                : (is_string($data['message'] ?? null) ? $data['message'] : null);
 
-            $webhookEvent = DB::transaction(function () use ($deliveryId, $eventType, $data, $occurredAt, $payload): GoLogWebhookEvent {
+            $webhookEvent = DB::transaction(function () use ($deliveryId, $eventType, $data, $occurredAt, $description, $payload): GoLogWebhookEvent {
                 return GoLogWebhookEvent::create([
                     'delivery_id' => $deliveryId,
                     'event' => $eventType,
                     'golog_shipment_id' => is_string($data['shipmentId'] ?? null) ? $data['shipmentId'] : null,
                     'occurrence_id' => is_string($data['occurrenceId'] ?? null) ? $data['occurrenceId'] : null,
                     'occurrence_type' => is_string($data['occurrenceType'] ?? null) ? $data['occurrenceType'] : null,
-                    'description' => is_string($data['description'] ?? null) ? $data['description'] : null,
+                    'description' => $description,
                     'occurred_at' => $occurredAt,
                     'payload' => $payload,
                 ]);

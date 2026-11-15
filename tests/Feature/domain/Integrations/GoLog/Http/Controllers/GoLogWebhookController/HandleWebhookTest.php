@@ -158,6 +158,53 @@ final class HandleWebhookTest extends TestCase
         Queue::assertPushed(ProcessGoLogWebhookJob::class, 1);
     }
 
+    public function test_should_accept_and_queue_check_in_geofence_webhook(): void
+    {
+        // Arrange
+        Queue::fake();
+
+        $deliveryId = '44444444-4444-4444-8444-444444444444';
+        $payload = [
+            'companyId' => 'company-uuid-1',
+            'event' => 'CHECK_IN_GEOFENCE',
+            'timestamp' => '2026-11-15T01:14:52Z',
+            'data' => [
+                'eventType' => 'AUTO_CHECK_IN',
+                'routeStopId' => 'stop-uuid-1',
+                'shipmentId' => 'shipment-uuid-99',
+                'transportId' => 'transport-uuid-1',
+                'plate' => 'RCH7D22',
+                'sequenceOrder' => 1,
+                'distanceMeters' => 0.0,
+                'status' => 'CHEGOU',
+                'timestamp' => '2026-11-15T01:14:51',
+                'message' => 'Chegada detectada a 0.0m da parada #1. Check-in automático efetuado.',
+            ],
+        ];
+        $body = json_encode($payload, JSON_THROW_ON_ERROR);
+        $signature = 'sha256='.hash_hmac('sha256', $body, self::WEBHOOK_SECRET);
+
+        // Action
+        $response = $this->postWebhook($body, 'CHECK_IN_GEOFENCE', $deliveryId, $signature);
+
+        // Assert
+        $response->assertOk()
+            ->assertJson(['status' => 'accepted']);
+
+        $this->assertDatabaseHas('golog_webhook_events', [
+            'delivery_id' => $deliveryId,
+            'event' => 'CHECK_IN_GEOFENCE',
+            'golog_shipment_id' => 'shipment-uuid-99',
+            'description' => 'Chegada detectada a 0.0m da parada #1. Check-in automático efetuado.',
+        ]);
+
+        $storedEvent = GoLogWebhookEvent::where('delivery_id', $deliveryId)->firstOrFail();
+
+        Queue::assertPushed(ProcessGoLogWebhookJob::class, function (ProcessGoLogWebhookJob $job) use ($storedEvent): bool {
+            return $job->webhookEventId === $storedEvent->id;
+        });
+    }
+
     private function postWebhook(string $rawBody, string $event, string $deliveryId, string $signature)
     {
         return $this->call(
