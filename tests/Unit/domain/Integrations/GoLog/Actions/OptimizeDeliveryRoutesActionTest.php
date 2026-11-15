@@ -15,6 +15,7 @@ use Cultiva\Integrations\GoLog\DTO\OptimizeRoutesResultDTO;
 use Cultiva\Integrations\GoLog\Enums\GoLogRoutePriority;
 use Cultiva\Integrations\GoLog\Enums\GoLogShipmentStatus;
 use Cultiva\Integrations\GoLog\Enums\GoLogWorkScheduleStatus;
+use Cultiva\Models\DeliveryOrder\Enums\DeliveryOrderStatus;
 use Cultiva\Models\DeliveryOrder\GoLogShipment;
 use Database\Factories\DeliveryOrderFactory;
 use Database\Factories\GoLogDriverFactory;
@@ -153,9 +154,17 @@ class OptimizeDeliveryRoutesActionTest extends TestCase
             'id' => $shipment1->id,
             'status' => GoLogShipmentStatus::AGUARDANDO_INICIO->value,
         ]);
+        $this->assertDatabaseHas('delivery_orders', [
+            'id' => $order1->id,
+            'status' => DeliveryOrderStatus::ASSIGNED->value,
+        ]);
         $this->assertDatabaseHas('golog_shipments', [
             'id' => $shipment2->id,
             'status' => GoLogShipmentStatus::PENDENTE->value,
+        ]);
+        $this->assertDatabaseHas('delivery_orders', [
+            'id' => $order2->id,
+            'status' => DeliveryOrderStatus::PENDING->value,
         ]);
     }
 
