@@ -28,6 +28,7 @@ final readonly class HandleGoLogWebhookAction
                 GoLogWebhookEventType::SHIPMENT_PLANNED,
                 GoLogWebhookEventType::SHIPMENT_UNPLANNED,
                 GoLogWebhookEventType::SHIPMENT_STARTED,
+                GoLogWebhookEventType::CHECK_IN_GEOFENCE,
                 GoLogWebhookEventType::SHIPMENT_DELIVERED => $this->applyShipmentEvent($event),
             };
 
@@ -84,7 +85,8 @@ final readonly class HandleGoLogWebhookAction
             GoLogWebhookEventType::SHIPMENT_CREATED,
             GoLogWebhookEventType::SHIPMENT_UNPLANNED => GoLogShipmentStatus::PENDENTE,
             GoLogWebhookEventType::SHIPMENT_PLANNED => GoLogShipmentStatus::AGUARDANDO_INICIO,
-            GoLogWebhookEventType::SHIPMENT_STARTED => GoLogShipmentStatus::INICIADO,
+            GoLogWebhookEventType::SHIPMENT_STARTED,
+            GoLogWebhookEventType::CHECK_IN_GEOFENCE => GoLogShipmentStatus::INICIADO,
             GoLogWebhookEventType::SHIPMENT_DELIVERED => GoLogShipmentStatus::FINALIZADO,
             default => null,
         };
