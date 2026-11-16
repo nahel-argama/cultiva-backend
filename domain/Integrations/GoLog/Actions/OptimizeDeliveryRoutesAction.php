@@ -4,24 +4,24 @@ declare(strict_types=1);
 
 namespace Cultiva\Integrations\GoLog\Actions;
 
-use Carbon\CarbonImmutable;
-use Cultiva\Base\Exceptions\CultivaException;
 use Cultiva\Integrations\GoLog\Clients\GoLogClient;
 use Cultiva\Integrations\GoLog\DTO\OptimizeRoutesResultDTO;
 use Cultiva\Integrations\GoLog\Enums\GoLogRoutePriority;
 use Cultiva\Integrations\GoLog\Enums\GoLogShipmentStatus;
-use Cultiva\Models\Delivery\GoLogDriver;
 use Cultiva\Models\DeliveryOrder\GoLogShipment;
 use Illuminate\Support\Facades\DB;
 
 class OptimizeDeliveryRoutesAction
 {
-    private const string SCHEDULE_TIMEZONE = 'America/Sao_Paulo';
+    private readonly ResolveAvailableWorkSchedulesAction $resolveWorkSchedules;
 
     public function __construct(
         private readonly GoLogClient $goLogClient,
         private readonly SyncGoLogShipmentStatusAction $syncStatusAction = new SyncGoLogShipmentStatusAction,
-    ) {}
+        ?ResolveAvailableWorkSchedulesAction $resolveWorkSchedules = null,
+    ) {
+        $this->resolveWorkSchedules = $resolveWorkSchedules ?? new ResolveAvailableWorkSchedulesAction($this->goLogClient);
+    }
 
     public function execute(): OptimizeRoutesResultDTO
     {
@@ -31,24 +31,7 @@ class OptimizeDeliveryRoutesAction
             return $this->emptyResult();
         }
 
-        $provisionedDriverIds = $this->findProvisionedDriverIds();
-
-        if ($provisionedDriverIds === []) {
-            throw new CultivaException(
-                422,
-                'No provisioned GoLog drivers available for route optimization.'
-            );
-        }
-
-        $scheduleDate = CarbonImmutable::now(self::SCHEDULE_TIMEZONE)->nextWeekday()->toDateString();
-        $workScheduleIds = $this->resolveActiveWorkScheduleIds($provisionedDriverIds, $scheduleDate);
-
-        if ($workScheduleIds === []) {
-            throw new CultivaException(
-                422,
-                "No active GoLog work schedules found for date [{$scheduleDate}]."
-            );
-        }
+        $workScheduleIds = $this->resolveWorkSchedules->execute()->workScheduleIds;
 
         $apiResponse = $this->goLogClient->optimizeRoutes(
             shipmentIds: $shipmentIds,
@@ -83,47 +66,6 @@ class OptimizeDeliveryRoutesAction
             ->orderBy('id')
             ->pluck('golog_shipment_id')
             ->all();
-    }
-
-    /**
-     * @return array<int, string>
-     */
-    private function findProvisionedDriverIds(): array
-    {
-        /** @var array<int, string> */
-        return GoLogDriver::query()
-            ->whereNotNull('golog_user_id')
-            ->whereNotNull('golog_driver_id')
-            ->whereHas('vehicle', fn ($query) => $query
-                ->whereNotNull('golog_tractor_id')
-                ->whereNotNull('golog_equipament_group_id')
-            )
-            ->orderBy('id')
-            ->pluck('golog_driver_id')
-            ->all();
-    }
-
-    /**
-     * @param array<int, string> $provisionedDriverIds
-     * @return array<int, string>
-     */
-    private function resolveActiveWorkScheduleIds(array $provisionedDriverIds, string $scheduleDate): array
-    {
-        $workScheduleIds = [];
-
-        foreach ($this->goLogClient->listActiveWorkSchedules() as $schedule) {
-            if ($schedule->scheduleDate !== $scheduleDate) {
-                continue;
-            }
-
-            if (! in_array($schedule->driverId, $provisionedDriverIds, true)) {
-                continue;
-            }
-
-            $workScheduleIds[] = $schedule->id;
-        }
-
-        return $workScheduleIds;
     }
 
     /**

@@ -21,10 +21,15 @@ class DispatchDeliveryOrdersBatchAction
 {
     private const string SCHEDULE_TIMEZONE = 'America/Sao_Paulo';
 
+    private readonly ResolveAvailableWorkSchedulesAction $resolveWorkSchedules;
+
     public function __construct(
         private readonly GoLogClient $goLogClient,
         private readonly ResolveTransportTypeAction $resolveTransportType,
-    ) {}
+        ?ResolveAvailableWorkSchedulesAction $resolveWorkSchedules = null,
+    ) {
+        $this->resolveWorkSchedules = $resolveWorkSchedules ?? new ResolveAvailableWorkSchedulesAction($this->goLogClient);
+    }
 
     public function execute(): DispatchBatchResultDTO
     {
@@ -55,7 +60,7 @@ class DispatchDeliveryOrdersBatchAction
             );
         }
 
-        $scheduleDate = CarbonImmutable::now(self::SCHEDULE_TIMEZONE)->nextWeekday();
+        $scheduleDate = $this->resolveWorkSchedules->execute()->scheduleDate;
 
         $groupedOrders = $orders->groupBy(
             fn (DeliveryOrder $order): string => $order->purchase->offer->category->name->value

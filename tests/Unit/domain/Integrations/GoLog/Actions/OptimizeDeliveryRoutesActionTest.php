@@ -244,4 +244,90 @@ class OptimizeDeliveryRoutesActionTest extends TestCase
             'status' => GoLogShipmentStatus::PENDENTE->value,
         ]);
     }
+
+    public function test_should_fallback_to_earliest_future_active_work_schedule_date_when_next_weekday_has_no_active_schedules(): void
+    {
+        // Arrange
+        CarbonImmutable::setTestNow(CarbonImmutable::parse('2026-11-15 11:00:00', 'America/Sao_Paulo'));
+
+        $order = DeliveryOrderFactory::new()->create();
+        $shipment = GoLogShipment::query()->create([
+            'delivery_order_id' => $order->id,
+            'golog_shipment_id' => '11111111-1111-1111-1111-111111111111',
+            'status' => GoLogShipmentStatus::PENDENTE,
+        ]);
+
+        $driver = GoLogDriverFactory::new()->create([
+            'golog_user_id' => 'a1111111-1111-1111-1111-111111111111',
+            'golog_driver_id' => 'b1111111-1111-1111-1111-111111111111',
+        ]);
+        GoLogVehicleFactory::new()->create([
+            'golog_driver_id' => $driver->id,
+            'golog_tractor_id' => 'd1111111-1111-1111-1111-111111111111',
+            'golog_equipament_group_id' => 'e1111111-1111-1111-1111-111111111111',
+        ]);
+
+        // Expects
+        $clientMock = Mockery::mock(GoLogClient::class, function (MockInterface $mock): void {
+            $mock->shouldReceive('listActiveWorkSchedules')
+                ->once()
+                ->andReturn([
+                    new GoLogWorkScheduleResponseDTO(
+                        id: 'past-schedule',
+                        scheduleDate: '2026-11-13',
+                        status: GoLogWorkScheduleStatus::ATIVO,
+                        driverId: 'b1111111-1111-1111-1111-111111111111',
+                    ),
+                    new GoLogWorkScheduleResponseDTO(
+                        id: 'ws-2026-11-18',
+                        scheduleDate: '2026-11-18',
+                        status: GoLogWorkScheduleStatus::ATIVO,
+                        driverId: 'b1111111-1111-1111-1111-111111111111',
+                    ),
+                    new GoLogWorkScheduleResponseDTO(
+                        id: 'ws-2026-11-17',
+                        scheduleDate: '2026-11-17',
+                        status: GoLogWorkScheduleStatus::ATIVO,
+                        driverId: 'b1111111-1111-1111-1111-111111111111',
+                    ),
+                ]);
+
+            $mock->shouldReceive('optimizeRoutes')
+                ->once()
+                ->with(
+                    ['11111111-1111-1111-1111-111111111111'],
+                    ['ws-2026-11-17'],
+                    GoLogRoutePriority::TEMPO,
+                )
+                ->andReturn(new GoLogOptimizeRoutesResponseDTO(
+                    routesCount: 1,
+                    plannedShipments: 1,
+                    transportIds: ['t1111111-1111-1111-1111-111111111111'],
+                    skipped: [],
+                    totalDistanceMeters: 8500,
+                    totalCost: 90.0,
+                ));
+        });
+
+        $sut = new OptimizeDeliveryRoutesAction($clientMock);
+
+        // Action
+        try {
+            $result = $sut->execute();
+        } finally {
+            CarbonImmutable::setTestNow();
+        }
+
+        // Assert
+        $this->assertSame(1, $result->shipmentsOptimized);
+        $this->assertSame(1, $result->workSchedulesUsed);
+        $this->assertDatabaseHas('golog_shipments', [
+            'id' => $shipment->id,
+            'status' => GoLogShipmentStatus::AGUARDANDO_INICIO->value,
+        ]);
+        $this->assertDatabaseHas('delivery_orders', [
+            'id' => $order->id,
+            'status' => DeliveryOrderStatus::ASSIGNED->value,
+        ]);
+    }
 }
