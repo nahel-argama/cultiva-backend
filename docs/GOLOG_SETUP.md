@@ -1,14 +1,14 @@
-# Integração Cultiva ↔ GoLog TMS — Arquitetura, Setup e Uso
+# Integração Cultiva ↔ GoLog TMS — Arquitetura e Guia de Uso
 
-Este guia explica como funciona a integração entre o backend do Cultiva e a API da **GoLog TMS**, como preparar o ambiente local do zero, como operar o ciclo completo de entregas e como utilizá-la junto ao ambiente de demonstração criado pelos seeders.
+Este guia explica como funciona a integração entre o backend do Cultiva e a API da **GoLog TMS**, como configurá-la para uso, como operar o ciclo completo de entregas e como testá-la com os dados gerados pelo ambiente de demonstração.
 
 ```mermaid
 flowchart LR
-    A["1. Ambiente e Tenant\n(.env + Docker + Webhook)"] --> B["2. Frota e Escalas\n(GoLogDriverSeeder ou /v1/golog/*)"]
+    A["1. Configuração GoLog\n(.env + Tenant + Webhook)"] --> B["2. Frota e Escalas\n(GoLogDriverSeeder ou /v1/golog/*)"]
     B --> C["3. Pedido de Entrega\n(Compra via API -> DeliveryOrder)"]
     C --> D["4. Despacho em Lote\n(delivery:dispatch-orders-batch)"]
     D --> E["5. Roteirização VRP\n(delivery:optimize-routes)"]
-    E --> F["6. Execução e Sync\n(Webhooks + Horizon / Reconciliação)"]
+    E --> F["6. Execução e Sync\n(Webhooks + Reconciliação)"]
 ```
 
 ---
@@ -17,61 +17,35 @@ flowchart LR
 
 | Componente | Responsabilidade | Implementação |
 | :--- | :--- | :--- |
-| **Cliente HTTP e Sessão** | Faz login na GoLog (`POST /login`), armazena a sessão em cache Redis (`golog_auth_session`, TTL `6600s`) e envia `Authorization: Bearer` + `X-Tenant-Id` obrigatório em toda requisição autenticada. | [`GoLogClient`](../domain/Integrations/GoLog/Clients/GoLogClient.php), [`Config`](../domain/Integrations/GoLog/Config.php) |
-| **Provisionamento de Frota** | Cadastra motorista/veículo em etapas (`user` → `driver` → `tractor` → `equipament_group`) até `isProvisioned() === true`. Escalas diárias (`workSchedule`) são consultadas diretamente na GoLog na roteirização (sem persistência de `golog_work_schedule_id`). | [`GoLogDriverController`](../domain/Integrations/GoLog/Http/Controllers/GoLogDriverController.php), [`GoLogDriver`](../domain/Models/Delivery/GoLogDriver.php) |
-| **Despacho em Lote** | Agrupa `delivery_orders` `pending` sem shipments por categoria, resolve o tipo de transporte (`REFRIGERADO`, `CLIMATIZADO`, `CARGA SECA`), envia `POST /integration/invoices/json` para o próximo dia útil em `America/Sao_Paulo` e cria 2 [`GoLogShipment`](../domain/Models/DeliveryOrder/GoLogShipment.php) (`COLETA` e `ENTREGA`) com status `PENDENTE`. | [`DispatchDeliveryOrdersBatchAction`](../domain/Integrations/GoLog/Actions/DispatchDeliveryOrdersBatchAction.php) |
-| **Roteirização (VRP)** | Coleta shipments `PENDENTE`, motoristas locais provisionados e escalas `ATIVO` na GoLog para o próximo dia útil; chama `POST /api-route-optimization` (`routePriority: TEMPO`) e transiciona os shipments aceitos para `AGUARDANDO_INICIO` e os [`DeliveryOrder`](../domain/Models/DeliveryOrder/DeliveryOrder.php) para `assigned`. | [`OptimizeDeliveryRoutesAction`](../domain/Integrations/GoLog/Actions/OptimizeDeliveryRoutesAction.php) |
-| **Webhooks e Reconciliação** | Recebe eventos assinados (`HMAC-SHA256`), persiste idempotentemente em `golog_webhook_events` com lock no Redis e processa via fila (`Horizon`), atualizando [`GoLogShipment`](../domain/Models/DeliveryOrder/GoLogShipment.php) e [`DeliveryOrder`](../domain/Models/DeliveryOrder/DeliveryOrder.php) sob `lockForUpdate()`. | [`GoLogWebhookController`](../domain/Integrations/GoLog/Http/Controllers/GoLogWebhookController.php), [`SyncGoLogShipmentStatusAction`](../domain/Integrations/GoLog/Actions/SyncGoLogShipmentStatusAction.php), [`ReconcileGoLogShipmentsAction`](../domain/Integrations/GoLog/Actions/ReconcileGoLogShipmentsAction.php) |
+| **Cliente HTTP e Sessão** | Autentica na GoLog (`POST /login`), armazena a sessão em cache Redis (`golog_auth_session`, TTL `6600s`) e envia `Authorization: Bearer` + `X-Tenant-Id` obrigatório em toda requisição autenticada. | [`GoLogClient`](../domain/Integrations/GoLog/Clients/GoLogClient.php), [`Config`](../domain/Integrations/GoLog/Config.php) |
+| **Provisionamento de Frota** | Cadastra motorista e veículo em etapas (`user` → `driver` → `tractor` → `equipament_group`) até `isProvisioned() === true`. Escalas diárias (`workSchedule`) são consultadas diretamente na GoLog na roteirização (sem persistência local de `golog_work_schedule_id`). | [`GoLogDriverController`](../domain/Integrations/GoLog/Http/Controllers/GoLogDriverController.php), [`GoLogDriver`](../domain/Models/Delivery/GoLogDriver.php) |
+| **Despacho em Lote** | Agrupa `delivery_orders` `pending` sem shipments por categoria, resolve o tipo de transporte (`REFRIGERADO`, `CLIMATIZADO`, `CARGA SECA`), seleciona via [`ResolveAvailableWorkSchedulesAction`](../domain/Integrations/GoLog/Actions/ResolveAvailableWorkSchedulesAction.php) a menor data com escalas `ATIVO` dos motoristas provisionados a partir do próximo dia útil em `America/Sao_Paulo`, envia `POST /integration/invoices/json` e cria 2 [`GoLogShipment`](../domain/Models/DeliveryOrder/GoLogShipment.php) (`COLETA` e `ENTREGA`) com status `PENDENTE`. | [`DispatchDeliveryOrdersBatchAction`](../domain/Integrations/GoLog/Actions/DispatchDeliveryOrdersBatchAction.php) |
+| **Roteirização (VRP)** | Coleta shipments `PENDENTE` e obtém via [`ResolveAvailableWorkSchedulesAction`](../domain/Integrations/GoLog/Actions/ResolveAvailableWorkSchedulesAction.php) as escalas `ATIVO` na GoLog para a mesma menor data disponível; chama `POST /api-route-optimization` (`routePriority: TEMPO`) e transiciona os shipments aceitos para `AGUARDANDO_INICIO` e os [`DeliveryOrder`](../domain/Models/DeliveryOrder/DeliveryOrder.php) para `assigned`. | [`OptimizeDeliveryRoutesAction`](../domain/Integrations/GoLog/Actions/OptimizeDeliveryRoutesAction.php) |
+| **Webhooks e Reconciliação** | Recebe eventos assinados (`HMAC-SHA256`), persiste idempotentemente em `golog_webhook_events` com lock no Redis e processa em fila (Horizon), atualizando [`GoLogShipment`](../domain/Models/DeliveryOrder/GoLogShipment.php) e [`DeliveryOrder`](../domain/Models/DeliveryOrder/DeliveryOrder.php) sob `lockForUpdate()`. | [`GoLogWebhookController`](../domain/Integrations/GoLog/Http/Controllers/GoLogWebhookController.php), [`SyncGoLogShipmentStatusAction`](../domain/Integrations/GoLog/Actions/SyncGoLogShipmentStatusAction.php), [`ReconcileGoLogShipmentsAction`](../domain/Integrations/GoLog/Actions/ReconcileGoLogShipmentsAction.php) |
 
 ---
 
-## 2. Preparo do Ambiente
+## 2. Configuração da Integração GoLog
 
-### 2.1. Variáveis de Ambiente (`backend/.env`)
+### 2.1. Variáveis GoLog no `.env`
 
-1. Copie [`.env.example`](../.env.example) para `.env` dentro de `backend/` e ajuste as credenciais da GoLog:
+Configure no `backend/.env` os parâmetros específicos da GoLog (referenciados em [`config/services.php`](../config/services.php)):
 
-   ```dotenv
-   GOLOG_BASE_URL=http://147.15.18.21:8081
-   GOLOG_EMAIL=cultiva@cultiva.com
-   GOLOG_PASSWORD="<senha_admin_golog>"
-   GOLOG_TENANT_ID=5647b3d4-f42f-4905-a617-896afa8dccef
-   GOLOG_TIMEOUT=60
-   GOLOG_WEBHOOK_SECRET="<seu_segredo_hmac>"
-   ```
-
-   - `GOLOG_TENANT_ID` é **obrigatório**: toda requisição autenticada envia o header `X-Tenant-Id`.
-   - `QUEUE_CONNECTION=redis` e `CACHE_STORE=redis` (padrões do [`.env.example`](../.env.example)) são usados pelo Horizon (processamento de webhooks) e pelo cache do token GoLog (`golog_auth_session`).
-   - `PRODUCT_SOURCE_BASE_URL=http://host.docker.internal:8001/api`: necessário apenas se você for criar/editar ofertas ou previsões de safra via API (para comprar ofertas já existentes do seeder, o catálogo externo não é consultado).
-
-> **Observação de segurança:** nunca versione senhas reais ou segredos HMAC em `.env.example`, seeders ou arquivos de documentação.
-
-### 2.2. Containers Docker e Inicialização do Laravel
-
-A partir de `backend/` (veja [`compose.yml`](../compose.yml)):
-
-```bash
-cd backend
-docker compose up -d
-docker compose exec php composer install
-docker compose exec php php artisan key:generate
+```dotenv
+GOLOG_BASE_URL=http://147.15.18.21:8081
+GOLOG_EMAIL=cultiva@cultiva.com
+GOLOG_PASSWORD="<senha_admin_golog>"
+GOLOG_TENANT_ID=5647b3d4-f42f-4905-a617-896afa8dccef
+GOLOG_TIMEOUT=60
+GOLOG_WEBHOOK_SECRET="<seu_segredo_hmac>"
 ```
 
-Serviços relevantes que passam a rodar:
-- `database`: PostgreSQL 17 + PostGIS (banco `app`, porta `5432`)
-- `redis`: Redis 8 (cache de sessão GoLog, locks e filas)
-- `php`: PHP-FPM
-- `nginx`: HTTP na porta `80` (expõe `/v1/*`, incluindo `/v1/golog/webhook`)
-- `worker`: executa `php artisan horizon` (consumidor obrigatório para processar eventos de webhook recebidos)
+- `GOLOG_TENANT_ID` é **obrigatório**: toda requisição autenticada envia o header `X-Tenant-Id`.
+- O cliente usa o cache Redis configurado na aplicação (`golog_auth_session`), e o consumo de webhooks depende da fila sendo processada pelo Horizon (`worker`).
 
-Caso também execute a suíte PHPUnit localmente, crie o banco de testes isolado `cultiva_test` com extensão `postgis` conforme configurado em [`phpunit.xml`](../phpunit.xml):
+> **Observação de segurança:** nunca versione senhas reais ou segredos HMAC no repositório.
 
-```bash
-docker compose exec database createdb -U root cultiva_test
-docker compose exec database psql -U root -d cultiva_test -c 'CREATE EXTENSION IF NOT EXISTS postgis'
-```
-
-### 2.3. Tenant, Tipos de Transporte e Perfil de Otimização
+### 2.2. Tenant e Tipos de Transporte
 
 #### Opção A — Reusar o Tenant Compartilhado da Cultiva (Recomendado)
 
@@ -80,44 +54,37 @@ Mantenha `GOLOG_TENANT_ID=5647b3d4-f42f-4905-a617-896afa8dccef` no `.env` (já p
 - Perfil padrão de otimização VRP
 - Os 3 motoristas/veículos pré-provisionados que correspondem ao [`GoLogDriverSeeder`](../database/seeders/GoLogDriverSeeder.php)
 
-Se precisar validar ou garantir que os tipos de transporte existam no tenant configurado:
+Para conferir ou garantir os tipos de transporte no tenant configurado:
 
 ```bash
 docker compose exec php php artisan golog:populate-transport-types
 ```
 
-#### Opção B — Criar um Novo Tenant na GoLog
+#### Opção B — Utilizar um Novo Tenant na GoLog
 
-1. Abra a collection Bruno em `backend/collection/bruno` (ambiente `local`).
-2. Execute [`GoLog TMS/01. Auth & Setup/01. Login.yml`](../collection/bruno/GoLog%20TMS/01.%20Auth%20%26%20Setup/01.%20Login.yml) para obter `golog_token`.
-3. Execute [`GoLog TMS/01. Auth & Setup/08. Create Cultiva Tenant.yml`](../collection/bruno/GoLog%20TMS/01.%20Auth%20%26%20Setup/08.%20Create%20Cultiva%20Tenant.yml) com `cnpjCpf`, `email`, `adminEmail` e `adminCpf` únicos.
-4. Atualize `GOLOG_TENANT_ID` (e, se aplicável, `GOLOG_EMAIL`/`GOLOG_PASSWORD`) em `backend/.env` e limpe o cache da sessão anterior no Redis:
+1. Na collection Bruno em `backend/collection/bruno` (ambiente `local`), autentique com [`GoLog TMS/01. Auth & Setup/01. Login.yml`](../collection/bruno/GoLog%20TMS/01.%20Auth%20%26%20Setup/01.%20Login.yml) e crie o tenant com [`GoLog TMS/01. Auth & Setup/08. Create Cultiva Tenant.yml`](../collection/bruno/GoLog%20TMS/01.%20Auth%20%26%20Setup/08.%20Create%20Cultiva%20Tenant.yml).
+2. Atualize `GOLOG_TENANT_ID` (e, se necessário, `GOLOG_EMAIL`/`GOLOG_PASSWORD`) no `.env`, limpe o cache do token anterior no Redis e cadastre os tipos de transporte:
 
    ```bash
    docker compose exec php php artisan cache:forget golog_auth_session
    docker compose exec php php artisan golog:populate-transport-types
    ```
 
-5. Crie um perfil padrão de otimização para o novo tenant diretamente na GoLog (`POST /optimization-profile` com `"companyId": "<GOLOG_TENANT_ID>"` e `"isDefault": true`).
+3. Crie um perfil padrão de otimização para o novo tenant na GoLog (`POST /optimization-profile` com `"companyId": "<GOLOG_TENANT_ID>"` e `"isDefault": true`).
 
-### 2.4. Configuração de Webhook Público (ngrok / HTTPS)
+### 2.3. Registro de Webhook Público (ngrok / HTTPS)
 
-Para que a GoLog envie atualizações de status em tempo real para `POST /v1/golog/webhook`:
+Para receber eventos em tempo real em `POST /v1/golog/webhook`:
 
-1. Confirme que `worker` (`php artisan horizon`) está rodando:
-   ```bash
-   docker compose ps worker
-   ```
-2. Exponha o Nginx local (porta `80`) usando um túnel público, por exemplo `ngrok`:
-   ```bash
-   ngrok http 80
-   ```
-3. Defina `GOLOG_WEBHOOK_SECRET` em `backend/.env` e registre a URL pública na GoLog com o comando Artisan [`ConfigureGoLogWebhookCommand`](../domain/Integrations/GoLog/Commands/ConfigureGoLogWebhookCommand.php):
+1. Exponha a API local por uma URL pública HTTPS (ex.: `ngrok http 80`).
+2. Defina `GOLOG_WEBHOOK_SECRET` no `.env` e registre a URL na GoLog usando [`ConfigureGoLogWebhookCommand`](../domain/Integrations/GoLog/Commands/ConfigureGoLogWebhookCommand.php):
+
    ```bash
    docker compose exec php php artisan golog:configure-webhook "https://<seu-subdominio>.ngrok-free.app/v1/golog/webhook" --test
    ```
+
    - Opções disponíveis: `--secret=<segredo>` (sobrescreve `GOLOG_WEBHOOK_SECRET`), `--inactive` (registra inativo) e `--test` (dispara `POST company/{tenantId}/webhook/test` com evento `TEST_PING`).
-   - O endpoint local valida `X-GoLog-Signature` (`sha256=<hmac>`), `X-GoLog-Delivery` (UUID idempotente) e `X-GoLog-Event`.
+   - O endpoint valida `X-GoLog-Signature` (`sha256=<hmac>`), `X-GoLog-Delivery` (UUID idempotente) e `X-GoLog-Event`, e exige o processador de fila ativo para executar os jobs enfileirados.
 
 ---
 
@@ -126,9 +93,9 @@ Para que a GoLog envie atualizações de status em tempo real para `POST /v1/gol
 Um [`GoLogDriver`](../domain/Models/Delivery/GoLogDriver.php) está completo (`isProvisioned() === true`) quando possui os 4 identificadores externos persistidos localmente:
 `golog_user_id` → `golog_driver_id` → `golog_tractor_id` → `golog_equipament_group_id`.
 
-### Caminho Rápido — `GoLogDriverSeeder` (Tenant Compartilhado)
+### Motoristas Pré-provisionados (`GoLogDriverSeeder`)
 
-Ao executar as migrations e seeders, o [`GoLogDriverSeeder`](../database/seeders/GoLogDriverSeeder.php) cria/atualiza localmente os 3 motoristas já provisionados no tenant `5647b3d4-f42f-4905-a617-896afa8dccef` (todos com empresa sediada em Blumenau/SC, `POINT(-49.06611 -26.91944)`):
+Para o tenant compartilhado `5647b3d4-f42f-4905-a617-896afa8dccef`, o [`GoLogDriverSeeder`](../database/seeders/GoLogDriverSeeder.php) popula os 3 motoristas reais (todos com empresa em Blumenau/SC, `POINT(-49.06611 -26.91944)`):
 
 | Motorista | E-mail de login no Cultiva | Senha | Placa / Veículo |
 | :--- | :--- | :--- | :--- |
@@ -136,9 +103,9 @@ Ao executar as migrations e seeders, o [`GoLogDriverSeeder`](../database/seeders
 | Camila Rocha | `camila.rocha@cultiva.com` | `Password123!` | `RCH7D22` (Scania R 450) |
 | Thiago Almeida | `thiago.almeida@cultiva.com` | `Password123!` | `ALM3F88` (Actros 2651) |
 
-### Caminho Manual — Endpoints de Provisionamento (`/v1/golog/*`)
+### Provisionamento Manual via API (`/v1/golog/*`)
 
-Para cadastrar novos motoristas em qualquer tenant, execute os requests em `collection/bruno/API/GoLog Drivers/` em sequência (`getStoppedStep()` permite retomar do ponto onde parou):
+Para cadastrar novos motoristas pela API do Cultiva, execute os endpoints em sequência (`getStoppedStep()` permite retomar do ponto em que parou), disponíveis em `collection/bruno/API/GoLog Drivers/`:
 
 | Etapa | Request Bruno | Endpoint Cultiva | O que faz |
 | :---: | :--- | :--- | :--- |
@@ -149,12 +116,12 @@ Para cadastrar novos motoristas em qualquer tenant, execute os requests em `coll
 
 ### Escalas de Trabalho (`workSchedule`)
 
-A tabela `golog_drivers` **não** armazena mais `golog_work_schedule_id`. Ao rodar `delivery:optimize-routes`, o backend:
-1. Calcula a data alvo como o **próximo dia útil** no fuso `America/Sao_Paulo` (`CarbonImmutable::now('America/Sao_Paulo')->nextWeekday()->toDateString()`).
+A tabela `golog_drivers` **não** armazena mais `golog_work_schedule_id`. Tanto `delivery:dispatch-orders-batch` quanto `delivery:optimize-routes` usam [`ResolveAvailableWorkSchedulesAction`](../domain/Integrations/GoLog/Actions/ResolveAvailableWorkSchedulesAction.php), que:
+1. Calcula a data mínima como o **próximo dia útil** em `America/Sao_Paulo` (`CarbonImmutable::now('America/Sao_Paulo')->nextWeekday()->toDateString()`).
 2. Consulta `GET /workSchedule/getByStatus?status=ATIVO` na GoLog.
-3. Filtra apenas escalas com `scheduleDate` igual à data alvo e pertencentes aos motoristas provisionados no banco local.
+3. Filtra apenas escalas com `status === ATIVO`, `scheduleDate >= data mínima` e pertencentes aos motoristas provisionados localmente, selecionando a **menor `scheduleDate` disponível** (garantindo que despacho e VRP usem exatamente a mesma janela, inclusive se o próximo dia útil já tiver suas escalas em `EM_OPERACAO`).
 
-Portanto, **antes de rodar `delivery:optimize-routes`**, é necessário existir ao menos uma escala `ATIVO` na GoLog para essa data. Você pode criá-la:
+Portanto, **antes de rodar `delivery:dispatch-orders-batch` e `delivery:optimize-routes`**, garanta que exista ao menos uma escala `ATIVO` na GoLog a partir dessa data mínima:
 - Pela API do Cultiva autenticado como o motorista (`POST /v1/golog/work-schedules` — [`05. Create Work Schedule.yml`](../collection/bruno/API/GoLog%20Drivers/05.%20Create%20Work%20Schedule.yml)), informando `schedule_date` (`YYYY-MM-DD`), `start_time` (`HH:mm`) e `end_time` (`HH:mm`); **ou**
 - Diretamente na GoLog via [`GoLog TMS/02. Fleet & Drivers/07. Create Work Schedule.yml`](../collection/bruno/GoLog%20TMS/02.%20Fleet%20&%20Drivers/07.%20Create%20Work%20Schedule.yml).
 
@@ -162,66 +129,59 @@ Portanto, **antes de rodar `delivery:optimize-routes`**, é necessário existir 
 
 ## 4. Como Usar com o Ambiente de Demo Criado pelo Seeder
 
-### 4.1. Populando o Banco Demo
+### 4.1. O que o `DatabaseSeeder` Disponibiliza
 
-Dentro de `backend/`:
+Quando o banco é populado pelo seeder (`php artisan db:seed`), o [`DatabaseSeeder`](../database/seeders/DatabaseSeeder.php) executa:
 
-```bash
-docker compose exec php php artisan migrate --seed
-# ou, para zerar o banco app e recriar tudo do zero:
-docker compose exec php php artisan migrate:fresh --seed
-```
-
-O [`DatabaseSeeder`](../database/seeders/DatabaseSeeder.php) executa em ordem:
-1. [`DemoDataSeeder`](../database/seeders/DemoDataSeeder.php) *(apenas fora de `production`; idempotente — remove apenas dados de demonstração existentes e preserva outros registros)*:
+1. [`DemoDataSeeder`](../database/seeders/DemoDataSeeder.php) *(apenas fora de `production`; idempotente — recria apenas registros demo e preserva os demais)*:
    - **25 produtores**: `produtor1@gmail.com` até `produtor25@gmail.com`
    - **50 varejistas**: `varejista1@gmail.com` até `varejista50@gmail.com`
-   - **Senha compartilhada** de produtores e varejistas demo: `teste@123` (todos já criados com `is_verified = true` e `is_active = true`, cada um com `Company` e `Address`)
+   - **Senha compartilhada** dos produtores e varejistas demo: `teste@123` (todos já criados com `is_verified = true` e `is_active = true`, com `Company` e `Address`)
    - **200 ofertas ativas** (`8` por produtor, `total_quantity = 100`), distribuídas pelas 5 categorias suportadas (`Frutas`, `Legumes`, `Verduras`, `Tubérculos e raízes`, `Grãos e cereais`)
    - Previsões de safra, itens de wishlist e **250 compras históricas**
 2. [`GoLogDriverSeeder`](../database/seeders/GoLogDriverSeeder.php):
-   - Os **3 motoristas pré-provisionados** da Cultiva (`henrique.costa@cultiva.com`, `camila.rocha@cultiva.com`, `thiago.almeida@cultiva.com`, senha `Password123!`).
+   - Os **3 motoristas pré-provisionados** (`henrique.costa@cultiva.com`, `camila.rocha@cultiva.com`, `thiago.almeida@cultiva.com`, senha `Password123!`).
 
-### 4.2. Cuidados Importantes ao Usar o Ambiente Demo na GoLog
+### 4.2. Pontos de Atenção ao Testar a GoLog com Dados do Seeder
 
-1. **As 250 compras criadas pelo `DemoDataSeeder` NÃO geram `delivery_orders`**:
-   O `DemoDataSeeder` insere em `purchases` via `Purchase::query()->create(...)` dentro de um seeder com `WithoutModelEvents`, sem disparar o evento `PurchaseCreated`. Logo, imediatamente após `db:seed`, a tabela `delivery_orders` estará vazia. Para gerar pedidos despacháveis para a GoLog, **realize uma nova compra via endpoint `POST /v1/offers/{offer}/purchase`** (usando um varejista demo e uma das 200 ofertas ativas).
-2. **Coordenadas geradas pela `AddressFactory` no ambiente demo**:
-   Os endereços gerados pelo `DemoDataSeeder` usam [`AddressFactory`](../database/factories/AddressFactory.php), que preenche cidade, estado e `coordinate` (`POINT(longitude latitude)`) aleatoriamente pelo Faker `en_US`. Coordenadas em outro continente ou no oceano fazem o otimizador VRP da GoLog rejeitar a parada (colocando os shipments em `skipped`) e impedem testes realistas de geofencing com os motoristas de **Blumenau/SC** (`-26.91944, -49.06611`).
-   - **Para testar VRP/rotas/webhooks de ponta a ponta com os dados demo:** antes de efetuar a compra (ou no `DeliveryAddress` criado), ajuste para coordenadas válidas em Blumenau/SC (ex.: perto de `-26.91944, -49.06611`) os registros na tabela `addresses` do produtor dono da oferta escolhida e do varejista comprador (ex.: `varejista1@gmail.com`).
+1. **As 250 compras semeadas NÃO geram `delivery_orders`**:
+   O [`DemoDataSeeder`](../database/seeders/DemoDataSeeder.php) insere diretamente via `Purchase::query()->create(...)` dentro de um seeder com `WithoutModelEvents`, sem disparar `PurchaseCreated`. Logo, após rodar o seeder, a tabela `delivery_orders` inicia vazia — para gerar pedidos despacháveis, **realize uma nova compra via `POST /v1/offers/{offer}/purchase`** usando um varejista e uma oferta demo.
+2. **Coordenadas aleatórias geradas pela [`AddressFactory`](../database/factories/AddressFactory.php)**:
+   Os endereços criados pelo `DemoDataSeeder` usam coordenadas globais aleatórias (`POINT(longitude latitude)` do Faker `en_US`), o que pode cair no oceano ou fora da área da frota. Isso faz o otimizador VRP da GoLog recusar a parada (`skipped`) e impede testes de geofencing com os motoristas de **Blumenau/SC** (`-26.91944, -49.06611`).
+   - **Para testar VRP, rotas e webhooks ponta a ponta com os dados demo:** antes de efetuar a compra (ou ajustando o `DeliveryAddress` criado), atualize na tabela `addresses` as coordenadas da empresa do produtor dono da oferta e do varejista comprador (ex.: `varejista1@gmail.com`) para pontos válidos próximos a Blumenau/SC (`-26.91944, -49.06611`).
 
-### 4.3. Roteiro Prático Passo a Passo com o Seeder
+### 4.3. Roteiro Prático com o Ambiente Demo
 
-1. **Autentique como varejista demo** (`POST /v1/auth/login` via Bruno [`API/auth/Login.yml`](../collection/bruno/API/auth/Login.yml)):
+1. **Autentique como um varejista demo** (`POST /v1/auth/login` via Bruno [`API/auth/Login.yml`](../collection/bruno/API/auth/Login.yml)):
    ```json
    {
      "email": "varejista1@gmail.com",
      "password": "teste@123"
    }
    ```
-   Como o usuário já possui `is_verified = true` e as ofertas demo já existem no banco, não é necessário fazer upload de documento nem subir o serviço `product-source`.
+   Como o usuário já possui `is_verified = true` e as ofertas já existem no banco, não é necessário verificar documentos nem criar novas ofertas para gerar pedidos.
 
-2. **Liste e escolha uma oferta ativa** (`GET /v1/offers?page=1&per_page=15` — [`API/Offers/List Available Offers.yml`](../collection/bruno/API/Offers/List%20Available%20Offers.yml)) e anote o `id` da oferta (e, se for rodar VRP/geofencing real na GoLog, garanta coordenadas válidas de Blumenau/SC nos endereços das empresas envolvidas).
+2. **Liste e escolha uma oferta ativa** (`GET /v1/offers?page=1&per_page=15` — [`API/Offers/List Available Offers.yml`](../collection/bruno/API/Offers/List%20Available%20Offers.yml)) e anote o `id` desejado (garantindo coordenadas válidas nos endereços do produtor e do varejista caso execute VRP/geofencing real).
 
-3. **Crie a compra para gerar um `DeliveryOrder`** (`POST /v1/offers/{offer_id}/purchase` — [`API/Purchases/Buy Offer.yml`](../collection/bruno/API/Purchases/Buy%20Offer.yml)):
+3. **Realize a compra para gerar um `DeliveryOrder`** (`POST /v1/offers/{offer_id}/purchase` — [`API/Purchases/Buy Offer.yml`](../collection/bruno/API/Purchases/Buy%20Offer.yml)):
    ```json
    {
      "quantity": 2
    }
    ```
-   [`CreatePurchaseAction`](../domain/Models/Purchase/Actions/CreatePurchaseAction.php) dispara `PurchaseCreated`, e [`CreateDeliveryOrderListener`](../domain/Models/DeliveryOrder/Listeners/CreateDeliveryOrderListener.php) cria sincronamente o registro em `delivery_orders` com `status = pending` e snapshots em `delivery_addresses`.
+   [`CreatePurchaseAction`](../domain/Models/Purchase/Actions/CreatePurchaseAction.php) dispara `PurchaseCreated`, e [`CreateDeliveryOrderListener`](../domain/Models/DeliveryOrder/Listeners/CreateDeliveryOrderListener.php) cria o registro em `delivery_orders` com `status = pending` e snapshots em `delivery_addresses`.
 
-4. **Garanta ao menos uma escala `ATIVO` para o próximo dia útil** para um dos motoristas do `GoLogDriverSeeder`:
-   - Faça login como `henrique.costa@cultiva.com` (`Password123!`) e chame `POST /v1/golog/work-schedules` com a data do próximo dia útil em `America/Sao_Paulo`:
-     ```json
-     {
-       "schedule_date": "YYYY-MM-DD",
-       "start_time": "08:00",
-       "end_time": "18:00"
-     }
-     ```
+4. **Crie ao menos uma escala `ATIVO` a partir do próximo dia útil**:
+   Autentique como um dos motoristas do `GoLogDriverSeeder` (ex.: `henrique.costa@cultiva.com` / `Password123!`) e chame `POST /v1/golog/work-schedules`:
+   ```json
+   {
+     "schedule_date": "YYYY-MM-DD",
+     "start_time": "08:00",
+     "end_time": "18:00"
+   }
+   ```
 
-5. **Execute o despacho e a roteirização** conforme descrito na Seção 5 abaixo.
+5. **Execute o despacho e a roteirização** conforme a Seção 5 abaixo.
 
 ---
 
@@ -234,15 +194,15 @@ docker compose exec php php artisan delivery:dispatch-orders-batch
 ```
 
 O que [`DispatchDeliveryOrdersBatchAction`](../domain/Integrations/GoLog/Actions/DispatchDeliveryOrdersBatchAction.php) executa:
-- Busca `delivery_orders` com `status = pending` que ainda não possuem `golog_shipments`.
+- Busca `delivery_orders` com `status = pending` sem `golog_shipments`.
 - Extrai `latitude` e `longitude` PostGIS de `delivery_addresses` (`pickupAddress` e `dropoffAddress`).
 - Agrupa pedidos por categoria e mapeia o tipo de transporte em [`ResolveTransportTypeAction`](../domain/Integrations/GoLog/Actions/ResolveTransportTypeAction.php):
   - `Frutas`, `Verduras` → `REFRIGERADO`
   - `Legumes` → `CLIMATIZADO`
   - `Tubérculos e raízes`, `Grãos e cereais` → `CARGA SECA`
-- Envia um lote `POST /integration/invoices/json` por categoria com duas operações por pedido para o próximo dia útil em `America/Sao_Paulo`:
-  - `COLETA` (`DO-{id}-COL`, janela prevista às 12h locais)
-  - `ENTREGA` (`DO-{id}-ENT`, janela prevista às 15h locais)
+- Envia um lote `POST /integration/invoices/json` por categoria gerando duas operações por pedido na menor data com escalas `ATIVO` disponível (`>= nextWeekday()` em `America/Sao_Paulo`):
+  - `COLETA` (`DO-{id}-COL`, janela às 12h locais)
+  - `ENTREGA` (`DO-{id}-ENT`, janela às 15h locais)
 - Cria 2 registros em `golog_shipments` (`COLETA` e `ENTREGA`) com `status = PENDENTE`.
 
 ### 5.2. Passo 2 — Otimização de Rotas VRP (`delivery:optimize-routes`)
@@ -252,8 +212,7 @@ docker compose exec php php artisan delivery:optimize-routes
 ```
 
 O que [`OptimizeDeliveryRoutesAction`](../domain/Integrations/GoLog/Actions/OptimizeDeliveryRoutesAction.php) executa:
-- Busca todos os `golog_shipments` em `PENDENTE` e os motoristas locais onde `isProvisioned() === true`.
-- Busca na GoLog (`GET /workSchedule/getByStatus?status=ATIVO`) as escalas da data alvo (próximo dia útil em `America/Sao_Paulo`) pertencentes aos motoristas provisionados.
+- Busca todos os `golog_shipments` em `PENDENTE` e resolve via [`ResolveAvailableWorkSchedulesAction`](../domain/Integrations/GoLog/Actions/ResolveAvailableWorkSchedulesAction.php) os motoristas provisionados (`isProvisioned() === true`) e as escalas `ATIVO` (`GET /workSchedule/getByStatus?status=ATIVO`) da menor data disponível (`>= nextWeekday()` em `America/Sao_Paulo`).
 - Envia `POST /api-route-optimization` com `routePriority: "TEMPO"`.
 - Para cada shipment aceito na rota (excluindo `skipped`), chama [`SyncGoLogShipmentStatusAction`](../domain/Integrations/GoLog/Actions/SyncGoLogShipmentStatusAction.php):
   - `GoLogShipment`: `PENDENTE` → `AGUARDANDO_INICIO`
@@ -262,7 +221,7 @@ O que [`OptimizeDeliveryRoutesAction`](../domain/Integrations/GoLog/Actions/Opti
 
 ### 5.3. Passo 3 — Acompanhamento via Webhooks e Transições de Status
 
-Durante a execução na GoLog (app/motorista, geofencing e API GoLog), os webhooks chegam em `POST /v1/golog/webhook`, são gravados em `golog_webhook_events` e processados por [`ProcessGoLogWebhookJob`](../domain/Integrations/GoLog/Jobs/ProcessGoLogWebhookJob.php) → [`HandleGoLogWebhookAction`](../domain/Integrations/GoLog/Actions/HandleGoLogWebhookAction.php) → [`SyncGoLogShipmentStatusAction`](../domain/Integrations/GoLog/Actions/SyncGoLogShipmentStatusAction.php):
+Durante a operação na GoLog, os webhooks chegam em `POST /v1/golog/webhook`, são gravados em `golog_webhook_events` e processados por [`ProcessGoLogWebhookJob`](../domain/Integrations/GoLog/Jobs/ProcessGoLogWebhookJob.php) → [`HandleGoLogWebhookAction`](../domain/Integrations/GoLog/Actions/HandleGoLogWebhookAction.php) → [`SyncGoLogShipmentStatusAction`](../domain/Integrations/GoLog/Actions/SyncGoLogShipmentStatusAction.php):
 
 | Evento Webhook (`GoLogWebhookEventType`) | Status `GoLogShipment` | Efeito em `DeliveryOrder` |
 | :--- | :--- | :--- |
@@ -275,23 +234,23 @@ Durante a execução na GoLog (app/motorista, geofencing e API GoLog), os webhoo
 
 ### 5.4. Passo 4 — Reconciliação Ativa (`golog:reconcile-shipments`)
 
-Caso algum webhook seja perdido ou um shipment seja alterado diretamente na GoLog sem entrega de webhook, execute a reconciliação ativa:
+Caso algum webhook seja perdido ou um shipment seja alterado diretamente na GoLog sem entrega de webhook, execute:
 
 ```bash
 docker compose exec php php artisan golog:reconcile-shipments
 ```
 
-- Consulta `GET /shipment/{golog_shipment_id}` na GoLog para todos os `golog_shipments` em estados não-terminais (`PENDENTE`, `AGUARDANDO_INICIO`, `INICIADO`) e aplica [`SyncGoLogShipmentStatusAction`](../domain/Integrations/GoLog/Actions/SyncGoLogShipmentStatusAction.php) (inclusive corrigindo `delivery_orders` dessincronizados).
-- Esse comando também está agendado diariamente para `03:00` em [`routes/console.php`](../routes/console.php).
+- Consulta `GET /shipment/{golog_shipment_id}` na GoLog para todos os `golog_shipments` não-terminais (`PENDENTE`, `AGUARDANDO_INICIO`, `INICIADO`) e aplica [`SyncGoLogShipmentStatusAction`](../domain/Integrations/GoLog/Actions/SyncGoLogShipmentStatusAction.php) (inclusive corrigindo `delivery_orders` dessincronizados).
+- Também roda diariamente às `03:00` via Scheduler definido em [`routes/console.php`](../routes/console.php).
 
 ---
 
 ## 6. Inspeção, Cache e Troubleshooting
 
-### Logs e Banco de Dados
+### Logs e Inspeção
 
 - **Requisições de saída à GoLog**: gravadas em `backend/storage/logs/laravel.log` (`endpoint`, `status`, `body`).
-- **Processamento assíncrono de webhooks**: acompanhe o Horizon via `docker compose logs -f worker`.
+- **Processamento assíncrono de webhooks**: logs do Horizon (`docker compose logs -f worker`).
 - **Tabelas locais de acompanhamento**: `delivery_orders`, `delivery_addresses`, `golog_drivers`, `golog_vehicles`, `golog_shipments`, `golog_webhook_events`.
 - **Inspeção direta na GoLog (Bruno)**:
   - [`GoLog TMS/02. Fleet & Drivers/08. Get Active Work Schedules.yml`](../collection/bruno/GoLog%20TMS/02.%20Fleet%20&%20Drivers/08.%20Get%20Active%20Work%20Schedules.yml)
@@ -303,7 +262,7 @@ docker compose exec php php artisan golog:reconcile-shipments
 | Sintoma / Mensagem | Causa Provável | Resolução |
 | :--- | :--- | :--- |
 | `401` / erro de permissão na GoLog após trocar `.env` | Token antigo ainda no cache Redis (`golog_auth_session`, TTL `6600s`). | Rode `docker compose exec php php artisan cache:forget golog_auth_session`. |
-| `No active GoLog work schedules found for date [...]` | Não há escala `ATIVO` na GoLog para os motoristas provisionados na data do próximo dia útil em `America/Sao_Paulo`. | Crie a escala para essa data via `POST /v1/golog/work-schedules` ou diretamente na GoLog. |
-| `Shipments skipped (remained PENDENTE)` na roteirização | Coordenadas inválidas/distantes (comum se usar endereço aleatório do `DemoDataSeeder`), veículo sem capacidade ou janela incompatível. | Ajuste as coordenadas da coleta/entrega para uma região viável (ex.: Blumenau/SC) e rode `delivery:optimize-routes` novamente. |
+| `No active GoLog work schedules found on or after [...]` | Não há nenhuma escala `ATIVO` na GoLog para os motoristas provisionados a partir do próximo dia útil em `America/Sao_Paulo`. | Crie uma escala `ATIVO` futura via `POST /v1/golog/work-schedules` ou diretamente na GoLog. |
+| `Shipments skipped (remained PENDENTE)` na roteirização | Coordenadas inválidas/distantes (comum com endereço aleatório do `DemoDataSeeder`), veículo sem capacidade ou janela incompatível. | Ajuste as coordenadas da coleta/entrega para uma região viável (ex.: Blumenau/SC) e rode `delivery:optimize-routes` novamente. |
 | `401 Invalid webhook signature` no webhook | `GOLOG_WEBHOOK_SECRET` no `.env` diverge do segredo configurado na GoLog. | Atualize o `.env` e reexecute `php artisan golog:configure-webhook "<url>" --test`. |
-| Webhook retorna `200`, mas `delivery_orders` não atualiza | Container `worker` (`php artisan horizon`) parado (`processed_at` fica `null` em `golog_webhook_events`). | Suba o worker com `docker compose up -d worker`. |
+| Webhook retorna `200`, mas `delivery_orders` não atualiza | Processador de fila (Horizon) parado (`processed_at` fica `null` em `golog_webhook_events`). | Inicie o worker da fila (Horizon) para processar os jobs pendentes. |
