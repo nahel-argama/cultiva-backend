@@ -11,14 +11,18 @@ use Cultiva\Integrations\GoLog\Actions\ResolveTransportTypeAction;
 use Cultiva\Integrations\GoLog\Clients\GoLogClient;
 use Cultiva\Integrations\GoLog\DTO\DispatchBatchResultDTO;
 use Cultiva\Integrations\GoLog\DTO\GoLogInvoiceImportResponseDTO;
+use Cultiva\Integrations\GoLog\DTO\GoLogWorkScheduleResponseDTO;
 use Cultiva\Integrations\GoLog\Enums\GoLogOperationType;
 use Cultiva\Integrations\GoLog\Enums\GoLogShipmentStatus;
+use Cultiva\Integrations\GoLog\Enums\GoLogWorkScheduleStatus;
 use Cultiva\Models\Category\Category;
 use Cultiva\Models\Category\Enums\Category as CategoryEnum;
 use Cultiva\Models\DeliveryOrder\Enums\DeliveryOrderStatus;
 use Cultiva\Models\DeliveryOrder\GoLogShipment;
 use Database\Factories\DeliveryAddressFactory;
 use Database\Factories\DeliveryOrderFactory;
+use Database\Factories\GoLogDriverFactory;
+use Database\Factories\GoLogVehicleFactory;
 use Database\Factories\OfferFactory;
 use Database\Factories\PurchaseFactory;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -84,8 +88,21 @@ class DispatchDeliveryOrdersBatchActionTest extends TestCase
             'status' => DeliveryOrderStatus::IN_TRANSIT,
         ]);
 
+        $this->createProvisionedDriver('b1111111-1111-1111-1111-111111111111');
+
         // Expects
         $clientMock = Mockery::mock(GoLogClient::class, function (MockInterface $mock) use ($order1): void {
+            $mock->shouldReceive('listActiveWorkSchedules')
+                ->once()
+                ->andReturn([
+                    new GoLogWorkScheduleResponseDTO(
+                        id: 'ws-2026-11-16',
+                        scheduleDate: '2026-11-16',
+                        status: GoLogWorkScheduleStatus::ATIVO,
+                        driverId: 'b1111111-1111-1111-1111-111111111111',
+                    ),
+                ]);
+
             $mock->shouldReceive('importInvoicesJson')
                 ->once()
                 ->with(Mockery::on(function (array $invoices) use ($order1): bool {
@@ -199,6 +216,8 @@ class DispatchDeliveryOrdersBatchActionTest extends TestCase
     public function test_should_persist_succeeded_category_batch_and_fail_fast_when_subsequent_batch_returns_errors(): void
     {
         // Arrange
+        CarbonImmutable::setTestNow(CarbonImmutable::parse('2026-11-13 20:00:00', 'America/Sao_Paulo'));
+
         $categoryFrutas = Category::query()->where('name', CategoryEnum::FRUTAS)->firstOrFail();
         $categoryVerduras = Category::query()->where('name', CategoryEnum::VERDURAS)->firstOrFail();
 
@@ -217,8 +236,21 @@ class DispatchDeliveryOrdersBatchActionTest extends TestCase
             'status' => DeliveryOrderStatus::PENDING,
         ]);
 
+        $this->createProvisionedDriver('b1111111-1111-1111-1111-111111111111');
+
         // Expects
         $clientMock = Mockery::mock(GoLogClient::class, function (MockInterface $mock): void {
+            $mock->shouldReceive('listActiveWorkSchedules')
+                ->once()
+                ->andReturn([
+                    new GoLogWorkScheduleResponseDTO(
+                        id: 'ws-2026-11-16',
+                        scheduleDate: '2026-11-16',
+                        status: GoLogWorkScheduleStatus::ATIVO,
+                        driverId: 'b1111111-1111-1111-1111-111111111111',
+                    ),
+                ]);
+
             $mock->shouldReceive('importInvoicesJson')
                 ->once()
                 ->andReturn(new GoLogInvoiceImportResponseDTO(
@@ -252,6 +284,8 @@ class DispatchDeliveryOrdersBatchActionTest extends TestCase
         } catch (CultivaException $exception) {
             $this->assertSame(502, $exception->getStatusCode());
             $this->assertStringContainsString('Invalid customer document', $exception->getMessage());
+        } finally {
+            CarbonImmutable::setTestNow();
         }
 
         $this->assertDatabaseHas('golog_shipments', [
@@ -269,10 +303,121 @@ class DispatchDeliveryOrdersBatchActionTest extends TestCase
         ]);
     }
 
+    public function test_should_dispatch_using_earliest_available_work_schedule_date_when_next_weekday_has_no_active_schedules(): void
+    {
+        // Arrange
+        CarbonImmutable::setTestNow(CarbonImmutable::parse('2026-11-15 11:00:00', 'America/Sao_Paulo'));
+
+        $categoryFrutas = Category::query()->where('name', CategoryEnum::FRUTAS)->firstOrFail();
+        $offer = OfferFactory::new()->create(['category_id' => $categoryFrutas->id]);
+        $purchase = PurchaseFactory::new()->create(['offer_id' => $offer->id]);
+        $order = DeliveryOrderFactory::new()->create([
+            'purchase_id' => $purchase->id,
+            'status' => DeliveryOrderStatus::PENDING,
+        ]);
+
+        $this->createProvisionedDriver('b1111111-1111-1111-1111-111111111111');
+
+        // Expects
+        $clientMock = Mockery::mock(GoLogClient::class, function (MockInterface $mock) use ($order): void {
+            $mock->shouldReceive('listActiveWorkSchedules')
+                ->once()
+                ->andReturn([
+                    new GoLogWorkScheduleResponseDTO(
+                        id: 'ws-2026-11-18',
+                        scheduleDate: '2026-11-18',
+                        status: GoLogWorkScheduleStatus::ATIVO,
+                        driverId: 'b1111111-1111-1111-1111-111111111111',
+                    ),
+                    new GoLogWorkScheduleResponseDTO(
+                        id: 'ws-2026-11-17',
+                        scheduleDate: '2026-11-17',
+                        status: GoLogWorkScheduleStatus::ATIVO,
+                        driverId: 'b1111111-1111-1111-1111-111111111111',
+                    ),
+                ]);
+
+            $mock->shouldReceive('importInvoicesJson')
+                ->once()
+                ->with(Mockery::on(function (array $invoices) use ($order): bool {
+                    return count($invoices) === 2
+                        && $invoices[0]->invoiceNumber === "DO-{$order->id}-COL"
+                        && $invoices[0]->scheduledDate === '2026-11-17T15:00:00Z'
+                        && $invoices[1]->invoiceNumber === "DO-{$order->id}-ENT"
+                        && $invoices[1]->scheduledDate === '2026-11-17T18:00:00Z';
+                }))
+                ->andReturn(new GoLogInvoiceImportResponseDTO(
+                    totalReceived: 2,
+                    successCount: 2,
+                    errorCount: 0,
+                    createdShipmentIds: [
+                        's1111111-col-1111-1111-111111111111',
+                        's1111111-ent-1111-1111-111111111111',
+                    ],
+                    errors: [],
+                ));
+        });
+
+        $sut = new DispatchDeliveryOrdersBatchAction($clientMock, new ResolveTransportTypeAction());
+
+        // Action
+        try {
+            $result = $sut->execute();
+        } finally {
+            CarbonImmutable::setTestNow();
+        }
+
+        // Assert
+        $this->assertSame(1, $result->totalOrders);
+        $this->assertSame(2, $result->shipmentsCreated);
+    }
+
+    public function test_should_throw_exception_and_not_import_invoices_when_no_active_work_schedules_exist(): void
+    {
+        // Arrange
+        CarbonImmutable::setTestNow(CarbonImmutable::parse('2026-11-15 11:00:00', 'America/Sao_Paulo'));
+
+        $categoryFrutas = Category::query()->where('name', CategoryEnum::FRUTAS)->firstOrFail();
+        $offer = OfferFactory::new()->create(['category_id' => $categoryFrutas->id]);
+        $purchase = PurchaseFactory::new()->create(['offer_id' => $offer->id]);
+        $order = DeliveryOrderFactory::new()->create([
+            'purchase_id' => $purchase->id,
+            'status' => DeliveryOrderStatus::PENDING,
+        ]);
+
+        $this->createProvisionedDriver('b1111111-1111-1111-1111-111111111111');
+
+        // Expects
+        $clientMock = Mockery::mock(GoLogClient::class, function (MockInterface $mock): void {
+            $mock->shouldReceive('listActiveWorkSchedules')
+                ->once()
+                ->andReturn([]);
+            $mock->shouldNotReceive('importInvoicesJson');
+        });
+
+        $sut = new DispatchDeliveryOrdersBatchAction($clientMock, new ResolveTransportTypeAction());
+
+        // Action & Assert
+        try {
+            $sut->execute();
+            $this->fail('Expected CultivaException was not thrown.');
+        } catch (CultivaException $exception) {
+            $this->assertSame(422, $exception->getStatusCode());
+            $this->assertStringContainsString('2026-11-16', $exception->getMessage());
+        } finally {
+            CarbonImmutable::setTestNow();
+        }
+
+        $this->assertDatabaseMissing('golog_shipments', [
+            'delivery_order_id' => $order->id,
+        ]);
+    }
+
     public function test_should_return_empty_result_dto_when_no_pending_orders_exist(): void
     {
         // Expects
         $clientMock = Mockery::mock(GoLogClient::class, function (MockInterface $mock): void {
+            $mock->shouldNotReceive('listActiveWorkSchedules');
             $mock->shouldNotReceive('importInvoicesJson');
         });
 
@@ -287,5 +432,19 @@ class DispatchDeliveryOrdersBatchActionTest extends TestCase
         $this->assertSame(0, $result->batchesSent);
         $this->assertSame(0, $result->shipmentsCreated);
         $this->assertSame([], $result->byCategory);
+    }
+
+    private function createProvisionedDriver(string $gologDriverId): void
+    {
+        $driver = GoLogDriverFactory::new()->create([
+            'golog_user_id' => 'a1111111-1111-1111-1111-111111111111',
+            'golog_driver_id' => $gologDriverId,
+        ]);
+
+        GoLogVehicleFactory::new()->create([
+            'golog_driver_id' => $driver->id,
+            'golog_tractor_id' => 'c1111111-1111-1111-1111-111111111111',
+            'golog_equipament_group_id' => 'e1111111-1111-1111-1111-111111111111',
+        ]);
     }
 }
