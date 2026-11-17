@@ -3,6 +3,7 @@
 namespace Cultiva\Models\Purchase\Actions;
 
 use Cultiva\Base\Exceptions\CultivaException;
+use Cultiva\Base\Observer\Contracts\EventSubjectInterface;
 use Cultiva\Models\Offer\Offer;
 use Cultiva\Models\Offer\Enums\OfferStatus;
 use Cultiva\Models\Purchase\DTO\CreatePurchaseDTO;
@@ -14,6 +15,10 @@ use Illuminate\Support\Facades\Lang;
 
 final class CreatePurchaseAction
 {
+    public function __construct(
+        private readonly EventSubjectInterface $eventSubject,
+    ) {}
+
     public function execute(Retailer $retailer, int $offerId, CreatePurchaseDTO $data): Purchase
     {
         $purchase = DB::transaction(function () use ($retailer, $offerId, $data): Purchase {
@@ -55,7 +60,7 @@ final class CreatePurchaseAction
             return $purchase;
         });
 
-        event(new PurchaseCreated($purchase));
+        $this->eventSubject->notify(new PurchaseCreated($purchase));
 
         return $purchase->load(['producer.company.user', 'producer.company.address', 'offer.category']);
     }

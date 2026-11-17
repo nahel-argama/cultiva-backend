@@ -3,12 +3,13 @@
 namespace Cultiva\Providers;
 
 use Carbon\CarbonImmutable;
+use Cultiva\Base\Observer\Contracts\EventSubjectInterface;
+use Cultiva\Base\Observer\LaravelEventSubject;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\ServiceProvider;
 
 use Cultiva\Models\DeliveryOrder\Listeners\CreateDeliveryOrderListener;
 use Cultiva\Models\Purchase\Events\PurchaseCreated;
-use Illuminate\Support\Facades\Event;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -18,14 +19,15 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->configureDate();
+        $this->app->bind(EventSubjectInterface::class, LaravelEventSubject::class);
     }
 
     /**
      * Bootstrap any application services.
      */
-    public function boot(): void
+    public function boot(EventSubjectInterface $eventSubject): void
     {
-        Event::listen(
+        $eventSubject->attach(
             PurchaseCreated::class,
             CreateDeliveryOrderListener::class,
         );
