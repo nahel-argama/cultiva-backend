@@ -13,7 +13,7 @@ final class ListProducerSalesAction
         $search = trim($search ?? '');
 
         return Purchase::query()
-            ->with(['retailer.company.user', 'retailer.company.address', 'offer.category'])
+            ->with(['retailer.company.user', 'retailer.company.address', 'offer.category', 'deliveryOrder'])
             ->where('producer_id', $producer->id)
             ->when($search !== '', fn ($query) => $query->where(function ($query) use ($search): void {
                 $query->where('product_name', 'ilike', '%'.$search.'%');

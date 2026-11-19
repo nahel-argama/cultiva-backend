@@ -19,6 +19,7 @@ use Database\Factories\RetailerFactory;
 use Database\Factories\UserFactory;
 use Database\Factories\WishlistItemFactory;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
@@ -27,6 +28,17 @@ class DemoDataSeeder extends Seeder
     private const DEMO_PASSWORD = 'teste@123';
 
     private const DEMO_STATE = 'SP';
+
+    // Pontos de referência fictícios em municípios paulistas para demonstrar os filtros de distância.
+    private const PRODUCER_LOCATIONS = [
+        ['São Paulo', -46.690, -23.550],
+        ['Osasco', -46.792, -23.533],
+        ['Cotia', -46.920, -23.605],
+        ['Jundiaí', -46.884, -23.186],
+        ['Sorocaba', -47.458, -23.502],
+        ['Campinas', -47.060, -22.906],
+        ['Piracicaba', -47.649, -22.725],
+    ];
 
     private const PRODUCTS = [
         'Frutas' => ['Abacate', 'Banana', 'Goiaba', 'Laranja', 'Limão', 'Mamão', 'Manga', 'Uva'],
@@ -155,7 +167,7 @@ class DemoDataSeeder extends Seeder
                 'password' => self::DEMO_PASSWORD,
                 'profile_type' => ProfileType::PRODUCER,
             ]);
-            $company = $this->createCompany($user->id, $number - 1);
+            $company = $this->createCompany($user->id, $number - 1, isProducer: true);
             $producers[] = ProducerFactory::new()->create(['company_id' => $company->id]);
         }
 
@@ -180,14 +192,16 @@ class DemoDataSeeder extends Seeder
         return $retailers;
     }
 
-    private function createCompany(int $userId, int $addressIndex): Company
+    private function createCompany(int $userId, int $addressIndex, bool $isProducer = false): Company
     {
         $faker = fake('pt_BR');
         $tradeName = $faker->lastName().' Hortifrúti';
 
-        // Endereços fictícios em uma malha na cidade de São Paulo.
-        $longitude = -46.690 + ($addressIndex % 10) * 0.006;
-        $latitude = -23.550 - intdiv($addressIndex, 10) * 0.006;
+        [$city, $longitude, $latitude] = $isProducer
+            ? self::PRODUCER_LOCATIONS[$addressIndex % count(self::PRODUCER_LOCATIONS)]
+            : ['São Paulo', -46.690, -23.550];
+        $longitude += ($addressIndex % 10) * 0.006;
+        $latitude -= intdiv($addressIndex, 10) * 0.006;
 
         return CompanyFactory::new()
             ->has(AddressFactory::new()->state([
@@ -197,7 +211,7 @@ class DemoDataSeeder extends Seeder
                 'complement' => null,
                 'reference_point' => null,
                 'neighborhood' => 'Zona Sul',
-                'city' => 'São Paulo',
+                'city' => $city,
                 'state' => self::DEMO_STATE,
                 'coordinate' => sprintf('POINT(%.6F %.6F)', $longitude, $latitude),
             ]), 'address')
@@ -216,20 +230,36 @@ class DemoDataSeeder extends Seeder
     private function createOffers(array $producers, array $categories): array
     {
         $offers = [];
+        $catalog = [];
+        foreach (self::PRODUCTS as $categoryName => $products) {
+            foreach ($products as $productName) {
+                $catalog[] = [$categoryName, $productName];
+            }
+        }
 
         foreach ($producers as $producerIndex => $producer) {
-            foreach (range(1, 8) as $offerNumber) {
-                $categoryName = array_keys(self::PRODUCTS)[($producerIndex * 8 + $offerNumber - 1) % count(self::PRODUCTS)];
-                $products = self::PRODUCTS[$categoryName];
-                $productName = $products[($producerIndex + $offerNumber - 1) % count($products)];
+            foreach (range(1, 12) as $offerNumber) {
+                if ($offerNumber <= 8) {
+                    $categoryName = array_keys(self::PRODUCTS)[($producerIndex * 8 + $offerNumber - 1) % count(self::PRODUCTS)];
+                    $products = self::PRODUCTS[$categoryName];
+                    $productName = $products[($producerIndex + $offerNumber - 1) % count($products)];
+                    $imagePath = 'demo-offers/'.($producerIndex + 1)."-{$offerNumber}.jpg";
+                } else {
+                    [$categoryName, $productName] = $catalog[($producerIndex * 4 + $offerNumber - 9) % count($catalog)];
+                    $imagePath = 'products/'.self::PRODUCT_IDS[$productName].'.jpg';
+                }
+
+                $pricePercent = 70 + ($producerIndex * 19 + $offerNumber * 11) % 76;
+                $stock = 30 + (($producerIndex * 29 + $offerNumber * 17) % 71) * 7;
+
                 $offers[] = OfferFactory::new()->create([
                     'producer_id' => $producer->id,
                     'category_id' => $categories[$categoryName],
                     'source_product_id' => self::PRODUCT_IDS[$productName],
                     'product_name' => $productName,
-                    'image_path' => 'demo-offers/'.($producerIndex + 1)."-{$offerNumber}.jpg",
-                    'unit_price' => self::PRODUCT_PRICES[$productName],
-                    'total_quantity' => 100,
+                    'image_path' => $imagePath,
+                    'unit_price' => round(self::PRODUCT_PRICES[$productName] * $pricePercent / 100, 2),
+                    'total_quantity' => $stock,
                     'reserved_quantity' => 0,
                     'status' => OfferStatus::ACTIVE,
                     'harvest_date' => now()->toDateString(),
@@ -243,17 +273,24 @@ class DemoDataSeeder extends Seeder
     /** @param list<Offer> $offers */
     private function createHarvestForecasts(array $offers): void
     {
-        foreach ($offers as $index => $offer) {
-            $startDate = now()->addDays(7 + ($index % 45));
+        $calendarStart = Carbon::createFromDate(2026, 10, 1);
+        $calendarMonths = max(2, (int) $calendarStart->diffInMonths(today()->startOfMonth(), false) + 1);
 
-            HarvestForecastFactory::new()->create([
-                'producer_id' => $offer->producer_id,
-                'source_product_id' => $offer->source_product_id,
-                'product_name' => $offer->product_name,
-                'quantity' => 100 + ($index % 5) * 50,
-                'start_date' => $startDate->toDateString(),
-                'end_date' => $startDate->copy()->addDays($index % 3 === 0 ? 14 : 0)->toDateString(),
-            ]);
+        foreach ($offers as $index => $offer) {
+            $calendarDate = $calendarStart->copy()->addMonths($index % $calendarMonths)
+                ->addDays(intdiv($index, $calendarMonths) % 23);
+            $futureDate = today()->addDays(7 + ($index % 45));
+
+            foreach ([$calendarDate, $futureDate] as $startDate) {
+                HarvestForecastFactory::new()->create([
+                    'producer_id' => $offer->producer_id,
+                    'source_product_id' => $offer->source_product_id,
+                    'product_name' => $offer->product_name,
+                    'quantity' => 75 + ($index % 19) * 25,
+                    'start_date' => $startDate->toDateString(),
+                    'end_date' => $startDate->copy()->addDays($index % 3 === 0 ? 14 : 0)->toDateString(),
+                ]);
+            }
         }
     }
 
@@ -263,8 +300,8 @@ class DemoDataSeeder extends Seeder
     private function createPurchases(array $retailers, array $offers): void
     {
         foreach ($retailers as $retailerIndex => $retailer) {
-            foreach (range(0, 9) as $purchaseIndex) {
-                $offer = $offers[($retailerIndex * 10 + $purchaseIndex) % count($offers)];
+            foreach (range(0, 14) as $purchaseIndex) {
+                $offer = $offers[($retailerIndex * 15 + $purchaseIndex) % count($offers)];
                 $quantity = 1 + (($retailerIndex + $purchaseIndex) % 5);
 
                 $subtotalCents = (int) round((float) $offer->unit_price * 100) * $quantity;

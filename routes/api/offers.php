@@ -15,6 +15,10 @@ Route::group([
         ->name('show');
 });
 
+Route::get('offers/compare', [OfferController::class, 'compare'])
+    ->middleware('profile:retailer')
+    ->name('offers.compare');
+
 Route::middleware('profile:producer')
     ->name('producer.')
     ->group(function (): void {

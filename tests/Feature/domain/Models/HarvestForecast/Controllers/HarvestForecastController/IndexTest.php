@@ -54,6 +54,24 @@ class IndexTest extends TestCase
             ->assertJsonPath('data.0.producer.state', 'SP');
     }
 
+    public function test_should_show_past_forecasts_only_when_the_requested_range_includes_them(): void
+    {
+        $this->travelTo(now()->setDate(2026, 11, 19));
+        $historical = HarvestForecastFactory::new()->create([
+            'start_date' => '2026-10-23',
+            'end_date' => '2026-11-02',
+        ]);
+        $retailer = RetailerFactory::new()->create();
+        Sanctum::actingAs($retailer->company->user, ['access']);
+
+        $this->getJson('/v1/harvest-forecasts?date_from=2026-10-01&date_to=2026-10-31')
+            ->assertOk()
+            ->assertJsonPath('data.0.id', $historical->id);
+        $this->getJson('/v1/harvest-forecasts')
+            ->assertOk()
+            ->assertJsonPath('meta.total', 0);
+    }
+
     public function test_should_paginate_future_forecasts(): void
     {
         // Arrange

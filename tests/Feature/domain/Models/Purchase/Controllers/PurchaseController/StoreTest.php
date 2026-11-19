@@ -2,12 +2,14 @@
 
 namespace Tests\Feature\domain\Models\Purchase\Controllers\PurchaseController;
 
+use Cultiva\Integrations\GoLog\Jobs\DispatchPurchasedDeliveryOrdersJob;
 use Cultiva\Models\Offer\Enums\OfferStatus;
 use Database\Factories\DeliveryFactory;
 use Database\Factories\OfferFactory;
 use Database\Factories\ProducerFactory;
 use Database\Factories\RetailerFactory;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Queue;
 use Laravel\Sanctum\Sanctum;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
@@ -15,6 +17,12 @@ use Tests\TestCase;
 class StoreTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        Queue::fake([DispatchPurchasedDeliveryOrdersJob::class]);
+    }
 
     public function test_should_create_partial_purchase_and_reduce_offer_availability(): void
     {
@@ -48,6 +56,9 @@ class StoreTest extends TestCase
             ->assertJsonPath('data.quantity', 30)
             ->assertJsonPath('data.unit_price', '10.00')
             ->assertJsonPath('data.total_price', '315.00');
+
+        Queue::assertPushed(DispatchPurchasedDeliveryOrdersJob::class, fn ($job) => $job->afterCommit === true);
+        $this->assertDatabaseHas('delivery_orders', ['purchase_id' => $response->json('data.id'), 'status' => 'pending']);
 
         $this->assertDatabaseHas('purchases', [
             'offer_id' => $offer->id,

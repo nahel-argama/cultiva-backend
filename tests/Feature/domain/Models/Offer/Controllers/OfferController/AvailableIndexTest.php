@@ -108,6 +108,39 @@ class AvailableIndexTest extends TestCase
             ->assertJsonPath('data.0.id', $matching->id);
     }
 
+    public function test_should_limit_comparison_list_to_the_exact_catalog_product_before_pagination(): void
+    {
+        $retailer = RetailerFactory::new()->create();
+        $matching = OfferFactory::new()->create([
+            'source_product_id' => 'tomato-1',
+            'product_name' => 'Tomate',
+            'status' => OfferStatus::ACTIVE,
+            'created_at' => now(),
+        ]);
+        OfferFactory::new()->create([
+            'source_product_id' => 'tomato-2',
+            'product_name' => 'Tomate',
+            'status' => OfferStatus::ACTIVE,
+        ]);
+        $secondMatch = OfferFactory::new()->create([
+            'source_product_id' => 'tomato-1',
+            'product_name' => 'Tomate',
+            'status' => OfferStatus::ACTIVE,
+            'created_at' => now()->subHour(),
+        ]);
+        Sanctum::actingAs($retailer->company->user, ['access']);
+
+        $this->getJson('/v1/offers?source_product_id=tomato-1&sort=recent&per_page=1')
+            ->assertOk()
+            ->assertJsonPath('meta.total', 2)
+            ->assertJsonPath('data.0.id', $matching->id);
+
+        $this->getJson('/v1/offers?source_product_id=tomato-1&sort=recent&per_page=1&page=2')
+            ->assertOk()
+            ->assertJsonPath('meta.total', 2)
+            ->assertJsonPath('data.0.id', $secondMatch->id);
+    }
+
     public function test_should_return_401_without_token(): void
     {
         // Arrange

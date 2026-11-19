@@ -3,6 +3,7 @@
 namespace Cultiva\Models\DeliveryOrder\Listeners;
 
 use Cultiva\Base\Observer\Contracts\EventObserverInterface;
+use Cultiva\Integrations\GoLog\Jobs\DispatchPurchasedDeliveryOrdersJob;
 use Cultiva\Models\DeliveryOrder\Actions\CreateDeliveryOrderAction;
 use Cultiva\Models\Purchase\Events\PurchaseCreated;
 use InvalidArgumentException;
@@ -27,5 +28,6 @@ class CreateDeliveryOrderListener implements EventObserverInterface
     public function handle(PurchaseCreated $event): void
     {
         $this->action->execute($event->purchase);
+        DispatchPurchasedDeliveryOrdersJob::dispatch()->afterCommit();
     }
 }

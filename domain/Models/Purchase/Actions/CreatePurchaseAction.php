@@ -57,12 +57,12 @@ final class CreatePurchaseAction
                 'status' => $newStatus,
             ]);
 
+            $this->eventSubject->notify(new PurchaseCreated($purchase));
+
             return $purchase;
         });
 
-        $this->eventSubject->notify(new PurchaseCreated($purchase));
-
-        return $purchase->load(['producer.company.user', 'producer.company.address', 'offer.category']);
+        return $purchase->load(['producer.company.user', 'producer.company.address', 'offer.category', 'deliveryOrder']);
     }
 
     private function calculateTotalPrice(float $unitPrice, int $quantity): float

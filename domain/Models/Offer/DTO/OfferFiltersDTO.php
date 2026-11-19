@@ -9,6 +9,7 @@ final readonly class OfferFiltersDTO
         public string $wishlist = 'all',
         public ?int $maxDistanceKm = null,
         public string $sort = 'nearest',
+        public ?string $sourceProductId = null,
     ) {}
 
     public static function from(array $data): self
@@ -18,6 +19,7 @@ final readonly class OfferFiltersDTO
             wishlist: $data['wishlist'] ?? 'all',
             maxDistanceKm: $data['max_distance_km'] ?? null,
             sort: $data['sort'] ?? 'nearest',
+            sourceProductId: $data['source_product_id'] ?? null,
         );
     }
 }

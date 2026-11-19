@@ -28,6 +28,7 @@ final class OfferResource extends JsonResource
             'lifespan_days' => $this->lifespan_days,
             'is_in_wishlist' => $this->whenHas('is_in_wishlist', fn (): bool => (bool) $this->is_in_wishlist),
             'distance_km' => $this->whenHas('distance_km', fn (): ?float => $this->distance_km === null ? null : (float) $this->distance_km),
+            'recent_sales' => $this->whenHas('recent_sales', fn (): int => (int) $this->recent_sales),
             'created_at' => $this->created_at->toISOString(),
             'updated_at' => $this->updated_at->toISOString(),
         ];

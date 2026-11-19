@@ -3,12 +3,14 @@
 namespace Cultiva\Models\Purchase;
 
 use Carbon\CarbonImmutable;
+use Cultiva\Models\DeliveryOrder\DeliveryOrder;
 use Cultiva\Models\Offer\Offer;
 use Cultiva\Models\Producer\Producer;
 use Cultiva\Models\Retailer\Retailer;
 use Database\Factories\PurchaseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Model;
 use Override;
 
@@ -49,6 +51,12 @@ class Purchase extends Model
             'unit_price' => 'decimal:2',
             'total_price' => 'decimal:2',
         ];
+    }
+
+    /** @return HasOne<DeliveryOrder, $this> */
+    public function deliveryOrder(): HasOne
+    {
+        return $this->hasOne(DeliveryOrder::class);
     }
 
     /** @return BelongsTo<Offer, $this> */

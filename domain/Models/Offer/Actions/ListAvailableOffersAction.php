@@ -37,6 +37,8 @@ final class ListAvailableOffersAction
             ->selectRaw('(wishlist_items.id IS NOT NULL) as is_in_wishlist')
             ->where('offers.status', OfferStatus::ACTIVE->value)
             ->whereColumn('offers.total_quantity', '>', 'offers.reserved_quantity')
+            ->when($filters->sourceProductId !== null, fn (Builder $query) =>
+                $query->where('offers.source_product_id', $filters->sourceProductId))
             ->when($search !== '', fn(Builder $query) => $query->where('offers.product_name', 'ilike', '%' . $search . '%'))
             ->when($filters->wishlist === 'included', fn(Builder $query) => $query->whereNotNull('wishlist_items.id'))
             ->when($filters->wishlist === 'excluded', fn(Builder $query) => $query->whereNull('wishlist_items.id'))

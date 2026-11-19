@@ -4,16 +4,19 @@ namespace Cultiva\Models\Offer\Controllers;
 
 use Cultiva\Models\Offer\DTO\OfferFiltersDTO;
 use Cultiva\Base\Contracts\Controller;
+use Cultiva\Models\Offer\Actions\CompareOffersAction;
 use Cultiva\Models\Offer\Actions\CreateOfferAction;
 use Cultiva\Models\Offer\Actions\GetOfferAction;
 use Cultiva\Models\Offer\Actions\ListOffersAction;
 use Cultiva\Models\Offer\Actions\UpdateOfferAction;
 use Cultiva\Models\Offer\DTO\CreateOfferDTO;
 use Cultiva\Models\Offer\DTO\UpdateOfferDTO;
+use Cultiva\Models\Offer\Requests\CompareOffersRequest;
 use Cultiva\Models\Offer\Requests\ListOffersRequest;
 use Cultiva\Models\Offer\Requests\StoreOfferRequest;
 use Cultiva\Models\Offer\Requests\UpdateOfferRequest;
 use Cultiva\Models\Offer\Resources\OfferResource;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -34,6 +37,21 @@ final class OfferController extends Controller
         $offers = $action->execute($user, $page, $perPage, $filters);
 
         return OfferResource::collection($offers);
+    }
+
+    public function compare(CompareOffersRequest $request, CompareOffersAction $action): JsonResponse
+    {
+        $comparison = $action->execute(
+            $request->user(),
+            $request->integer('first_offer_id'),
+            $request->integer('second_offer_id'),
+        );
+
+        return response()->json(['data' => [
+            'offers' => OfferResource::collection($comparison->offers),
+            'criteria' => $comparison->criteria,
+            'recommended_offer_id' => $comparison->recommendedOfferId,
+        ]]);
     }
 
     public function store(

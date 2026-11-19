@@ -2,7 +2,9 @@
 
 namespace Tests\Feature\domain\Models\Purchase\Controllers\PurchaseController;
 
+use Cultiva\Models\DeliveryOrder\Enums\DeliveryOrderStatus;
 use Cultiva\Models\Offer\Enums\OfferStatus;
+use Database\Factories\DeliveryOrderFactory;
 use Database\Factories\OfferFactory;
 use Database\Factories\PurchaseFactory;
 use Database\Factories\RetailerFactory;
@@ -25,6 +27,10 @@ class PurchaseIndexTest extends TestCase
             'unit_price' => '10.00',
             'total_price' => '30.00',
         ]);
+        DeliveryOrderFactory::new()->create([
+            'purchase_id' => $ownPurchase->id,
+            'status' => DeliveryOrderStatus::IN_TRANSIT,
+        ]);
         PurchaseFactory::new()->create(['retailer_id' => $otherRetailer->id]);
         Sanctum::actingAs($retailer->company->user, ['access']);
 
@@ -34,6 +40,8 @@ class PurchaseIndexTest extends TestCase
         // Assert
         $response->assertOk()
             ->assertJsonPath('data.0.id', $ownPurchase->id)
+            ->assertJsonPath('data.0.delivery_status.code', 'in_transit')
+            ->assertJsonPath('data.0.delivery_status.label', DeliveryOrderStatus::IN_TRANSIT->getLabel())
             ->assertJsonPath('data.0.quantity', 3)
             ->assertJsonPath('data.0.unit_price', '10.00')
             ->assertJsonPath('data.0.total_price', '30.00')
