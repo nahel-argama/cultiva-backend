@@ -4,11 +4,13 @@ namespace Database\Seeders;
 
 use Cultiva\Auth\Enums\ProfileType;
 use Cultiva\Models\Category\Category;
+use Cultiva\Models\Company\Company;
 use Cultiva\Models\Offer\Enums\OfferStatus;
 use Cultiva\Models\Offer\Offer;
 use Cultiva\Models\Producer\Producer;
 use Cultiva\Models\Purchase\Purchase;
 use Cultiva\Models\Retailer\Retailer;
+use Database\Factories\AddressFactory;
 use Database\Factories\CompanyFactory;
 use Database\Factories\HarvestForecastFactory;
 use Database\Factories\OfferFactory;
@@ -23,6 +25,8 @@ use Illuminate\Support\Facades\Storage;
 class DemoDataSeeder extends Seeder
 {
     private const DEMO_PASSWORD = 'teste@123';
+
+    private const DEMO_STATE = 'SP';
 
     private const PRODUCTS = [
         'Frutas' => ['Abacate', 'Banana', 'Goiaba', 'Laranja', 'Limão', 'Mamão', 'Manga', 'Uva'],
@@ -146,11 +150,12 @@ class DemoDataSeeder extends Seeder
 
         foreach (range(1, 25) as $number) {
             $user = UserFactory::new()->create([
+                'name' => fake('pt_BR')->name(),
                 'email' => sprintf('produtor%d@gmail.com', $number),
                 'password' => self::DEMO_PASSWORD,
                 'profile_type' => ProfileType::PRODUCER,
             ]);
-            $company = CompanyFactory::new()->create(['user_id' => $user->id]);
+            $company = $this->createCompany($user->id, $number - 1);
             $producers[] = ProducerFactory::new()->create(['company_id' => $company->id]);
         }
 
@@ -164,14 +169,44 @@ class DemoDataSeeder extends Seeder
 
         foreach (range(1, 50) as $number) {
             $user = UserFactory::new()->retailer()->create([
+                'name' => fake('pt_BR')->name(),
                 'email' => sprintf('varejista%d@gmail.com', $number),
                 'password' => self::DEMO_PASSWORD,
             ]);
-            $company = CompanyFactory::new()->create(['user_id' => $user->id]);
+            $company = $this->createCompany($user->id, 25 + $number - 1);
             $retailers[] = RetailerFactory::new()->create(['company_id' => $company->id]);
         }
 
         return $retailers;
+    }
+
+    private function createCompany(int $userId, int $addressIndex): Company
+    {
+        $faker = fake('pt_BR');
+        $tradeName = $faker->lastName().' Hortifrúti';
+
+        // Endereços fictícios em uma malha na cidade de São Paulo.
+        $longitude = -46.690 + ($addressIndex % 10) * 0.006;
+        $latitude = -23.550 - intdiv($addressIndex, 10) * 0.006;
+
+        return CompanyFactory::new()
+            ->has(AddressFactory::new()->state([
+                'zip' => '01310100',
+                'street' => $faker->streetName(),
+                'number' => (string) ($addressIndex + 1),
+                'complement' => null,
+                'reference_point' => null,
+                'neighborhood' => 'Zona Sul',
+                'city' => 'São Paulo',
+                'state' => self::DEMO_STATE,
+                'coordinate' => sprintf('POINT(%.6F %.6F)', $longitude, $latitude),
+            ]), 'address')
+            ->create([
+                'user_id' => $userId,
+                'document_number' => $faker->unique()->cnpj(false),
+                'trade_name' => $tradeName,
+                'legal_name' => $tradeName.' LTDA',
+            ]);
     }
 
     /** @param list<Producer> $producers
@@ -263,6 +298,7 @@ class DemoDataSeeder extends Seeder
                     'retailer_id' => $retailers[$retailerIndex]->id,
                     'source_product_id' => self::PRODUCT_IDS[$productName],
                     'product_name' => $productName,
+                    'state' => self::DEMO_STATE,
                 ]);
             }
 

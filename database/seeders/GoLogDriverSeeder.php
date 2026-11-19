@@ -142,7 +142,7 @@ class GoLogDriverSeeder extends Seeder
                     'neighborhood' => 'Centro',
                     'city' => 'Blumenau',
                     'state' => 'SC',
-                    'coordinate' => 'POINT(-49.06611 -26.91944)',
+                    'coordinate' => 'POINT(-49.06710 -26.92010)',
                 ],
                 'driver' => [
                     'cpf' => '34729185005',
@@ -176,7 +176,7 @@ class GoLogDriverSeeder extends Seeder
                     'neighborhood' => 'Centro',
                     'city' => 'Blumenau',
                     'state' => 'SC',
-                    'coordinate' => 'POINT(-49.06611 -26.91944)',
+                    'coordinate' => 'POINT(-49.06810 -26.92090)',
                 ],
                 'driver' => [
                     'cpf' => '28471936003',
