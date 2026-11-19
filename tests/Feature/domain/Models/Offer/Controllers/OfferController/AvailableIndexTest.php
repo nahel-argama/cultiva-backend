@@ -178,7 +178,7 @@ class AvailableIndexTest extends TestCase
             ->assertJsonPath('data.1.distance_km', 11.29);
         $this->assertCount(2, $response->json('data'));
     }
-    public function test_should_prioritize_retailer_wishlist_before_distance_and_pagination(): void
+    public function test_should_filter_retailer_wishlist_and_default_to_distance_order(): void
     {
         $retailer = RetailerFactory::new()->create();
         $retailer->company->address->update(['coordinate' => 'POINT(-49.0629788 -26.9244749)']);
@@ -186,13 +186,38 @@ class AvailableIndexTest extends TestCase
         $near->company->address->update(['coordinate' => 'POINT(-49.0700000 -26.9300000)']);
         $far = ProducerFactory::new()->create();
         $far->company->address->update(['coordinate' => 'POINT(-49.1500000 -26.9900000)']);
-        $nearOffer = OfferFactory::new()->create(['producer_id' => $near->id, 'source_product_id' => 'near', 'status' => OfferStatus::ACTIVE, 'total_quantity' => 10, 'reserved_quantity' => 0]);
-        $farOffer = OfferFactory::new()->create(['producer_id' => $far->id, 'source_product_id' => 'wanted', 'status' => OfferStatus::ACTIVE, 'total_quantity' => 10, 'reserved_quantity' => 0]);
+        $nearOffer = OfferFactory::new()->create(['producer_id' => $near->id, 'source_product_id' => 'near', 'unit_price' => '5.00', 'status' => OfferStatus::ACTIVE, 'total_quantity' => 10, 'reserved_quantity' => 0, 'created_at' => now()]);
+        $farOffer = OfferFactory::new()->create(['producer_id' => $far->id, 'source_product_id' => 'wanted', 'unit_price' => '2.00', 'status' => OfferStatus::ACTIVE, 'total_quantity' => 10, 'reserved_quantity' => 0, 'created_at' => now()->subHour()]);
         WishlistItemFactory::new()->create(['retailer_id' => $retailer->id, 'source_product_id' => 'wanted']);
         Sanctum::actingAs($retailer->company->user, ['access']);
 
-        $this->getJson('/v1/offers?per_page=1')->assertOk()->assertJsonPath('data.0.id', $farOffer->id)->assertJsonPath('data.0.is_in_wishlist', true);
-        $this->getJson('/v1/offers?per_page=1&page=2')->assertOk()->assertJsonPath('data.0.id', $nearOffer->id)->assertJsonPath('data.0.is_in_wishlist', false);
+        $this->getJson('/v1/offers?per_page=1')->assertOk()->assertJsonPath('data.0.id', $nearOffer->id)->assertJsonPath('data.0.is_in_wishlist', false);
+        $this->getJson('/v1/offers?per_page=1&page=2')->assertOk()->assertJsonPath('data.0.id', $farOffer->id)->assertJsonPath('data.0.is_in_wishlist', true);
+
+        $this->getJson('/v1/offers?wishlist=included')
+            ->assertOk()
+            ->assertJsonPath('data.0.id', $farOffer->id)
+            ->assertJsonCount(1, 'data');
+        $this->getJson('/v1/offers?wishlist=excluded')
+            ->assertOk()
+            ->assertJsonPath('data.0.id', $nearOffer->id)
+            ->assertJsonCount(1, 'data');
+        $this->getJson('/v1/offers?max_distance_km=10&sort=recent&per_page=1')
+            ->assertOk()
+            ->assertJsonPath('meta.total', 1)
+            ->assertJsonPath('data.0.id', $nearOffer->id);
+        $this->getJson('/v1/offers?wishlist=included&max_distance_km=10')
+            ->assertOk()
+            ->assertJsonCount(0, 'data');
+        $this->getJson('/v1/offers?sort=recent&per_page=1')
+            ->assertOk()
+            ->assertJsonPath('data.0.id', $nearOffer->id);
+        $this->getJson('/v1/offers?sort=price_asc&per_page=1')
+            ->assertOk()
+            ->assertJsonPath('data.0.id', $farOffer->id);
+        $this->getJson('/v1/offers?sort=price_desc&per_page=1')
+            ->assertOk()
+            ->assertJsonPath('data.0.id', $nearOffer->id);
     }
 
 }

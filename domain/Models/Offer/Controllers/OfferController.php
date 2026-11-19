@@ -2,6 +2,7 @@
 
 namespace Cultiva\Models\Offer\Controllers;
 
+use Cultiva\Models\Offer\DTO\OfferFiltersDTO;
 use Cultiva\Base\Contracts\Controller;
 use Cultiva\Models\Offer\Actions\CreateOfferAction;
 use Cultiva\Models\Offer\Actions\GetOfferAction;
@@ -29,8 +30,8 @@ final class OfferController extends Controller
         $perPage = $request->integer('per_page', 15);
         $user = $request->user();
 
-        $search = $request->validated('search');
-        $offers = $action->execute($user, $page, $perPage, $search);
+        $filters = OfferFiltersDTO::from($request->validated());
+        $offers = $action->execute($user, $page, $perPage, $filters);
 
         return OfferResource::collection($offers);
     }
